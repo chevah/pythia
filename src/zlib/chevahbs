@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#
+# Chevah Build Script for zlib.
+
+# Import shared code.
+# The relative paths work in both src/blabla and build/blabla.
+source ../../functions.sh
+source ../../functions_pythia.sh
+
+
+chevahbs_getsources() {
+    local name=$1
+    local ver=$2
+    local ext="tar.gz"
+    local link=https://www.zlib.net/"$name"-"$ver"."$ext"
+
+    download_sources $name $ver $link $ext
+}
+
+
+chevahbs_configure() {
+    # We want static builds only, so that we don't have to mess with LIBPATH.
+    CONF_OPTS="--static"
+    execute ./configure --prefix="" $CONF_OPTS
+}
+
+
+chevahbs_compile() {
+    execute $MAKE
+}
+
+
+chevahbs_install() {
+    execute $MAKE install DESTDIR=$INSTALL_DIR
+}
+
+
+select_chevahbs_command $@

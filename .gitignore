@@ -1,0 +1,8 @@
+/build/
+/dist/
+/BUILD_ENV_VARS
+/src/*/*.tar.gz
+/src/*/*.tgz
+/src/*/*.zip
+/src/*/*.msi
+/src/*/*.exe

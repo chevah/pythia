@@ -1,0 +1,339 @@
+#!/usr/bin/env bash
+#
+# Pythia's script for building Python.
+
+# Set versions for the software to be built.
+source pythia.conf
+
+# Import shared and specific code.
+source ./functions.sh
+source ./functions_pythia.sh
+
+# Git revision to inject into Python's sys.version string through chevahbs.
+PYTHON_PACKAGE_VERSION="$(git rev-parse --short=8 HEAD)"
+exit_on_error $? 250
+
+# Export the variables needed by the chevahbs scripts and the test phase.
+export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION REDISTRIBUTABLE_VERSION
+export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_GMP BUILD_LIBFFI BUILD_OPENSSL
+
+# Import build env vars set by "./brink.sh detect_os" and export needed ones.
+if [ -f ./BUILD_ENV_VARS ]; then
+    source ./BUILD_ENV_VARS
+else
+    (>&2 echo "Missing BUILD_ENV_VARS file!")
+    echo "Run './brink.sh detect_os' first, as per the README file..."
+    exit 249
+fi
+# On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
+# to force a 32bit build on a 64bit machine, e.g. by setting ARCH in brink.sh
+# as "x86" instead of "x64" for a certain platform.
+# $ARCH is also used when statically building libffi/GMP and for testing.
+# $OS is used when patching/configuring/building/testing.
+export ARCH
+export OS
+
+# Sub-directories for building from sources and the final distributable.
+BUILD_DIR="build"
+DIST_DIR="dist"
+
+# Local variables for the build process.
+LOCAL_PYTHON_BINARY_DIST="$PYTHON_VERSION-$OS-$ARCH"
+LOCAL_PYTHON_BINARY="./$LOCAL_PYTHON_BINARY_DIST/bin/python"
+INSTALL_DIR="$PWD/$BUILD_DIR/$LOCAL_PYTHON_BINARY_DIST"
+PYTHON_BIN="$INSTALL_DIR/bin/python"
+PYTHON_BUILD_DIR="$PYTHON_VERSION-$OS-$ARCH"
+
+# Used when building pysqlite and gmpy2.
+export PYTHON_BIN
+
+# Explicitly choose the C compiler in order to make it possible to switch
+# between native compilers and GCC on platforms such as Solaris.
+export CC="gcc"
+# Other needed tools (GNU flavours preferred).
+export MAKE="make"
+# $GET_CMD must save to custom filename, which must be appended before the link.
+export GET_CMD="wget --quiet -O"
+export SHA_CMD="sha512sum --check --status --warn"
+export TAR_CMD="tar xfz"
+export ZIP_CMD="unzip -q"
+
+# OS quirks.
+source os_quirks.sh
+
+
+help_text_clean="Clean build dir. Add -a to clean downloads from src/ too."
+command_clean() {
+    echo "#### Removing previous build/ sub-directory, if existing... ####"
+    execute rm -rf "$BUILD_DIR"
+
+    if [ $# -ne 0 ]; then
+        if [ $1 = "-a" ]; then
+            echo "#### Removing any downloads from src/... ####"
+            execute rm -fv src/*/*.{tar.gz,tgz,zip,msi,exe}
+        fi
+    fi
+}
+
+
+help_text_build="Build Python binaries for current platform."
+command_build() {
+    # Check for packages required to build on current OS.
+    source pkg_checks.sh
+
+    # Clean build dir to avoid contamination from previous builds,
+    # but without removing the download archives, to speed up the build.
+    command_clean
+
+    # Build stuff statically on most platforms, install headers and libs in the
+    # following locations, making sure they are picked up when building Python.
+    # $CPPFLAGS is another way to ensure this, but it's not as portable.
+    execute mkdir -p $INSTALL_DIR/{include,lib}
+    export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS}"
+    export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH}"
+
+    build_dep $BUILD_LIBFFI   libffi    $LIBFFI_VERSION
+    build_dep $BUILD_ZLIB     zlib        $ZLIB_VERSION
+    build_dep $BUILD_BZIP2    bzip2      $BZIP2_VERSION
+    build_dep $BUILD_LIBEDIT  libedit  $LIBEDIT_VERSION
+    build_dep $BUILD_GMP      gmp          $GMP_VERSION
+    build_dep $BUILD_OPENSSL  openssl  $OPENSSL_VERSION
+
+    build_python
+
+    # SQLite build consists of getting sources and copying what pysqlite needs.
+    build sqlite-autoconf $SQLITE_VERSION
+
+    # Python modules that require tweaks when building.
+    if [ $OS != 'win' ]; then
+        build pysqlite $PYSQLITE_VERSION
+        build gmpy2 $GMPY2_VERSION
+    fi
+
+    # Python modules installed with pip. Some are built locally.
+    command_install_python_modules
+
+    case $OS in
+        win)
+            echo "    Skipping cleaning install dir"
+            ;;
+        *)
+            execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
+                # Clean the build dir.
+                execute rm -rf tmp
+                execute mkdir -p lib/config
+                safe_move share lib/config
+                safe_move pysqlite2-doc lib/config
+                # Move all bin to lib/config
+                safe_move bin lib/config
+                execute mkdir bin
+                # Copy back python binary
+                execute cp lib/config/bin/$PYTHON_VERSION bin/python
+            execute popd
+            ;;
+    esac
+
+    # Output the python-package version to a dedicated file in the archive.
+    echo "${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
+        > ${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHON_PACKAGE_VERSION
+
+    make_dist 'python' ${PYTHON_BUILD_DIR}
+}
+
+
+# This builds Python's dependencies: libffi, bzip2, GMP, etc.
+build_dep() {
+    local dep_boolean=$1
+    local dep_name=$2
+    local dep_version=$3
+
+    if [ $dep_boolean = "yes" ]; then
+        # This is where building happens.
+        echo "#### Building $dep_name version ${dep_version}... ####"
+        build $dep_name $dep_version
+        # If there's something to be done post-build, here's the place.
+        if [ $dep_name = "openssl" -a "$OS" = "lnx" ]; then
+            # '-Wl,-rpath' voodoo is needed when building cryptography w/ pip.
+            export LDFLAGS="-L${INSTALL_DIR}/lib64/ \
+                -Wl,-rpath,${INSTALL_DIR}/lib64/ ${LDFLAGS}"
+            export PKG_CONFIG_PATH="\
+                ${INSTALL_DIR}/lib64/pkgconfig/:${PKG_CONFIG_PATH}"
+            # To make sure they're found, we're back to using CPPFLAGS.
+            export CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include"
+        fi
+    elif [ $dep_boolean = "no" ]; then
+        (>&2 echo "    Skipping building ${dep_name}...")
+    else
+        (>&2 echo "Unknown env var for building ${dep_name}. Exiting!")
+        exit 248
+    fi
+}
+
+
+# This builds Python itself.
+build_python() {
+    if [ $OS = "win" ]; then
+        # Python "build" is a very special case under Windows.
+        execute pushd src/Python-Windows
+        ./chevahbs Python $PYTHON_BUILD_VERSION $INSTALL_DIR
+        execute popd
+    else
+        build Python $PYTHON_BUILD_VERSION
+    fi
+}
+
+# This gets get-pip.py
+download_get_pip() {
+    if [ ! -e "$BUILD_DIR"/get-pip.py ]; then
+        execute $GET_CMD \
+            "$BUILD_DIR"/get-pip.py https://bootstrap.pypa.io/get-pip.py
+    fi
+}
+
+
+# Compile and install all Python extra libraries.
+command_install_python_modules() {
+
+    # Install latest PIP, then instruct it to get exact versions of setuptools.
+    # Otherwise, get-pip.py will always try to get latest versions.
+    download_get_pip
+    execute $PYTHON_BIN "$BUILD_DIR"/get-pip.py $PIP_ARGS \
+        pip==$PIP_VERSION --no-setuptools setuptools==$SETUPTOOLS_VERSION
+
+    # pycparser is installed first as setup_requires is ugly.
+    # https://pip.pypa.io/en/stable/reference/pip_install/#controlling-setup-requires
+    execute $PYTHON_BIN -m pip \
+        install $PIP_ARGS -U pycparser==$PYCPARSER_VERSION
+
+    if [ $OS = 'win' ]; then
+        echo "    Skipping makefile updating on Windows"
+    else
+        # Update Python config Makefile to use the newly-built Python.
+        makefile=$INSTALL_DIR/lib/$PYTHON_VERSION/config/Makefile
+        makefile_orig=$INSTALL_DIR/lib/$PYTHON_VERSION/config/Makefile.orig
+
+        execute cp $makefile $makefile_orig
+        execute sed "s#^prefix=.*#prefix= $INSTALL_DIR#" $makefile_orig \
+            > $makefile
+    fi
+
+    for library in $PIP_LIBRARIES ; do
+        execute $PYTHON_BIN -m pip install $PIP_ARGS $library
+    done
+
+    if [ "$OS" = "win" ]; then
+        PKG_INSTALL_DIR="$INSTALL_DIR/lib/Lib/site-packages"
+        # Adjust this when the manifest wiper moves around.
+        WIPER="src/Python-Windows/manifest-wiper.exe"
+
+        echo "#### Patching pyWin32 manifests for our redistributables... ###"
+        wipe_manifest $WIPER $PKG_INSTALL_DIR/win32/pythonservice.exe
+        wipe_manifest $WIPER $PKG_INSTALL_DIR/win32/perfmondata.dll
+        wipe_manifest $WIPER \
+            $PKG_INSTALL_DIR/pywin32_system32/pythoncomloader27.dll
+
+        echo "#### Copying Python runtime to pyWin32 site-packages dir... ###"
+        execute cp $INSTALL_DIR/lib/*CRT.manifest* $PKG_INSTALL_DIR/win32
+        execute cp $INSTALL_DIR/lib/python*.dll.* $PKG_INSTALL_DIR/win32
+        execute cp $INSTALL_DIR/lib/msvc?90.dll $PKG_INSTALL_DIR/win32
+        execute cp $PKG_INSTALL_DIR/pywin32_system32/*.dll \
+            $PKG_INSTALL_DIR/win32
+    fi
+
+}
+
+
+help_text_test=\
+"Run own tests for the newly-build Python distribution."
+command_test() {
+    test_file="test_python_binary_dist.py"
+    execute cp src/chevah-python-test/$test_file "$BUILD_DIR"
+    execute cp src/chevah-python-test/get_binaries_deps.sh "$BUILD_DIR"
+    execute pushd "$BUILD_DIR"
+
+    echo "#### Executing Chevah tests... ####"
+    execute $LOCAL_PYTHON_BINARY $test_file
+
+    echo "#### Testing for outdated packages and security issues... ####"
+    execute $PYTHON_BIN -m pip list --outdated --format=columns
+    execute $PYTHON_BIN -m pip install $PIP_ARGS safety
+    execute $PYTHON_BIN -m safety check --full-report \
+        $SAFETY_FALSE_POSITIVES_OPTS $SAFETY_IGNORED_OPTS
+    if [ -n "$SAFETY_FALSE_POSITIVES_OPTS" ]; then
+        SAFETY_FALSE_POSITIVES_IDS="\
+            $(echo $SAFETY_FALSE_POSITIVES_OPTS | sed s/\-i\ //g)"
+        echo "Following Safety DB IDs were excepted as false positives:"
+        echo "${SAFETY_FALSE_POSITIVES_IDS}"
+    fi
+    if [ -n "$SAFETY_IGNORED_OPTS" ]; then
+        SAFETY_IGNORED_IDS="\
+            $(echo $SAFETY_IGNORED_OPTS | sed s/\-i\ //g)"
+        (>&2 echo "Following Safety DB IDs were excepted from checks:")
+        (>&2 echo "${SAFETY_IGNORED_IDS}")
+    fi
+    # Avoid having output messages sometimes mangled for some reason.
+    sleep 1
+
+    echo "#### Executing tests for included Python modules... ####"
+
+    # This test requires quite some RAM, so beware of heavy swapping.
+    echo "## Testing PyCryptodomex... ##"
+    execute $LOCAL_PYTHON_BINARY -m Cryptodome.SelfTest
+
+    echo "## Testing scandir... ##"
+    # Scandir build consists of getting sources and copying the needed tests.
+    execute popd
+    build scandir $SCANDIR_VERSION
+    execute pushd "$BUILD_DIR"
+
+    # There are a series of issues with the scandir tests in Linux/Unix.
+    # Reported upstream at https://github.com/benhoyt/scandir/issues/78.
+    SCANDIR_TEST_DIR="scandir-${SCANDIR_VERSION}/test"
+    case "$OS" in
+        macos|osx|win)
+            execute $LOCAL_PYTHON_BINARY $SCANDIR_TEST_DIR/run_tests.py
+            ;;
+        *)
+            # Remaining build slaves have the required UTF-8 locale settings
+            # available, but they need to be requested for the tests to pass.
+            export LC_ALL=en_US.UTF-8
+            execute $LOCAL_PYTHON_BINARY $SCANDIR_TEST_DIR/run_tests.py
+            export LC_ALL=C
+            ;;
+    esac
+
+    execute popd
+}
+
+
+help_text_compat=\
+"Run the test suite from chevah/compat master."
+command_compat() {
+    execute pushd "$BUILD_DIR"
+
+    # This is quite hackish, as compat is arm-twisted to use the local version.
+    echo '#### Running chevah/compat tests... ####'
+    echo '## Removing any pre-existing compat code... ####'
+    execute rm -rf compat/
+    execute git clone https://github.com/chevah/compat.git --depth=1 -b master
+    execute pushd compat
+    # Copy over current brink stuff, as some changes might require it.
+    execute cp ../../brink.{conf,sh} ./
+    # Patch compat to use the newly-built Python, then copy it to cache/.
+    execute echo -e \
+        "\nPYTHON_CONFIGURATION=default@${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
+        >> brink.conf
+    execute mkdir cache
+    execute cp -r ../$LOCAL_PYTHON_BINARY_DIST cache/
+    # Make sure everything is done from scratch in the current dir.
+    unset CHEVAH_CACHE CHEVAH_BUILD
+    # Some tests might fail due to causes which are not related to python.
+    execute ./brink.sh deps
+    execute ./brink.sh test_ci
+
+    execute popd
+}
+
+
+# Launch the whole thing.
+select_command $@

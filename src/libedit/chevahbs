@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+#
+# Chevah Build Script for libedit.
+
+# Import shared code.
+source ../../functions.sh
+source ../../functions_pythia.sh
+
+
+chevahbs_getsources() {
+    local name=$1
+    local ver=$2
+    local ext="tar.gz"
+    local link=https://thrysoee.dk/editline/"$name"-"$ver"."$ext"
+
+    download_sources $name $ver $link $ext
+}
+
+
+chevahbs_patch() {
+    # With libedit, terminal state is not properly restored on some OS'es, eg.
+    # after exiting the repl on systems with ncurses 6.0, such as Ubuntu 16.04.
+    # Patch from https://trac.macports.org/ticket/48807#comment:141.
+    # Upstream bugfix (not recommended): https://gnats.netbsd.org/48957.
+    echo "Applying terminal_restore.patch:"
+    execute patch -p0 < terminal_restore.patch
+}
+
+
+chevahbs_configure() {
+    # We want static builds only, so that we don't have to mess with LIBPATH.
+    CONF_OPTS="--disable-shared --enable-static"
+    case $OS in
+        sol*)
+            # Required when linking to libedit, which has a simpler configure.
+            CFLAGS="$CFLAGS -xcode=pic32"
+    esac
+    # We touch all files to prevent build aborts with:
+    # "WARNING: 'aclocal-1.15' is missing on your system."
+    execute find . -type f -exec touch -r acinclude.m4 {} +
+    execute ./configure --prefix="" $CONF_OPTS
+}
+
+
+chevahbs_compile() {
+    case $OS in
+        sol*)
+            # Path to newer awk.
+            PATH="/usr/xpg4/bin:$PATH"
+            ;;
+    esac
+    execute $MAKE
+}
+
+
+chevahbs_install() {
+    execute $MAKE install DESTDIR=$INSTALL_DIR
+}
+
+
+select_chevahbs_command $@

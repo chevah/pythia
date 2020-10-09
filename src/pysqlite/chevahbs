@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#
+# Chevah Build Script for pysqlite.
+
+# Import shared code.
+# The relative paths work in both src/blabla and build/blabla.
+source ../../functions.sh
+source ../../functions_pythia.sh
+
+
+chevahbs_getsources() {
+    local name=$1
+    local ver=$2
+    local ext="tar.gz"
+    local link=https://codeload.github.com/ghaering/"$name"/"$ext"/"$ver"
+
+    download_sources $name $ver $link $ext
+}
+
+
+chevahbs_configure() {
+	echo "[build_ext]" >> setup.cfg
+	echo "include_dirs=$INSTALL_DIR/include" >> setup.cfg
+	echo "library_dirs=$INSTALL_DIR/lib" >> setup.cfg
+
+	# Download deps from our PyPI server and block the official source.
+	echo "[easy_install]" >> setup.cfg
+	echo "find_links=https://pypi.chevah.com/" >> setup.cfg
+	echo "allow_hosts=*pypi.chevah.com*" >> setup.cfg
+}
+
+
+chevahbs_compile() {
+    # Bring SQLite amalgamation source locally.
+    execute cp ${INSTALL_DIR}/../sqlite3.c ./
+    execute $PYTHON_BIN setup.py build_static
+}
+
+
+chevahbs_install() {
+    execute $PYTHON_BIN setup.py install
+}
+
+
+select_chevahbs_command $@

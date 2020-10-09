@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+#
+# Chevah Build Script for bzip2.
+
+# Import shared code.
+# The relative paths work in both src/blabla and build/blabla.
+source ../../functions.sh
+source ../../functions_pythia.sh
+
+
+chevahbs_getsources() {
+    local name=$1
+    local ver=$2
+    local ext="tar.gz"
+    local link=https://sourceware.org/pub/bzip2/"$name"-"$ver"."$ext"
+
+    download_sources $name $ver $link $ext
+}
+
+
+chevahbs_patch() {
+    # Patch to support PIC and compilers other than GCC.
+    echo "Applying cc_fpic.patch:"
+    execute patch -p0 < cc_fpic.patch
+}
+
+
+chevahbs_configure() {
+    # Just a stub, bzip2's build doesn't need this.
+    execute true
+}
+
+
+chevahbs_compile() {
+    execute $MAKE
+}
+
+
+chevahbs_install() {
+    # bzip2's installation copies too many files, we do it manually.
+    execute cp bzlib.h ${INSTALL_DIR}/include/ 
+    execute cp libbz2.a ${INSTALL_DIR}/lib/ 
+}
+
+
+select_chevahbs_command $@

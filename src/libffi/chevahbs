@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#
+# Chevah Build Script for libffi.
+
+# Import shared code.
+# The relative paths work in both src/blabla and build/blabla.
+source ../../functions.sh
+source ../../functions_pythia.sh
+
+
+chevahbs_getsources() {
+    local name=$1
+    local ver=$2
+    local ext="tar.gz"
+    local link=ftp://sourceware.org/pub/libffi/"$name"-"$ver"."$ext"
+
+    download_sources $name $ver $link $ext
+}
+
+
+chevahbs_configure() {
+    # We want only static build so that we don't have to mess with LIBPATH.
+    execute ./configure --prefix="" --disable-shared --enable-static
+}
+
+
+chevahbs_compile() {
+    execute $MAKE
+}
+
+
+chevahbs_install() {
+
+    execute $MAKE install DESTDIR=$INSTALL_DIR
+
+    if [ -z "$(ls -A $INSTALL_DIR/include)" ]; then
+        # 3.2.1 installs its headers in $PREFIX/lib/libffi-$VERSION/include,
+        # instead of $PREFIX/include, so we copy them to the default location.
+        execute mkdir -p $INSTALL_DIR/include
+        execute cp $INSTALL_DIR/lib*/libffi-*/include/* \
+            $INSTALL_DIR/include/
+        # On some systems libffi is installed in lib64/ and then cffi is
+        # searching for it in lib/ (this affects RHEL 5-7 and SLES 11-12).
+        if [ -d $INSTALL_DIR/lib64 ]; then
+            execute cp $INSTALL_DIR/lib64/* $INSTALL_DIR/lib/
+        fi
+    fi
+}
+
+select_chevahbs_command $@

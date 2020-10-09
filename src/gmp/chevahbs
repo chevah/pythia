@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+#
+# Chevah Build Script for GMP.
+#
+
+# Import shared code.
+# The relative paths work in both src/blabla and build/blabla.
+source ../../functions.sh
+source ../../functions_pythia.sh
+
+
+chevahbs_getsources() {
+    local name=$1
+    local ver=$2
+    local ext="tar.gz"
+    local link=https://gmplib.org/download/gmp/"$name"-"$ver"."$ext"
+
+    download_sources $name $ver $link $ext
+}
+
+chevahbs_configure() {
+    # We want only static build so that we don't have to mess with LIBPATH.
+    CONF_OPTS="--disable-shared --enable-static"
+    case $ARCH in
+        arm64|x64|x86)
+            # Select a "fat binary" build, where optimized low level
+            # subroutines are chosen at runtime according to the CPU detected.
+            # This means more code, but gives good performance on all chips.
+            CONF_OPTS="$CONF_OPTS --enable-fat"
+            if [ ${ARCH%%64} != "$ARCH" ]; then
+                # Prevent gmpy lib relocation error for arm64 and x64.
+                # More at https://bugs.gentoo.org/show_bug.cgi?id=707332
+                # and https://tinyurl.com/y6sblguw.
+                CONF_OPTS="$CONF_OPTS --with-pic"
+            fi
+    esac
+    execute ./configure --prefix="" $CONF_OPTS
+}
+
+
+chevahbs_compile() {
+    execute $MAKE
+    # GMP needs to be checked even after a successful compilation.
+    # See its INSTALL file for details.
+    execute $MAKE check
+}
+
+
+chevahbs_install() {
+    execute $MAKE install DESTDIR=$INSTALL_DIR
+}
+
+
+select_chevahbs_command $@

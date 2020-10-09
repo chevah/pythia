@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+#
+# Chevah Script for copying required SQLite source and headers.
+
+# Import shared code.
+# The relative paths work in both src/blabla and build/blabla.
+source ../../functions.sh
+source ../../functions_pythia.sh
+
+
+chevahbs_getsources() {
+    # SQLite has a peculiar naming scheme for downloads.
+    # The year probably needs to be updated when updating the version.
+    local name=$1
+    local ver=$2
+    local ext="tar.gz"
+    local link=https://sqlite.org/2020/"$name"-"$ver"."$ext"
+
+    download_sources $name $ver $link $ext
+}
+
+
+chevahbs_configure() {
+    # Just a stub, we don't build SQLite here.
+    echo "    Nothing to configure for SQLite."
+}
+
+
+chevahbs_compile() {
+    # Just a stub, we don't build SQLite here.
+    echo "    Nothing to build for SQLite."
+}
+
+
+chevahbs_install() {
+    # Copy files required by pysqlite's build.
+    # Here's where the amalgamation file will be picked up.
+    execute cp sqlite3.c ${INSTALL_DIR}/../
+    # Headers go to the usual place.
+    execute cp *.h ${INSTALL_DIR}/include/ 
+}
+
+
+select_chevahbs_command $@
