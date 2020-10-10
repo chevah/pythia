@@ -79,6 +79,7 @@ command_clean() {
 help_text_build="Build Python binaries for current platform."
 command_build() {
     # Check for packages required to build on current OS.
+    echo "#### Checking for required packages... ####"
     source pkg_checks.sh
 
     # Clean build dir to avoid contamination from previous builds,
@@ -88,6 +89,7 @@ command_build() {
     # Build stuff statically on most platforms, install headers and libs in the
     # following locations, making sure they are picked up when building Python.
     # $CPPFLAGS is another way to ensure this, but it's not as portable.
+    echo "#### Starting the build... ####"
     execute mkdir -p $INSTALL_DIR/{include,lib}
     export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS}"
     export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH}"

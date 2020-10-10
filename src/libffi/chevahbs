@@ -19,7 +19,6 @@ chevahbs_getsources() {
 
 
 chevahbs_configure() {
-    # We want only static build so that we don't have to mess with LIBPATH.
     execute ./configure --prefix="" --disable-shared --enable-static
 }
 
@@ -34,8 +33,8 @@ chevahbs_install() {
     execute $MAKE install DESTDIR=$INSTALL_DIR
 
     if [ -z "$(ls -A $INSTALL_DIR/include)" ]; then
-        # 3.2.1 installs its headers in $PREFIX/lib/libffi-$VERSION/include,
-        # instead of $PREFIX/include, so we copy them to the default location.
+        # 3.2.1 installs its headers in $PREFIX/lib/libffi-$VERSION/include
+        # instead of $PREFIX/include, let's copy them to the default location.
         execute mkdir -p $INSTALL_DIR/include
         execute cp $INSTALL_DIR/lib*/libffi-*/include/* \
             $INSTALL_DIR/include/

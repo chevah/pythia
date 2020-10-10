@@ -19,7 +19,6 @@ chevahbs_getsources() {
 }
 
 chevahbs_configure() {
-    # We want only static build so that we don't have to mess with LIBPATH.
     CONF_OPTS="--disable-shared --enable-static"
     case $ARCH in
         arm64|x64|x86)

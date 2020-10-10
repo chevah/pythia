@@ -28,14 +28,13 @@ chevahbs_patch() {
 
 
 chevahbs_configure() {
-    # We want static builds only, so that we don't have to mess with LIBPATH.
     CONF_OPTS="--disable-shared --enable-static"
     case $OS in
         sol*)
             # Required when linking to libedit, which has a simpler configure.
             CFLAGS="$CFLAGS -xcode=pic32"
     esac
-    # We touch all files to prevent build aborts with:
+    # Touch all files to prevent the build erroring out with:
     # "WARNING: 'aclocal-1.15' is missing on your system."
     execute find . -type f -exec touch -r acinclude.m4 {} +
     execute ./configure --prefix="" $CONF_OPTS

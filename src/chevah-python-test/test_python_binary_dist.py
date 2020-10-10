@@ -226,7 +226,7 @@ def get_actual_deps(script_helper):
     # OpenBSD's ldd output is special, both the name of the examined files and
     # the needed libs are in the 7th colon, which also includes a colon header.
     openbsd_ignored_strings = ( 'Name', os.getcwd(), './', )
-    # On Linux with glibc we ignore ld-linux*, virtual deps and other special
+    # On Linux with glibc, ignore ld-linux*, virtual deps, and other special
     # libs and messages, to only get deps of regular libs with full paths.
     linux_ignored_strings = (
                             'linux-gate.so',
@@ -263,7 +263,7 @@ def get_actual_deps(script_helper):
                 if dep.startswith(openbsd_ignored_strings):
                     continue
             elif platform_system == 'linux':
-                # On Alpine we don't use regular ldd, the output is different.
+                # On Alpine, lddtree is used, the output is different.
                 if 'alpine' in CHEVAH_OS:
                     dep = line.split()[0]
                 else:
@@ -271,7 +271,7 @@ def get_actual_deps(script_helper):
                         continue
                     dep = line.split()[2]
             else:
-                # For other OS'es, the third field in each line is what we need.
+                # For other OS'es, the third field in each line is needed.
                 dep = line.split()[2]
             libs_deps.append(dep)
     return list(set(libs_deps))
@@ -333,7 +333,7 @@ def test_dependencies():
 def egg_check(module):
     """
     Check that the tested module is in the current path.
-    If not, it may be pulled from ~/.python-eggs and we don't want that.
+    If not, it may be pulled from ~/.python-eggs and that's not good.
 
     Return 0 on success, non zero on error.
     """
@@ -621,7 +621,7 @@ def main():
         else:
             print '"spwd" module is present.'
 
-    # We compile the readline module using libedit only on selected platforms.
+    # The readline module is built using libedit only on selected platforms.
     if BUILD_LIBEDIT:
         try:
             import readline

@@ -21,19 +21,17 @@ chevahbs_getsources() {
 
 
 chevahbs_configure() {
-    # Just a stub, we don't build SQLite here.
     echo "    Nothing to configure for SQLite."
 }
 
 
 chevahbs_compile() {
-    # Just a stub, we don't build SQLite here.
     echo "    Nothing to build for SQLite."
 }
 
 
 chevahbs_install() {
-    # Copy files required by pysqlite's build.
+    # This copies files required by pysqlite's build.
     # Here's where the amalgamation file will be picked up.
     execute cp sqlite3.c ${INSTALL_DIR}/../
     # Headers go to the usual place.

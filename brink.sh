@@ -807,10 +807,6 @@ detect_os() {
         "amd64"|"x86_64")
             ARCH="x64"
             case "$OS" in
-                sol10*)
-                    # On Solaris 10, x64 built fine prior to adding "bcrypt".
-                    ARCH="x86"
-                    ;;
                 win)
                     # 32bit build on Windows 2016, 64bit otherwise.
                     # Should work with a l10n pack too (tested with French).

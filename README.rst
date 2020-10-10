@@ -4,32 +4,44 @@ Pythia - a Python Portable Package
 Build system for a portable Python distribution. 
 A derivative of https://github.com/chevah/python-package/.
 
-Building steps::
+Building steps:
 
 * ``./brink.sh detect_os``
-* ``./chevah_build build``
+* ``./pythia build``
 
-Testing steps::
+Testing steps:
 
-* ``./chevah_build test``
-* ``./chevah_build test_compat``
+* ``./pythia test``
+* ``./pythia compat``
 
-Use ``./chevah_build help`` to discover all available commands.
+Use ``./pythia help`` to discover all available commands.
+
+
+Supported platforms
+-------------------
+
+* Windows Server 2012 R2 and newer
+* Red Hat Linux Enterprise 7 and 8 (including derivatives such as CentOS)
+* Amazon Linux 2
+* Ubuntu Server 18.04 and 20.04
+* any other Linux distribution with glibc 2.5 or newer
+* Alpine Linux 3.12
+* macOS 10.13 and newer
+* FreeBSD 11
+* OpenBSD 6.7
+* Solaris 11.4 x86.
+
+Note that https://github.com/chevah/python-package/ supported more platforms.
 
 
 Patching upstream code
 ----------------------
 
-This repository contains some patches for upstream code:
-Python, OpenSSL, SQLite, gmp, libffi, etc.
+This repository contains some patches for upstream code, e.g. Python and bzip2.
 
-For local changes to upstream projects, there are patches to be applied
-at build time. Those patches are kept in:
+These patches are applied at build time when added as:
 
 * ``src/$PROJECT/*.patch``
-
-New patches that respect the above scheme above will be picked up automatically
-by the build system.
 
 An example for creating a patch for src/python/Python/Lib/site.py::
 

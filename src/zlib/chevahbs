@@ -19,7 +19,6 @@ chevahbs_getsources() {
 
 
 chevahbs_configure() {
-    # We want static builds only, so that we don't have to mess with LIBPATH.
     CONF_OPTS="--static"
     execute ./configure --prefix="" $CONF_OPTS
 }

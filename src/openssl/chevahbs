@@ -19,10 +19,9 @@ chevahbs_getsources() {
 
 
 chevahbs_configure() {
-    # We want static builds only, so that we don't have to mess with LIBPATH.
     CONF_OPTS="no-shared"
     # OpenSSL's build requires an absolute path for --prefix,
-    # so we don't use --prefix="" as in the other chevahbs scripts.
+    # can't use --prefix="" as in the other chevahbs scripts.
     execute ./config --prefix="$INSTALL_DIR" $CONF_OPTS
 }
 

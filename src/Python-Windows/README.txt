@@ -63,7 +63,7 @@ the manifests on the system where the DLLs were collected, in files of the form
 /c/Windows/WinSxS/Manifests/"$ARCH"_microsoft.vc90.crt_*"$REDISTRIBUTABLE_VERSION"*.manifest
 
 The manifests in this repository are used to tie the upstream Python binary
-files to the VC++ 9.0 DLLs we distribute alongside them.
+files to the VC++ 9.0 DLLs distributed alongside them.
 
 When updating the redistributable version/revision, also update the value of
 the REDISTRIBUTABLE_VERSION variable in `pythia.conf` accordingly.

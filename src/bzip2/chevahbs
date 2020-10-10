@@ -37,7 +37,7 @@ chevahbs_compile() {
 
 
 chevahbs_install() {
-    # bzip2's installation copies too many files, we do it manually.
+    # bzip2's installation copies too many files, let's do it manually.
     execute cp bzlib.h ${INSTALL_DIR}/include/ 
     execute cp libbz2.a ${INSTALL_DIR}/lib/ 
 }

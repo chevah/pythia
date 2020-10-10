@@ -17,8 +17,8 @@ elif [ "$os" = "SunOS" ]; then
     checker="ldd -L"
 elif [ "$os" = "Linux" ]; then
     if [ -f /etc/alpine-release ]; then
-        # musl's ldd has issues with some Python modules, so we use lddtree,
-        # which is forked from pax-utils and installed by default in Alpine.
+        # musl's ldd has issues with some Python modules, but there's lddtree,
+        # which is forked from pax-utils, and installed by default in Alpine.
         checker="lddtree -l"
     fi
 fi
