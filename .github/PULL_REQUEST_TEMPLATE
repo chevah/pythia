@@ -1,11 +1,11 @@
 Scope
-=====
+-----
 
 Problems these changes solve and/or features added.
 
 
 Changes
-=======
+-------
 
 List fixes for the above problems and/or the added features.
 
@@ -23,6 +23,6 @@ Add comments for out-of-scope minor changes under a dedicated
 
 
 Testing
-=======
+-------
 
-Describe how to manyally test above changes, if needed.
+Describe how to manually test above changes, if needed.

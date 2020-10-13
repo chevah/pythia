@@ -64,6 +64,80 @@ jobs:
       uses: mxschmitt/action-tmate@v2
 
 
+  ubuntu-18-04:
+    runs-on: ubuntu-18.04
+    timeout-minutes: 30
+    steps:
+    - uses: chevah/auto-cancel-redundant-job@v1
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Cache build
+      uses: actions/cache@v2
+      with:
+        path: |
+          build-pythia
+        key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
+
+    - name: Prepare OS
+      run: sudo apt-get install libncurses5-dev
+
+    - name: Download needed deps for the detected OS
+      run: ./brink.sh detect_os
+
+    - name: Build Python
+      run: ./pythia build
+
+    - name: Test Python
+      run: ./pythia test
+
+    - name: Test Compat
+      run: ./pythia compat
+
+    - name: Tmate debug on failure
+      if: failure() && env.TMATE_DEBUG == 'yes'
+      uses: mxschmitt/action-tmate@v2
+
+
+  ubuntu-16-04:
+    runs-on: ubuntu-16.04
+    timeout-minutes: 30
+    steps:
+    - uses: chevah/auto-cancel-redundant-job@v1
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Cache build
+      uses: actions/cache@v2
+      with:
+        path: |
+          build-pythia
+        key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
+
+    - name: Prepare OS
+      run: sudo apt-get install libncurses5-dev
+
+    - name: Download needed deps for the detected OS
+      run: ./brink.sh detect_os
+
+    - name: Build Python
+      run: ./pythia build
+
+    - name: Test Python
+      run: ./pythia test
+
+    - name: Test Compat
+      run: ./pythia compat
+
+    - name: Tmate debug on failure
+      if: failure() && env.TMATE_DEBUG == 'yes'
+      uses: mxschmitt/action-tmate@v2
+
+
   macos-10-15:
     runs-on: macos-10.15
     timeout-minutes: 60
@@ -111,6 +185,41 @@ jobs:
 
   windows-2019:
     runs-on: windows-2019
+    timeout-minutes: 30
+    steps:
+    - uses: chevah/auto-cancel-redundant-job@v1
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Cache build
+      uses: actions/cache@v2
+      with:
+        path: |
+          build-pythia
+        key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
+
+    # Add packages needed to build our patched pycrypto.
+    - name: Prepare OS
+      run: |
+        chocolatey install -y make vcpython27
+
+    # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
+    - name: Download needed deps for the detected OS
+      run: bash ./brink.sh detect_os
+
+    - name: Build Python
+      run: bash ./pythia build
+
+    - name: Test Python
+      run: bash ./pythia test
+
+    - name: Test Compat
+      run: bash ./pythia compat
+
+
+  windows-2016:
+    runs-on: windows-2016
     timeout-minutes: 30
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
