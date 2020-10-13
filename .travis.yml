@@ -1,0 +1,24 @@
+#
+# Experimental Travis-CI
+#
+# For now, the build matrix has a single member: linux-arm64
+# Pinned on the oldest available distribution, to get a generic Linux build.
+
+language: c
+
+arch:
+  - arm64
+
+os:
+  - linux
+
+dist:
+  - xenial
+
+install: skip
+
+script:
+  - ./brink.sh detect_os
+  - ./pythia build
+  - ./pythia test
+  - ./pythia compat
