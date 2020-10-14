@@ -13,6 +13,10 @@ jobs:
       arch: arm64
     - os: osx
       osx_image: xcode10.1
+    - os: osx
+      osx_image: xcode11.3
+    - os: osx
+      osx_image: xcode12.2
 
 install: skip
 
