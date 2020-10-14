@@ -232,15 +232,17 @@ jobs:
     - name: Hack Homebrew
       run: |
         sudo find /usr/local -name 'libintl*' -exec chmod a-r {} +
+        sudo find /usr/local -name 'libffi*' -exec chmod a-r {} +
         sudo rm -f /usr/local/bin/{wget,curl,git}
 
     - name: Build Python
       run: ./pythia build
 
-    # Fix back Homebrew, to make everything functional.
+    # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
       run: |
         sudo find /usr/local -name 'libintl*' -exec chmod a+r {} +
+        sudo find /usr/local -name 'libffi*' -exec chmod a+r {} +
 
     - name: Test Python
       run: ./pythia test
