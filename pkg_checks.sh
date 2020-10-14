@@ -17,7 +17,7 @@ RHEL_PKGS="$COMMON_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
 ALPINE_COMMON_PKGS="$COMMON_PKGS\
     git zlib-dev libffi-dev ncurses-dev linux-headers musl-dev openssl-dev"
 # Windows is special, but package management is possible through Chocolatey.
-# Chocolatey's git package comes with patch, included through bundling MINGW4.
+# Chocolatey's git package comes with patch, and curl is bundled with MINGW.
 CHOCO_PKGS="vcpython27 make git"
 
 # Check for OS packages required for the build.
@@ -55,7 +55,7 @@ case "$OS" in
 			packages=$CHOCO_PKGS
 			check_command="choco info --local-only --limit-output"
 		else
-			packages="make git patch wget sha512sum"
+			packages="make git patch curl sha512sum"
 		fi
 		;;
 esac

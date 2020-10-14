@@ -15,8 +15,8 @@ case $OS in
             gmpy2==${GMPY2_VERSION}
             pywin32==${PYWIN32_VERSION} \
             "
-        # Windows builds have issues with Let's Encrypt certs.
-        export GET_CMD="wget --quiet --no-check-certificate -O"
+        # GitHub's "runners" don't have wget installed, curl comes with MinGW.
+        export GET_CMD="curl --silent --output"
         # On Windows, only one of the installers is downloaded.
         export SHA_CMD="sha512sum.exe --check --strict --warn --ignore-missing"
         ;;
