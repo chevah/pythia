@@ -26,6 +26,11 @@ missing_packages=""
 packages="$CC make m4 git patch wget sha512sum tar unzip"
 check_command="command -v"
 
+choco_shim() {
+    local pkg=$1
+    choco list --local-only --limit-output | grep -iq ^"${pkg}|"
+}
+
 case "$OS" in
     ubuntu*)
         # Debian-derived distros are similar in this regard.
@@ -56,7 +61,7 @@ case "$OS" in
             # Chocolatey is present, let's use it.
             CHOCO_PRESENT="yes"
             packages=$CHOCO_PKGS
-            check_command="choco info --local-only --limit-output"
+            check_command=choco_shim
         else
             packages="make git patch curl sha512sum"
         fi
@@ -78,8 +83,8 @@ if [ -n "$missing_packages" ]; then
     (>&2 echo "Missing required dependencies: $missing_packages.")
     if [ $CHOCO_PRESENT = "yes" ]; then
         echo "## Installing missing Chocolatey packages... ##"
-        # Don't use execute here, as dotnet3.5 scripts fail under bash.
-        choco install --yes $missing packages
+        # No execute here, dotnet3.5's scripts (dep of vcpython27) fail w/ bash.
+        choco install --yes $missing_packages
     else
         exit 149
     fi
