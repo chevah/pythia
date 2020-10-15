@@ -1,20 +1,24 @@
 #!/usr/bin/env bash
 #
-# Checks for required packages.
-
-# List of OS packages required for building Python/pyOpenSSL/cryptography etc.
-# Check for the presence of required packages/commands. This build requires:
+# Check for the presence of required packages/commands.
+# Install missing ones if possible.
+#
+# This build requires:
 #   * a C compiler, e.g. gcc
 #   * build tools: make, m4
 #   * patch (for applying our own patches)
 #   * git (for patching Python's version)
 #   * automake, libtool, and headers of a curses library (if building libedit)
-#   * perl 5.10.0 and Test::More 0.96 (if building OpenSSL).
+#   * perl 5.10.0 and Test::More 0.96 (if building OpenSSL)
+#   * wget/curl, sha512sum, tar, and unzip for (downloading and unpacking).
+#
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
-COMMON_PKGS="gcc make m4 automake libtool texinfo patch"
-DEBIAN_PKGS="$COMMON_PKGS git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
-RHEL_PKGS="$COMMON_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
-ALPINE_COMMON_PKGS="$COMMON_PKGS\
+
+# List of OS packages required for building Python/pyOpenSSL/cryptography etc.
+BASE_PKGS="gcc make m4 automake libtool texinfo patch wget tar coreutils unzip"
+DPKG_PKGS="$BASE_PKGS git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
+RPM_PKGS="$BASE_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
+APK_PKGS="$BASE_PKGS \
     git zlib-dev libffi-dev ncurses-dev linux-headers musl-dev openssl-dev"
 # Windows is special, but package management is possible through Chocolatey.
 # Chocolatey's git package comes with patch, and curl is bundled with MINGW.
@@ -32,26 +36,17 @@ choco_shim() {
 }
 
 case "$OS" in
-    ubuntu*)
-        # Debian-derived distros are similar in this regard.
-        packages="$DEBIAN_PKGS"
-        check_command="dpkg --status"
-        ;;
     rhel*|amzn*)
-        packages="$RHEL_PKGS"
+        packages="$RPM_PKGS"
         check_command="rpm --query"
         ;;
+    ubuntu*)
+        packages="$DPKG_PKGS"
+        check_command="dpkg --status"
+        ;;
     alpine*)
-        # Alpine 3.9 switched back to OpenSSL as default.
-        packages="$ALPINE_OPENSSL_PKGS"
+        packages="$APK_PKGS"
         check_command="apk info -q -e"
-        ;;
-    # On remaining OS'es, just check for some of the needed commands.
-    macos)
-        packages="$CC make m4 git patch libtool perl curl shasum tar unzip"
-        ;;
-    lnx)
-        packages="$packages perl"
         ;;
     win)
         # The windows build is special.
@@ -66,8 +61,15 @@ case "$OS" in
             packages="make git patch curl sha512sum"
         fi
         ;;
+    macos)
+        packages="$CC make m4 git patch libtool perl curl shasum tar unzip"
+        ;;
+    lnx)
+        packages="$packages perl"
+        ;;
 esac
 
+# If $check_command is still "command -v", it's only a check for needed commands.
 if [ -n "$packages" ]; then
     for package in $packages ; do
         echo "Checking if $package is available..."
@@ -86,7 +88,24 @@ if [ -n "$missing_packages" ]; then
         # No execute here, dotnet3.5's scripts (dep of vcpython27) fail w/ bash.
         choco install --yes $missing_packages
     else
-        exit 149
+        case "$OS" in
+            ubuntu*)
+                echo "## Installing missing dpkg packages... ##"
+                execute sudo apt install -y $missing_packages
+                ;;
+            rhel*|amzn*)
+                echo "## Installing missing rpm packages... ##"
+                execute sudo yum install $missing_packages
+                ;;
+            alpine*)
+                echo "## Installing missing apk packages... ##"
+                execute sudo apk add $missing_packages
+                ;;
+            *)
+                (>&2 echo "Don't know how to install missing stuff!")
+                exit 149
+                ;;
+        esac
     fi
 fi
 
