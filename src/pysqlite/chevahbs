@@ -19,14 +19,14 @@ chevahbs_getsources() {
 
 
 chevahbs_configure() {
-	echo "[build_ext]" >> setup.cfg
-	echo "include_dirs=$INSTALL_DIR/include" >> setup.cfg
-	echo "library_dirs=$INSTALL_DIR/lib" >> setup.cfg
+    echo "[build_ext]" >> setup.cfg
+    echo "include_dirs=$INSTALL_DIR/include" >> setup.cfg
+    echo "library_dirs=$INSTALL_DIR/lib" >> setup.cfg
 
-	# Download deps from our PyPI server and block the official source.
-	echo "[easy_install]" >> setup.cfg
-	echo "find_links=https://pypi.chevah.com/" >> setup.cfg
-	echo "allow_hosts=*pypi.chevah.com*" >> setup.cfg
+    # Download deps from our PyPI server and block the official source.
+    echo "[easy_install]" >> setup.cfg
+    echo "find_links=https://pypi.chevah.com/" >> setup.cfg
+    echo "allow_hosts=*pypi.chevah.com*" >> setup.cfg
 }
 
 

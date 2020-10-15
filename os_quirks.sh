@@ -93,8 +93,8 @@ esac
 
 # Compiler-dependent flags. At this moment, the compiler is known.
 if [ "${OS%sol*}" = "" ]; then
-	# Not all packages enable PIC, force it to avoid relocation issues.
-	export CFLAGS="$CFLAGS -Kpic"
+    # Not all packages enable PIC, force it to avoid relocation issues.
+    export CFLAGS="$CFLAGS -Kpic"
 elif [ "${OS%fbsd*}" = "" -o "${OS%obsd*}" = "" ]; then
     # Use PIC (Position Independent Code) on FreeBSD and OpenBSD with Clang.
     export CFLAGS="${CFLAGS} -fPIC"
