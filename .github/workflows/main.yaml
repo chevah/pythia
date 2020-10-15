@@ -231,8 +231,8 @@ jobs:
     # We can use needed tools from /usr/bin.
     - name: Hack Homebrew
       run: |
-        sudo find /usr/local -name 'libintl*' -exec chmod a-r {} +
-        sudo find /usr/local -name 'libffi*' -exec chmod a-r {} +
+        sudo find /usr/local -type f -name 'libintl*' -exec chmod a-r {} +
+        sudo find /usr/local -type f -name 'libffi*' -exec chmod a-r {} +
         sudo rm -f /usr/local/bin/{wget,curl,git}
 
     - name: Build Python
@@ -241,8 +241,8 @@ jobs:
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
       run: |
-        sudo find /usr/local -name 'libintl*' -exec chmod a+r {} +
-        sudo find /usr/local -name 'libffi*' -exec chmod a+r {} +
+        sudo find /usr/local -type f -name 'libintl*' -exec chmod a+r {} +
+        sudo find /usr/local -type f -name 'libffi*' -exec chmod a+r {} +
 
     - name: Test Python
       run: ./pythia test
