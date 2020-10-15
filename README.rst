@@ -51,3 +51,9 @@ An example for creating a patch for src/python/Python/Lib/site.py::
     diff -ur Lib/site.py.orig Lib/site.py
     # Save the diff into a file such as:
     src/Python/site_fix.patch
+
+.. image:: https://github.com/chevah/pythia/workflows/GitHub-CI/badge.svg
+  :target: https://github.com/chevah/pythia/actions
+
+.. image:: https://travis-ci.com/chevah/pythia.svg?branch=main
+  :target: https://travis-ci.com/github/chevah/pythia
