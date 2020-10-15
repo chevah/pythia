@@ -4,23 +4,29 @@
 # Linux ARM64 target is pinned on the oldest distribution available on Travis,
 # thus matching a generic ARM64 Linux build.
 
-language: minimal
+language: shell
+
+git:
+  depth: false
 
 jobs:
   include:
     - os: windows
+
     - os: linux
       dist: xenial
       arch: arm64
+
     - os: osx
       osx_image: xcode10.1
+
     - os: osx
       osx_image: xcode11.3
 
 install: skip
 
-script:
+before_script:
   - ./brink.sh detect_os
-  - ./pythia build
-  - ./pythia test
-  - ./pythia compat
+
+script:
+  - ./pythia build && ./pythia test && ./pythia compat
