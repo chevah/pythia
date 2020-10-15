@@ -1,10 +1,10 @@
 #
-# Experimental Travis-CI
+# Experimental Travis CI.
 #
-# For now, the build matrix has a single member: linux-arm64
-# Pinned on the oldest available distribution, to get a generic Linux build.
+# Linux ARM64 target is pinned on the oldest distribution available on Travis,
+# thus matching a generic ARM64 Linux build.
 
-language: c
+language: minimal
 
 jobs:
   include:
@@ -15,8 +15,6 @@ jobs:
       osx_image: xcode10.1
     - os: osx
       osx_image: xcode11.3
-    - os: osx
-      osx_image: xcode12.2
 
 install: skip
 
