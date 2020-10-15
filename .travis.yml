@@ -8,6 +8,7 @@ language: minimal
 
 jobs:
   include:
+    - os: windows
     - os: linux
       dist: xenial
       arch: arm64
