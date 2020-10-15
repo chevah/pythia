@@ -16,7 +16,7 @@ on:
     branches: [ main ]
 
 env:
-  TMATE_DEBUG: 'yes'
+  TMATE_DEBUG: 'no'
 
 jobs:
 
@@ -39,10 +39,6 @@ jobs:
       with:
         path: build-pythia
         key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
-
-    # Add packages needed to build our patched pycrypto.
-    - name: Install required packages
-      run: chocolatey install -y make vcpython27
 
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
     - name: Detect current OS
@@ -76,10 +72,6 @@ jobs:
       with:
         path: build-pythia
         key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
-
-    # Add packages needed to build our patched pycrypto.
-    - name: Install required packages
-      run: chocolatey install -y make vcpython27
 
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
     - name: Detect current OS

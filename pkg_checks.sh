@@ -19,6 +19,7 @@ ALPINE_COMMON_PKGS="$COMMON_PKGS\
 # Windows is special, but package management is possible through Chocolatey.
 # Chocolatey's git package comes with patch, and curl is bundled with MINGW.
 CHOCO_PKGS="vcpython27 make git"
+CHOCO_PRESENT="unknown"
 
 # Check for OS packages required for the build.
 missing_packages=""
@@ -49,9 +50,11 @@ case "$OS" in
         ;;
     win)
         # The windows build is special.
+        echo "## Looking for Chocolatey... ##"
         command -v choco
         if [ $? -eq 0 ]; then
             # Chocolatey is present, let's use it.
+            CHOCO_PRESENT="yes"
             packages=$CHOCO_PKGS
             check_command="choco info --local-only --limit-output"
         else
@@ -61,7 +64,6 @@ case "$OS" in
 esac
 
 if [ -n "$packages" ]; then
-    echo "Checking for required packages or commands..."
     for package in $packages ; do
         echo "Checking if $package is available..."
         $check_command $package
@@ -74,7 +76,13 @@ fi
 
 if [ -n "$missing_packages" ]; then
     (>&2 echo "Missing required dependencies: $missing_packages.")
-    exit 149
+    if [ $CHOCO_PRESENT = "yes" ]; then
+        echo "## Installing missing Chocolatey packages... ##"
+        # Don't use execute here, as dotnet3.5 scripts fail under bash.
+        choco install --yes $missing packages
+    else
+        exit 149
+    fi
 fi
 
 if [ -n "$packages" ]; then
