@@ -20,9 +20,14 @@ jobs:
     - os: osx
       osx_image: xcode10.1
 
-# Homebrew's libs pollute our build.
-install:
-  - [ "$TRAVIS_OS_NAME" = "osx" ] && find /usr/local -type f -name 'libffi*' -exec chmod a+r {} +
+before_install:
+- |-
+    case $TRAVIS_OS_NAME in
+      osx)
+        # Homebrew's libs pollute our build.
+        find /usr/local -type f -name 'libffi*' -exec chmod a+r {} +
+        ;;
+    esac
 
 before_script:
   - ./brink.sh detect_os
