@@ -20,10 +20,9 @@ jobs:
     - os: osx
       osx_image: xcode10.1
 
-    - os: osx
-      osx_image: xcode11.3
-
-install: skip
+# Homebrew's libs pollute our build.
+install:
+  - sudo find /usr/local -type f -name 'libffi*' -exec chmod a+r {} +
 
 before_script:
   - ./brink.sh detect_os
