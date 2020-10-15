@@ -7,6 +7,10 @@ case $OS in
         # On Windows, python executable is installed at a different path.
         LOCAL_PYTHON_BINARY=./$LOCAL_PYTHON_BINARY_DIST/lib/python
         PYTHON_BIN=$INSTALL_DIR/lib/python
+        # On Windows Server 2016, redistributables are older.
+        if [ "$ARCH" = "x86" ]; then
+            export REDISTRIBUTABLE_VERSION="9.0.30729.9247"
+        fi
         # On Windows, there are no actual dependency builds.
         export BUILD_LIBEDIT="no"
         export BUILD_GMP="no"
