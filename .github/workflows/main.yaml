@@ -22,23 +22,22 @@ jobs:
 
 
   windows-2019:
+    # The type of runner that the job will run on
     runs-on: windows-2019
     timeout-minutes: 30
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+    # Make sure there are no concurrent jobs
     - uses: chevah/auto-cancel-redundant-job@v1
+    # Checks-out the repository under $GITHUB_WORKSPACE, so the job can access it
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
 
+    # Skip CI for commits with a message containing the skip-ci string.
     - name: Fail on skip-ci
       if: ${{ github.event.after }}
       run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
-
-    - name: Cache build
-      uses: actions/cache@v2
-      with:
-        path: build-pythia
-        key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
 
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
     - name: Detect current OS
@@ -67,12 +66,6 @@ jobs:
       if: ${{ github.event.after }}
       run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
 
-    - name: Cache build
-      uses: actions/cache@v2
-      with:
-        path: build-pythia
-        key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
-
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
     - name: Detect current OS
       run: bash ./brink.sh detect_os
@@ -88,30 +81,13 @@ jobs:
 
 
   ubuntu-20-04:
-    # The type of runner that the job will run on
     runs-on: ubuntu-20.04
     timeout-minutes: 30
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Make sure there are no concurrent jobs
     - uses: chevah/auto-cancel-redundant-job@v1
-
-    # Skip CI for commits with a message containing the skip-ci string.
-    - name: Fail on skip-ci
-      if: ${{ github.event.after }}
-      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
-
-    # Checks-out the repository under $GITHUB_WORKSPACE, so the job can access it
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
-
-    # Caches needed files for a faster deps phase.
-    - name: Cache build
-      uses: actions/cache@v2
-      with:
-        path: build-pythia
-        key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
 
     - name: Install required packages
       run: sudo apt-get install libncurses5-dev
@@ -139,7 +115,6 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
-
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
@@ -147,12 +122,6 @@ jobs:
     - name: Fail on skip-ci
       if: ${{ github.event.after }}
       run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
-
-    - name: Cache build
-      uses: actions/cache@v2
-      with:
-        path: build-pythia
-        key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
 
     - name: Install required packages
       run: sudo apt-get install libncurses5-dev
@@ -179,7 +148,6 @@ jobs:
     timeout-minutes: 30
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
-
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
@@ -187,12 +155,6 @@ jobs:
     - name: Fail on skip-ci
       if: ${{ github.event.after }}
       run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
-
-    - name: Cache build
-      uses: actions/cache@v2
-      with:
-        path: build-pythia
-        key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
 
     - name: Install required packages
       run: sudo apt-get install libncurses5-dev
@@ -227,12 +189,6 @@ jobs:
       if: ${{ github.event.after }}
       run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
 
-    - name: Cache build
-      uses: actions/cache@v2
-      with:
-        path: build-pythia
-        key: ${{ runner.os }}-${{ hashFiles('pavement.py') }}
-
     - name: Detect current OS
       run: ./brink.sh detect_os
 
@@ -240,6 +196,7 @@ jobs:
     - name: Hack Homebrew
       run: |
         sudo chmod a-r /usr/local/opt/libffi/lib/libffi.7.dylib
+        sudo chmod a-r /usr/local/opt/gettext/lib/libintl.8.dylib
 
     - name: Build Python
       run: ./pythia build
@@ -255,6 +212,7 @@ jobs:
       if: failure() && env.TMATE_DEBUG == 'yes'
       run: |
         sudo chmod a+r /usr/local/opt/libffi/lib/libffi.7.dylib
+        sudo chmod a+r /usr/local/opt/gettext/lib/libintl.8.dylib
 
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
