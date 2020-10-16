@@ -185,9 +185,9 @@ jobs:
       with:
         fetch-depth: 2
 
-    - name: Fail on skip-ci
+    - name: Only run when not building on Travis
       if: ${{ github.event.after }}
-      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
+      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep 'travis'
 
     - name: Detect current OS
       run: ./brink.sh detect_os
@@ -196,7 +196,7 @@ jobs:
     - name: Hack Homebrew
       run: |
         sudo chmod a-r /usr/local/opt/libffi/lib/libffi.7.dylib
-        sudo chmod a-r /usr/local/lib/libintl.8.dylib
+        sudo find /usr/local -name 'libintl*' -exec chmod a-r {} +
 
     - name: Build Python
       run: ./pythia build
@@ -212,7 +212,7 @@ jobs:
       if: failure() && env.TMATE_DEBUG == 'yes'
       run: |
         sudo chmod a+r /usr/local/opt/libffi/lib/libffi.7.dylib
-        sudo chmod a+r /usr/local/lib/libintl.8.dylib
+        sudo find /usr/local -name 'libintl*' -exec chmod a-r {} +
 
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
