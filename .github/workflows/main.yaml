@@ -87,6 +87,10 @@ jobs:
       with:
         fetch-depth: 2
 
+    - name: Fail on skip-ci
+      if: ${{ github.event.after }}
+      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
+
     - name: Install required packages
       run: sudo apt-get install libncurses5-dev
 
@@ -183,9 +187,9 @@ jobs:
       with:
         fetch-depth: 2
 
-    - name: Only run when not building on Travis
+    - name: Fail on skip-ci
       if: ${{ github.event.after }}
-      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep 'travis'
+      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
 
     - name: Detect current OS
       run: ./brink.sh detect_os
