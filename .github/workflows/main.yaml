@@ -96,7 +96,7 @@ jobs:
     # Make sure there are no concurrent jobs
     - uses: chevah/auto-cancel-redundant-job@v1
 
-    # Skip CI for commits with a message containing the 'skip-ci' string.
+    # Skip CI for commits with a message containing the skip-ci string.
     - name: Fail on skip-ci
       if: ${{ github.event.after }}
       run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
@@ -236,13 +236,10 @@ jobs:
     - name: Detect current OS
       run: ./brink.sh detect_os
 
-    # Avoid linking to Homebrew's libintl during build.
-    # We can use needed tools from /usr/bin.
+    # Some Homebrew libs pollute the build.
     - name: Hack Homebrew
       run: |
-        sudo find /usr/local -type f -name 'libintl*' -exec chmod a-r {} +
-        sudo find /usr/local -type f -name 'libffi*' -exec chmod a-r {} +
-        sudo rm -f /usr/local/bin/{wget,curl,git}
+        sudo chmod a-r /usr/local/opt/libffi/lib/libffi.7.dylib
 
     - name: Build Python
       run: ./pythia build
@@ -257,8 +254,7 @@ jobs:
     - name: Unhack Homebrew
       if: failure() && env.TMATE_DEBUG == 'yes'
       run: |
-        sudo find /usr/local -type f -name 'libintl*' -exec chmod a+r {} +
-        sudo find /usr/local -type f -name 'libffi*' -exec chmod a+r {} +
+        sudo chmod a+r /usr/local/opt/libffi/lib/libffi.7.dylib
 
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
