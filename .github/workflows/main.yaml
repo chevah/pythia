@@ -197,6 +197,7 @@ jobs:
       run: |
         sudo chmod a-r /usr/local/opt/libffi/lib/libffi.7.dylib
         sudo find /usr/local -name 'libintl*' -exec chmod a-r {} +
+        sudo rm -f /usr/local/bin/{wget,curl,git}
 
     - name: Build Python
       run: ./pythia build
