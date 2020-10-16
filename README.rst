@@ -47,10 +47,13 @@ An example for creating a patch for src/python/Python/Lib/site.py::
 
     cd build/Python-2.7.18/
     cp Lib/site.py Lib/site.py.orig
-    # Edit Lib/site.py as needed, then create the diff:
+    # Modify Lib/site.py as needed, then create the diff:
     diff -ur Lib/site.py.orig Lib/site.py
     # Save the diff into a file such as:
     src/Python/site_fix.patch
+
+Finnaly, edit the corresponding ``chevahbs`` script in ``/src`` to apply
+the new patch on platforms that require it before building from sources.
 
 .. image:: https://github.com/chevah/pythia/workflows/GitHub-CI/badge.svg
   :target: https://github.com/chevah/pythia/actions

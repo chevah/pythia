@@ -1,11 +1,11 @@
 #
 # GitHub actions for building and testing.
 #
-# Don't use `-latest` for targeted VMs, pin specific OS versions instead.
-# https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners
+# Don't use `-latest` for runners, pin specific OS versions instead. More at
+# https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
 #
 # When setting up for a tmate debug session, you might need to increase the
-# timeout-minutes for each build, else you get kicked out after the timeout.
+# timeout-minutes for failing builds, else you get kicked out after the timeout.
 
 name: GitHub-CI
 
@@ -19,12 +19,10 @@ env:
   TMATE_DEBUG: 'no'
 
 jobs:
-
-
   windows-2019:
     # The type of runner that the job will run on
     runs-on: windows-2019
-    timeout-minutes: 30
+    timeout-minutes: 40
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Make sure there are no concurrent jobs
@@ -55,7 +53,7 @@ jobs:
 
   windows-2016:
     runs-on: windows-2016
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
@@ -66,7 +64,6 @@ jobs:
       if: ${{ github.event.after }}
       run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
 
-    # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
     - name: Detect current OS
       run: bash ./brink.sh detect_os
 
@@ -81,8 +78,9 @@ jobs:
 
 
   ubuntu-20-04:
+    # 'Fail on skip-ci' action doesn't work for this runner (on 2020.10.16).
     runs-on: ubuntu-20.04
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
@@ -112,7 +110,7 @@ jobs:
 
   ubuntu-18-04:
     runs-on: ubuntu-18.04
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
@@ -145,7 +143,7 @@ jobs:
 
   ubuntu-16-04:
     runs-on: ubuntu-16.04
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2

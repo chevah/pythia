@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 #
 # Check for the presence of required packages/commands.
-# Install missing ones if possible.
+# If possible, install missing ones.
 #
 # This build requires:
 #   * a C compiler, e.g. gcc
 #   * build tools: make, m4
 #   * patch (for applying patches from src/)
-#   * git (for patching Python's version)
+#   * git (for patching Python's version, if building it)
 #   * automake, libtool, and headers of a curses library (if building libedit)
 #   * perl 5.10.0 and Test::More 0.96 (if building OpenSSL)
-#   * wget/curl, sha512sum, tar, and unzip for (downloading and unpacking).
+#   * wget/curl, sha512sum, tar, and unzip (for downloading and unpacking).
 #
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
@@ -26,27 +26,28 @@ CHOCO_PKGS="vcpython27 make"
 CHOCO_PRESENT="unknown"
 
 # Check for OS packages required for the build.
-missing_packages=""
-packages="$CC make m4 git patch wget sha512sum tar unzip"
-check_command="command -v"
+MISSING_PACKAGES=""
+PACKAGES="$CC make m4 git patch wget sha512sum tar unzip"
+CHECK_CMD="command -v"
 
 choco_shim() {
     local pkg=$1
     choco list --local-only --limit-output | grep -iq ^"${pkg}|"
 }
 
+# $CHECK_CMD should exit with 0 only when checked packages is installed.
 case "$OS" in
     rhel*|amzn*)
-        packages="$RPM_PKGS"
-        check_command="rpm --query"
+        PACKAGES="$RPM_PKGS"
+        CHECK_CMD="rpm --query"
         ;;
     ubuntu*)
-        packages="$DPKG_PKGS"
-        check_command="dpkg --status"
+        PACKAGES="$DPKG_PKGS"
+        CHECK_CMD="dpkg --status"
         ;;
     alpine*)
-        packages="$APK_PKGS"
-        check_command="apk info -q -e"
+        PACKAGES="$APK_PKGS"
+        CHECK_CMD="apk info -q -e"
         ;;
     win)
         # The windows build is special.
@@ -55,65 +56,65 @@ case "$OS" in
         if [ $? -eq 0 ]; then
             # Chocolatey is present, let's use it.
             CHOCO_PRESENT="yes"
-            packages=$CHOCO_PKGS
-            check_command=choco_shim
+            PACKAGES=$CHOCO_PKGS
+            CHECK_CMD=choco_shim
         else
-            packages="make patch curl sha512sum"
+            PACKAGES="make patch curl sha512sum"
         fi
         ;;
     macos)
         # Avoid using Homebrew tools from /usr/local, some break when messing
-        # with files there to avoid polluting the build with unwanted deps.
+        # with libs there to avoid polluting the build with unwanted deps.
         export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
-        packages="$CC make m4 git patch libtool perl curl shasum tar unzip"
+        PACKAGES="$CC make m4 git patch libtool perl curl shasum tar unzip"
         ;;
     lnx)
-        packages="$packages perl"
+        PACKAGES="$PACKAGES perl"
         ;;
 esac
 
-# If $check_command is still "command -v", it's only a check for needed commands.
-if [ -n "$packages" ]; then
-    for package in $packages ; do
+# If $CHECK_CMD is still "command -v", it's only a check for needed commands.
+if [ -n "$PACKAGES" ]; then
+    for package in $PACKAGES ; do
         echo "Checking if $package is available..."
-        $check_command $package
+        $CHECK_CMD $package
         if [ $? -ne 0 ]; then
             echo "Missing required dependency: $package"
-            missing_packages="$missing_packages $package"
+            MISSING_PACKAGES="$MISSING_PACKAGES $package"
         fi
     done
 fi
 
-if [ -n "$missing_packages" ]; then
-    (>&2 echo "Missing required dependencies: $missing_packages.")
+if [ -n "$MISSING_PACKAGES" ]; then
+    (>&2 echo "Missing required dependencies: $MISSING_PACKAGES.")
     if [ $CHOCO_PRESENT = "yes" ]; then
         echo "## Installing missing Chocolatey packages... ##"
         # No execute here, dotnet3.5's scripts (dep of vcpython27) fail w/ bash.
-        choco install --yes $missing_packages
+        choco install --yes $MISSING_PACKAGES
     else
         case "$OS" in
             ubuntu*)
                 echo "## Installing missing dpkg packages... ##"
-                execute sudo apt install -y $missing_packages
+                execute sudo apt install -y $MISSING_PACKAGES
                 ;;
             rhel*|amzn*)
                 echo "## Installing missing rpm packages... ##"
-                execute sudo yum install $missing_packages
+                execute sudo yum install $MISSING_PACKAGES
                 ;;
             alpine*)
                 echo "## Installing missing apk packages... ##"
-                execute sudo apk add $missing_packages
+                execute sudo apk add $MISSING_PACKAGES
                 ;;
             *)
-                (>&2 echo "Don't know how to install missing stuff!")
+                (>&2 echo "Don't know how to install missing dependencies.")
                 exit 149
                 ;;
         esac
     fi
 fi
 
-if [ -n "$packages" ]; then
-    echo "All required dependencies are present: $packages"
+if [ -n "$PACKAGES" ]; then
+    echo "All required dependencies are present: $PACKAGES"
 fi
 
 # Many systems don't have this installed and it's not really need it.

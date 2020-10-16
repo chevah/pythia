@@ -4,24 +4,19 @@
 # Linux ARM64 target is pinned on the oldest distribution available on Travis,
 # thus matching a generic ARM64 Linux build.
 
-
 language: shell
-
 
 git:
   depth: false
 
-
 jobs:
   include:
-
     - os: linux
       dist: xenial
       arch: arm64
 
     - os: osx
       osx_image: xcode10.1
-
 
 install:
   - |
@@ -32,18 +27,15 @@ install:
         ;;
       osx)
         # Some Homebrew libs pollute the build.
-        sudo chmod a+r /usr/local/opt/libffi/lib/libffi.6.dylib
+        sudo chmod a-r /usr/local/opt/libffi/lib/libffi.6.dylib
         ;;
     esac
-
 
 before_script:
   - ./brink.sh detect_os
 
-
 script:
   - ./pythia build && ./pythia test && ./pythia compat
-
 
 notifications:
   email:
