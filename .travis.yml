@@ -4,13 +4,17 @@
 # Linux ARM64 target is pinned on the oldest distribution available on Travis,
 # thus matching a generic ARM64 Linux build.
 
+
 language: shell
+
 
 git:
   depth: false
 
+
 jobs:
   include:
+
     - os: windows
 
     - os: linux
@@ -20,17 +24,33 @@ jobs:
     - os: osx
       osx_image: xcode10.1
 
-before_install:
-- |-
+
+install:
+  - |
     case $TRAVIS_OS_NAME in
+      linux)
+        # Only generic 'lnx' is targeted, thus no automatic package management.
+        sudo apt install -y unzip
+        ;;
       osx)
-        # Homebrew's libs pollute our build.
+        # Homebrew's libs that pollute the build.
         find /usr/local -type f -name 'libffi*' -exec chmod a+r {} +
         ;;
     esac
 
+
 before_script:
   - ./brink.sh detect_os
 
+
 script:
-  - ./pythia build && ./pythia test && ./pythia compat
+  - ./pythia build
+
+
+after_success:
+  -  ./pythia test && ./pythia compat
+
+
+notifications:
+  email:
+    - dumol@gmx.co.uk

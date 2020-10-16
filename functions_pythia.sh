@@ -199,7 +199,7 @@ wipe_manifest() {
     echo "Extracting manifests for ${source}..."
     execute $wiper --verbose --extract ${source}.embedded $source
 
-    echo "Patching manifests to use our redistributable version..."
+    echo "Patching manifests to use the newer redistributable version..."
     execute sed -e \
         "s|version=\"9.0.21022.8\"|version=\"${REDISTRIBUTABLE_VERSION}\"|" \
         < ${source}.embedded \

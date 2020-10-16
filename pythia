@@ -228,7 +228,7 @@ command_install_python_modules() {
         # Adjust this when the manifest wiper moves around.
         WIPER="src/Python-Windows/manifest-wiper.exe"
 
-        echo "#### Patching pyWin32 manifests for our redistributables... ###"
+        echo "#### Patching pyWin32 manifests for new redistributables... ###"
         wipe_manifest $WIPER $PKG_INSTALL_DIR/win32/pythonservice.exe
         wipe_manifest $WIPER $PKG_INSTALL_DIR/win32/perfmondata.dll
         wipe_manifest $WIPER \

@@ -18,6 +18,6 @@ for ARCH in x86 amd64; do
     execute cp $(find /c/Windows/WinSxS -name 'msvc?90.dll' \
         | grep $REDISTRIBUTABLE_VERSION \
         | grep WinSxS/$ARCH) $REDISTRIBUTABLE_VERSION/$ARCH/
-    echo "Copying our preformatted $ARCH Manifest..."
+    echo "Copying the preformatted $ARCH Manifest file..."
     execute cp Microsoft.VC90.CRT.manifest.$ARCH $REDISTRIBUTABLE_VERSION/$ARCH/
 done

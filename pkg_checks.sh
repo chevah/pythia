@@ -6,7 +6,7 @@
 # This build requires:
 #   * a C compiler, e.g. gcc
 #   * build tools: make, m4
-#   * patch (for applying our own patches)
+#   * patch (for applying patches from src/)
 #   * git (for patching Python's version)
 #   * automake, libtool, and headers of a curses library (if building libedit)
 #   * perl 5.10.0 and Test::More 0.96 (if building OpenSSL)
@@ -21,8 +21,8 @@ RPM_PKGS="$BASE_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
 APK_PKGS="$BASE_PKGS \
     git zlib-dev libffi-dev ncurses-dev linux-headers musl-dev openssl-dev"
 # Windows is special, but package management is possible through Chocolatey.
-# Chocolatey's git package comes with patch, and curl is bundled with MINGW.
-CHOCO_PKGS="vcpython27 make git"
+# Curl, sha512sum, and unzip are bundled with MINGW.
+CHOCO_PKGS="vcpython27 make"
 CHOCO_PRESENT="unknown"
 
 # Check for OS packages required for the build.
@@ -58,10 +58,13 @@ case "$OS" in
             packages=$CHOCO_PKGS
             check_command=choco_shim
         else
-            packages="make git patch curl sha512sum"
+            packages="make patch curl sha512sum"
         fi
         ;;
     macos)
+        # Avoid using Homebrew tools from /usr/local, some break when messing
+        # with files there to avoid polluting the build with unwanted deps.
+        export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
         packages="$CC make m4 git patch libtool perl curl shasum tar unzip"
         ;;
     lnx)
