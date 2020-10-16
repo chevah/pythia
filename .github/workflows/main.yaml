@@ -195,8 +195,8 @@ jobs:
     # Some Homebrew libs pollute the build.
     - name: Hack Homebrew
       run: |
+        sudo chmod a-r /usr/local/opt/libffi/lib/libffi.7.dylib
         sudo chmod a-r /usr/local/lib/libintl.8.dylib
-        sudo chmod a-r /usr/local/lib/libffi.7.dylib
 
     - name: Build Python
       run: ./pythia build
@@ -211,8 +211,8 @@ jobs:
     - name: Unhack Homebrew
       if: failure() && env.TMATE_DEBUG == 'yes'
       run: |
+        sudo chmod a+r /usr/local/opt/libffi/lib/libffi.7.dylib
         sudo chmod a+r /usr/local/lib/libintl.8.dylib
-        sudo chmod a+r /usr/local/lib/libffi.7.dylib
 
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
