@@ -19,7 +19,7 @@ env:
   TMATE_DEBUG: 'no'
 
 jobs:
-  windows-2019:
+  windows:
     # The type of runner that the job will run on
     runs-on: ${{ matrix.operating-system }}
     strategy:
@@ -54,7 +54,7 @@ jobs:
       run: bash ./pythia compat
 
 
-  ubuntu-20-04:
+  linux:
     # 'Fail on skip-ci' action doesn't work for this runner (on 2020.10.16).
     runs-on: ${{ matrix.operating-system }}
     strategy:
@@ -92,7 +92,7 @@ jobs:
       uses: mxschmitt/action-tmate@v2
 
 
-  macos-10-15:
+  macos:
     runs-on: macos-10.15
     timeout-minutes: 60
     steps:
