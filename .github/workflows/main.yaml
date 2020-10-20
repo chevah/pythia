@@ -1,0 +1,136 @@
+#
+# GitHub actions for building and testing.
+#
+# Don't use `-latest` for runners, pin specific OS versions instead. More at
+# https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
+#
+# When setting up for a tmate debug session, you might need to increase the
+# timeout-minutes for failing builds, as you get kicked out after the timeout.
+
+name: GitHub-CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  TMATE_DEBUG: 'no'
+
+jobs:
+  windows:
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ windows-2019, windows-2016 ]
+    timeout-minutes: 40
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Make sure there are no concurrent jobs
+    - uses: chevah/auto-cancel-redundant-job@v1
+    # Checks-out the repository under $GITHUB_WORKSPACE, so the job can access it
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    # Skip CI for commits with a message containing the skip-ci string.
+    - name: Fail on skip-ci
+      if: ${{ github.event.after }}
+      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
+
+    # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
+    - name: Detect current OS
+      run: bash ./brink.sh detect_os
+
+    - name: Build Python
+      run: bash ./pythia build
+
+    - name: Test Python
+      run: bash ./pythia test
+
+    - name: Test Compat
+      run: bash ./pythia compat
+
+
+  linux:
+    # 'Fail on skip-ci' action doesn't work for this runner (on 2020.10.16).
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ ubuntu-20.04, ubuntu-18.04, ubuntu-16.04 ]
+    timeout-minutes: 20
+    steps:
+    - uses: chevah/auto-cancel-redundant-job@v1
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Fail on skip-ci
+      if: ${{ github.event.after }}
+      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
+
+    - name: Install required packages
+      run: sudo apt-get install libncurses5-dev
+
+    - name: Detect current OS
+      run: ./brink.sh detect_os
+
+    - name: Build Python
+      run: ./pythia build
+
+    - name: Test Python
+      run: ./pythia test
+
+    - name: Test Compat
+      run: ./pythia compat
+
+    # If one of the above steps fails, fire up tmate for remote debugging.
+    - name: Tmate debug on failure
+      if: failure() && env.TMATE_DEBUG == 'yes'
+      uses: mxschmitt/action-tmate@v2
+
+
+  macos:
+    runs-on: macos-10.15
+    timeout-minutes: 60
+    steps:
+    - uses: chevah/auto-cancel-redundant-job@v1
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Fail on skip-ci
+      if: ${{ github.event.after }}
+      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
+
+    - name: Detect current OS
+      run: ./brink.sh detect_os
+
+    # Some Homebrew libs pollute the build.
+    - name: Hack Homebrew
+      run: |
+        sudo chmod a-r /usr/local/opt/libffi/lib/libffi.7.dylib
+        sudo find /usr/local -name 'libintl*' -exec chmod a-r {} +
+        sudo rm -f /usr/local/bin/{wget,curl,git}
+
+    - name: Build Python
+      run: ./pythia build
+
+    - name: Test Python
+      run: ./pythia test
+
+    - name: Test Compat
+      run: ./pythia compat
+
+    # Fix back Homebrew, to make everything functional for tmate debugging.
+    - name: Unhack Homebrew
+      if: failure() && env.TMATE_DEBUG == 'yes'
+      run: |
+        sudo chmod a+r /usr/local/opt/libffi/lib/libffi.7.dylib
+        sudo find /usr/local -name 'libintl*' -exec chmod a-r {} +
+
+    - name: Tmate debug on failure
+      if: failure() && env.TMATE_DEBUG == 'yes'
+      uses: mxschmitt/action-tmate@v2

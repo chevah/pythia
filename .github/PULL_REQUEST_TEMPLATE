@@ -1,0 +1,29 @@
+Scope
+-----
+
+Problems these changes solve and/or features added.
+
+
+Changes
+-------
+
+List fixes for the above problems and/or the added features.
+
+Briefly describe **all** changes made in a developer-friendly way.
+
+Briefly describe end-user changes in a tester-friendly way.
+
+List all changes for which an *ideal* solution was not found.
+Describe current solution.
+
+List what was not done yet.
+Link to issues filled for work still to be done.
+
+Add comments for out-of-scope minor changes under a dedicated
+**Drive-by changes** section.
+
+
+Testing
+-------
+
+Describe how to manually test above changes, if needed.

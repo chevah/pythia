@@ -138,8 +138,6 @@ clean_build() {
     delete_folder 'publish'
     echo "Cleaning pyc files ..."
 
-    # AIX's find complains if there are no matching files when using +.
-    [ $(uname) == AIX ] && touch ./dummy_file_for_AIX.pyc
     # Faster than '-exec rm {} \;' and supported in most OS'es,
     # details at http://www.in-ulm.de/~mascheck/various/find/#xargs
     find ./ -name '*.pyc' -exec rm {} +
@@ -373,7 +371,7 @@ get_binary_dist() {
         rm -f $tar_gz_file
         rm -f $tar_file
         execute $DOWNLOAD_CMD $remote_base_url/${tar_gz_file}
-        execute gunzip $tar_gz_file
+        execute gunzip -f $tar_gz_file
         execute tar -xf $tar_file
         rm -f $tar_gz_file
         rm -f $tar_file
@@ -662,7 +660,7 @@ check_linux_glibc() {
     fi
 
     # We pass here because:
-    #   1. Building python-package should work with an older glibc version.
+    #   1. Building Python should work with an older glibc version.
     #   2. Our generic "lnx" runtime might work with a slightly older glibc 2.
     if [ ${glibc_version_array[1]} -lt ${supported_glibc2_version} ]; then
         (>&2 echo -n "Detected glibc version: ${glibc_version}. Versions older")
@@ -838,7 +836,7 @@ if [ "$COMMAND" = "purge" ] ; then
     exit 0
 fi
 
-# Initialize BUILD_ENV_VARS file when building python-package from scratch.
+# Initialize BUILD_ENV_VARS file when building Python from scratch.
 if [ "$COMMAND" == "detect_os" ]; then
     echo "PYTHON_VERSION=$PYTHON_NAME" > BUILD_ENV_VARS
     echo "OS=$OS" >> BUILD_ENV_VARS

@@ -21,7 +21,7 @@ chevahbs_getsources() {
 
 
 chevahbs_patch() {
-    # Our own patch to avoid compiling certain modules.
+    # A simple patch to avoid building certain modules.
     echo "Applying disabled_modules.patch:"
     execute patch < disabled_modules.patch
 
@@ -38,7 +38,7 @@ chevahbs_configure() {
     CONFIG_ARGS="--disable-shared"
     CONFIGURE_ENVIRONMENT=""
 
-    echo "Copying our header files among Python's ones..."
+    echo "Copying collected header files among Python's ones..."
     execute cp -r "$INSTALL_DIR"/include/* ./Include/
 
     case $OS in

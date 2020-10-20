@@ -7,6 +7,10 @@ case $OS in
         # On Windows, python executable is installed at a different path.
         LOCAL_PYTHON_BINARY=./$LOCAL_PYTHON_BINARY_DIST/lib/python
         PYTHON_BIN=$INSTALL_DIR/lib/python
+        # On Windows Server 2016, redistributables are older.
+        if [ "$ARCH" = "x86" ]; then
+            export REDISTRIBUTABLE_VERSION="9.0.30729.9247"
+        fi
         # On Windows, there are no actual dependency builds.
         export BUILD_LIBEDIT="no"
         export BUILD_GMP="no"
@@ -15,10 +19,15 @@ case $OS in
             gmpy2==${GMPY2_VERSION}
             pywin32==${PYWIN32_VERSION} \
             "
-        # Windows builds have issues with Let's Encrypt certs.
-        export GET_CMD="wget --quiet --no-check-certificate -O"
+        # GitHub's "runners" don't have wget installed, curl comes with MinGW.
+        export GET_CMD="curl --silent --output"
         # On Windows, only one of the installers is downloaded.
-        export SHA_CMD="sha512sum.exe --check --strict --warn --ignore-missing"
+        export SHA_CMD="$SHA_CMD --ignore-missing"
+        # FIXME:3: sha512sum fails on Windows under GitHub/Travis CI.
+        if [ x"$USERNAME" = x"runneradmin" -o x"$USERNAME" = x"travis" ]; then
+            (>&2 echo '    No usable sha512sum.exe. Will not check checksums!')
+            export SHA_CMD="true"
+        fi
         ;;
     alpine*)
         # By default, the busybox ersatz binaries are used.
@@ -93,8 +102,8 @@ esac
 
 # Compiler-dependent flags. At this moment, the compiler is known.
 if [ "${OS%sol*}" = "" ]; then
-	# Not all packages enable PIC, force it to avoid relocation issues.
-	export CFLAGS="$CFLAGS -Kpic"
+    # Not all packages enable PIC, force it to avoid relocation issues.
+    export CFLAGS="$CFLAGS -Kpic"
 elif [ "${OS%fbsd*}" = "" -o "${OS%obsd*}" = "" ]; then
     # Use PIC (Position Independent Code) on FreeBSD and OpenBSD with Clang.
     export CFLAGS="${CFLAGS} -fPIC"
