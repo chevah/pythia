@@ -5,7 +5,7 @@
 # https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
 #
 # When setting up for a tmate debug session, you might need to increase the
-# timeout-minutes for failing builds, else you get kicked out after the timeout.
+# timeout-minutes for failing builds, as you get kicked out after the timeout.
 
 name: GitHub-CI
 
@@ -21,7 +21,10 @@ env:
 jobs:
   windows-2019:
     # The type of runner that the job will run on
-    runs-on: windows-2019
+    runs-on: {{ matrix.windows-versions }}
+    strategy:
+      matrix:
+        windows-versions: [ windows-2016, windows-2019 ]
     timeout-minutes: 40
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -51,35 +54,12 @@ jobs:
       run: bash ./pythia compat
 
 
-  windows-2016:
-    runs-on: windows-2016
-    timeout-minutes: 40
-    steps:
-    - uses: chevah/auto-cancel-redundant-job@v1
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
-
-    - name: Fail on skip-ci
-      if: ${{ github.event.after }}
-      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
-
-    - name: Detect current OS
-      run: bash ./brink.sh detect_os
-
-    - name: Build Python
-      run: bash ./pythia build
-
-    - name: Test Python
-      run: bash ./pythia test
-
-    - name: Test Compat
-      run: bash ./pythia compat
-
-
   ubuntu-20-04:
     # 'Fail on skip-ci' action doesn't work for this runner (on 2020.10.16).
-    runs-on: ubuntu-20.04
+    runs-on: {{ matrix-linux-versions }}
+    strategy:
+      matrix:
+        linux-versions: [ ubuntu-20.04, ubuntu-18.04, ubuntu-16.04 ]
     timeout-minutes: 20
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
@@ -107,72 +87,6 @@ jobs:
       run: ./pythia compat
 
     # If one of the above steps fails, fire up tmate for remote debugging.
-    - name: Tmate debug on failure
-      if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v2
-
-
-  ubuntu-18-04:
-    runs-on: ubuntu-18.04
-    timeout-minutes: 20
-    steps:
-    - uses: chevah/auto-cancel-redundant-job@v1
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
-
-    - name: Fail on skip-ci
-      if: ${{ github.event.after }}
-      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
-
-    - name: Install required packages
-      run: sudo apt-get install libncurses5-dev
-
-    - name: Detect current OS
-      run: ./brink.sh detect_os
-
-    - name: Build Python
-      run: ./pythia build
-
-    - name: Test Python
-      run: ./pythia test
-
-    - name: Test Compat
-      run: ./pythia compat
-
-    - name: Tmate debug on failure
-      if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v2
-
-
-  ubuntu-16-04:
-    runs-on: ubuntu-16.04
-    timeout-minutes: 20
-    steps:
-    - uses: chevah/auto-cancel-redundant-job@v1
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
-
-    - name: Fail on skip-ci
-      if: ${{ github.event.after }}
-      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
-
-    - name: Install required packages
-      run: sudo apt-get install libncurses5-dev
-
-    - name: Detect current OS
-      run: ./brink.sh detect_os
-
-    - name: Build Python
-      run: ./pythia build
-
-    - name: Test Python
-      run: ./pythia test
-
-    - name: Test Compat
-      run: ./pythia compat
-
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
       uses: mxschmitt/action-tmate@v2

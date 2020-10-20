@@ -59,7 +59,7 @@ case "$OS" in
             PACKAGES=$CHOCO_PKGS
             CHECK_CMD=choco_shim
         else
-            PACKAGES="make patch curl sha512sum"
+            PACKAGES="make curl sha512sum"
         fi
         ;;
     macos)

@@ -23,11 +23,6 @@ case $OS in
         export GET_CMD="curl --silent --output"
         # On Windows, only one of the installers is downloaded.
         export SHA_CMD="$SHA_CMD --ignore-missing"
-        # FIXME:3: sha512sum fails on Windows under GitHub/Travis CI.
-        if [ x"$USERNAME" = x"runneradmin" -o x"$USERNAME" = x"travis" ]; then
-            (>&2 echo '    No usable sha512sum.exe. Will not check checksums!')
-            export SHA_CMD="true"
-        fi
         ;;
     alpine*)
         # By default, the busybox ersatz binaries are used.

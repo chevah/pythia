@@ -20,16 +20,18 @@ Use ``./pythia help`` to discover all available commands.
 Supported platforms
 -------------------
 
-* Windows Server 2012 R2 and newer
+* Windows Server 2012 R2 and newer (x86 and x64)
 * Red Hat Linux Enterprise 7 and 8 (including derivatives such as CentOS)
 * Amazon Linux 2
 * Ubuntu Server 18.04 and 20.04
-* any other Linux distribution with glibc 2.5 or newer
+* all glibc-based Linux distributions (glibc 2.5+ for x64, 2.23+ for arm64)
 * Alpine Linux 3.12
 * macOS 10.13 and newer
 * FreeBSD 11
 * OpenBSD 6.7
-* Solaris 11.4 x86.
+* Solaris 11.4.
+
+Where not noted, supported architecture is x64 (also known as X86-64 or AMD64).
 
 Note that https://github.com/chevah/python-package/ supported more platforms.
 
@@ -52,7 +54,7 @@ An example for creating a patch for src/python/Python/Lib/site.py::
     # Save the diff into a file such as:
     src/Python/site_fix.patch
 
-Finnaly, edit the corresponding ``chevahbs`` script in ``/src`` to apply
+Finally, edit the corresponding ``chevahbs`` script in ``/src`` to apply
 the new patch on platforms that require it before building from sources.
 
 .. image:: https://github.com/chevah/pythia/workflows/GitHub-CI/badge.svg
