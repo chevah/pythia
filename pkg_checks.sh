@@ -18,7 +18,8 @@
 BASE_PKGS="gcc make m4 automake libtool texinfo patch wget tar coreutils unzip"
 DPKG_PKGS="$BASE_PKGS git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
 RPM_PKGS="$BASE_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
-APK_PKGS="$BASE_PKGS \
+# Alpine uses by default the ersatz wget/tar/sha51sum binaries from Busybox.
+APK_PKGS="gcc make m4 automake libtool texinfo patch unzip \
     git zlib-dev libffi-dev ncurses-dev linux-headers musl-dev openssl-dev"
 # Windows is special, but package management is possible through Chocolatey.
 # Curl, sha512sum, and unzip are bundled with MINGW.
