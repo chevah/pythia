@@ -31,8 +31,7 @@ chevahbs_compile() {
 
 
 chevahbs_install() {
-    # This copies files required by pysqlite's build.
-    # Here's where the amalgamation file will be picked up.
+    # Here's where the amalgamation file is picked up from.
     execute cp sqlite3.c ${INSTALL_DIR}/../
     # Headers go to the usual place.
     execute cp *.h ${INSTALL_DIR}/include/ 

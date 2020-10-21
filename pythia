@@ -39,12 +39,12 @@ DIST_DIR="dist"
 
 # Local variables for the build process.
 LOCAL_PYTHON_BINARY_DIST="$PYTHON_VERSION-$OS-$ARCH"
-LOCAL_PYTHON_BINARY="./$LOCAL_PYTHON_BINARY_DIST/bin/python"
+LOCAL_PYTHON_BINARY="./$LOCAL_PYTHON_BINARY_DIST/bin/python3"
 INSTALL_DIR="$PWD/$BUILD_DIR/$LOCAL_PYTHON_BINARY_DIST"
-PYTHON_BIN="$INSTALL_DIR/bin/python"
+PYTHON_BIN="$INSTALL_DIR/bin/python3"
 PYTHON_BUILD_DIR="$PYTHON_VERSION-$OS-$ARCH"
 
-# Used when building pysqlite and gmpy2.
+# Used when building gmpy2.
 export PYTHON_BIN
 
 # Explicitly choose the C compiler in order to make it possible to switch
@@ -101,14 +101,13 @@ command_build() {
     build_dep $BUILD_GMP      gmp          $GMP_VERSION
     build_dep $BUILD_OPENSSL  openssl  $OPENSSL_VERSION
 
-    build_python
-
-    # SQLite build consists of getting sources and copying what pysqlite needs.
+    # SQLite build consists of getting sources and copying needed headers.
     build sqlite-autoconf $SQLITE_VERSION
+
+    build_python
 
     # Python modules that require tweaks when building.
     if [ $OS != 'win' ]; then
-        build pysqlite $PYSQLITE_VERSION
         build gmpy2 $GMPY2_VERSION
     fi
 
@@ -125,12 +124,11 @@ command_build() {
                 execute rm -rf tmp
                 execute mkdir -p lib/config
                 safe_move share lib/config
-                safe_move pysqlite2-doc lib/config
                 # Move all bin to lib/config
                 safe_move bin lib/config
                 execute mkdir bin
                 # Copy back python binary
-                execute cp lib/config/bin/$PYTHON_VERSION bin/python
+                execute cp lib/config/bin/$PYTHON_VERSION bin/python3
             execute popd
             ;;
     esac
@@ -210,17 +208,17 @@ command_install_python_modules() {
     if [ $OS = 'win' ]; then
         echo "    Skipping makefile updating on Windows"
     else
-        # Update Python config Makefile to use the newly-built Python.
-        makefile=$INSTALL_DIR/lib/$PYTHON_VERSION/config/Makefile
-        makefile_orig=$INSTALL_DIR/lib/$PYTHON_VERSION/config/Makefile.orig
+        echo "## Updating Python config Makefile for newly-built Python... ##"
+        makefile="$(ls $INSTALL_DIR/lib/$PYTHON_VERSION/config*/Makefile)"
+        makefile_orig="${makefile}.orig"
 
         execute cp $makefile $makefile_orig
-        execute sed "s#^prefix=.*#prefix= $INSTALL_DIR#" $makefile_orig \
-            > $makefile
+        execute sed "s#^prefix=.*#prefix= $INSTALL_DIR#" "$makefile_orig" \
+            > "$makefile"
     fi
 
     for library in $PIP_LIBRARIES ; do
-        execute $PYTHON_BIN -m pip install $PIP_ARGS $library
+        execute "$PYTHON_BIN" -m pip install $PIP_ARGS $library
     done
 
     if [ "$OS" = "win" ]; then

@@ -21,11 +21,6 @@ chevahbs_getsources() {
 
 
 chevahbs_patch() {
-    # A simple patch to avoid building certain modules.
-    echo "Applying disabled_modules.patch:"
-    execute patch < disabled_modules.patch
-
-    # Features-specific patches.
     if [ "$BUILD_LIBEDIT" = "yes" ]; then
         # Adapted from the v4 patch at https://bugs.python.org/issue13501.
         echo "Applying readline_libedit.patch:"

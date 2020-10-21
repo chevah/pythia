@@ -12,7 +12,7 @@ try:
     CHEVAH_OS = os.environ.get('OS')
     CHEVAH_ARCH = os.environ.get('ARCH')
 except:
-    print 'Coult not get $OS/$ARCH Chevah env vars.'
+    print('Could not get $OS/$ARCH Chevah env vars.')
     sys.exit(120)
 
 BUILD_LIBEDIT = os.environ.get('BUILD_LIBEDIT', 'no').lower() == 'yes'
@@ -64,7 +64,7 @@ def get_allowed_deps():
                 '/lib64/libz.so.1',
                 ]
             rhel_version = CHEVAH_OS[4:]
-            if rhel_version.startswith("7"):
+            if rhel_version.startswith(b"7"):
                 allowed_deps.extend([
                     '/lib64/libcrypto.so.10',
                     '/lib64/libffi.so.6',
@@ -73,7 +73,7 @@ def get_allowed_deps():
                     '/lib64/libssl.so.10',
                     '/lib64/libtinfo.so.5',
                     ])
-            if rhel_version.startswith("8"):
+            if rhel_version.startswith(b"8"):
                 allowed_deps.extend([
                     '/lib64/libcrypto.so.1.1',
                     '/lib64/libffi.so.6',
@@ -139,11 +139,14 @@ def get_allowed_deps():
             allowed_deps=[
                 '/lib/ld-musl-x86_64.so.1',
                 '/lib/libc.musl-x86_64.so.1',
-                '/lib/libcrypto.so.1',
-                '/lib/libssl.so.1',
+                '/lib/libcrypto.so.1.1',
+                '/lib/libssl.so.1.1',
+                '/lib/libuuid.so.1',
                 '/lib/libz.so.1',
-                '/usr/lib/libncursesw.so.6',
                 '/usr/lib/libffi.so.7',
+                '/usr/lib/libintl.so.8',
+                '/usr/lib/libncursesw.so.6',
+                '/usr/lib/libpanelw.so.6',
                 ]
     elif platform_system == 'sunos':
         # This is the list of deps for Solaris 11 64bit builds.
@@ -241,7 +244,7 @@ def get_actual_deps(script_helper):
                             )
 
     try:
-        raw_deps = subprocess.check_output(script_helper).splitlines()
+        raw_deps = subprocess.check_output(script_helper).decode().splitlines()
     except:
         sys.stderr.write('Could not get the deps for the new binaries.\n')
         sys.exit(121)
@@ -356,7 +359,7 @@ def main():
     """
     exit_code = 0
     import sys
-    print 'python %s' % (sys.version,)
+    print('python %s' % (sys.version,))
 
     try:
         import zlib
@@ -364,7 +367,7 @@ def main():
         sys.stderr.write('"zlib" is missing.\n')
         exit_code = 131
     else:
-        print 'zlib %s' % (zlib.__version__,)
+        print('zlib %s' % (zlib.__version__,))
 
     try:
         from ssl import OPENSSL_VERSION
@@ -374,7 +377,7 @@ def main():
         sys.stderr.write('standard "ssl" is missing.\n')
         exit_code = 132
     else:
-        print 'stdlib ssl %s' % (OPENSSL_VERSION,)
+        print('stdlib ssl - %s' % (OPENSSL_VERSION,))
 
     try:
         from cryptography.hazmat.backends.openssl.backend import backend
@@ -391,8 +394,8 @@ def main():
         sys.stderr.write('"cryptography" failure. %s\n' % (error,))
         exit_code = 134
     else:
-        print 'cryptography %s - %s' % (
-            cryptography.__version__, openssl_version)
+        print('cryptography %s - %s' % (
+            cryptography.__version__, openssl_version))
 
     try:
         from OpenSSL import SSL, crypto, rand, __version__ as pyopenssl_version
@@ -402,10 +405,10 @@ def main():
         sys.stderr.write('"OpenSSL" is missing. %s\n' % (error,))
         exit_code = 135
     else:
-        print 'pyOpenSSL %s - %s' % (
+        print('pyOpenSSL %s - %s' % (
             pyopenssl_version,
-            SSL.SSLeay_version(SSL.SSLEAY_VERSION),
-            )
+            SSL.SSLeay_version(SSL.SSLEAY_VERSION).decode(),
+            ))
 
     try:
         import Crypto
@@ -414,7 +417,7 @@ def main():
         sys.stderr.write('"PyCrypto" is missing.\n')
         exit_code = 136
     else:
-        print 'PyCrypto %s' % (pycrypto_version)
+        print('PyCrypto %s' % (pycrypto_version))
 
     try:
         import Cryptodome
@@ -423,7 +426,7 @@ def main():
         sys.stderr.write('"PyCryptodome" is missing.\n')
         exit_code = 137
     else:
-        print 'PyCryptodome %s' % (pycryptodome_version)
+        print('PyCryptodome %s' % (pycryptodome_version))
 
     try:
         from ctypes import CDLL
@@ -433,7 +436,7 @@ def main():
         sys.stderr.write('"ctypes - CDLL" is missing. %s\n')
         exit_code = 138
     else:
-        print 'ctypes %s' % (ctypes.__version__,)
+        print('ctypes %s' % (ctypes.__version__,))
 
     try:
         from ctypes.util import find_library
@@ -461,10 +464,10 @@ def main():
 
     try:
         import gmpy2
-        print 'gmpy2 %s with:' % (gmpy2.version())
-        print '\tMP (Multiple-precision library) - %s' % (gmpy2.mp_version())
-        print '\tMPFR (Floating-point library) - %s' % (gmpy2.mpfr_version())
-        print '\tMPC (Complex library) - %s' % (gmpy2.mpc_version())
+        print('gmpy2 %s with:' % (gmpy2.version()))
+        print('\tMP (Multiple-precision library) - %s' % (gmpy2.mp_version()))
+        print('\tMPFR (Floating-point library) - %s' % (gmpy2.mpfr_version()))
+        print('\tMPC (Complex library) - %s' % (gmpy2.mpc_version()))
         x=gmpy2.mpz(123456789123456789)
         if not x==gmpy2.from_binary(gmpy2.to_binary(x)):
             sys.stderr.write('"gmpy2" is present, but broken!\n')
@@ -479,7 +482,7 @@ def main():
         sys.stderr.write('"Cython" is missing.\n')
         exit_code = 144
     else:
-        print 'Cython %s' % (Cython.__version__,)
+        print('Cython %s' % (Cython.__version__,))
 
     try:
         import subprocess32 as subprocess
@@ -488,7 +491,7 @@ def main():
         sys.stderr.write('"subprocess32" is missing or broken.\n')
         exit_code = 145
     else:
-        print '"subprocess32" module is present.'
+        print('"subprocess32" module is present.')
 
     try:
         import bcrypt
@@ -497,7 +500,7 @@ def main():
         hashed = bcrypt.hashpw(password, bcrypt.gensalt())
         # Check that an unhashed password matches hashed one.
         if bcrypt.checkpw(password, hashed):
-            print 'bcrypt %s' % (bcrypt.__version__,)
+            print('bcrypt %s' % (bcrypt.__version__,))
         else:
             sys.stderr.write('"bcrypt" is present, but broken.\n')
             exit_code = 146
@@ -510,7 +513,7 @@ def main():
         test_string = b"just a random string to quickly test bz2"
         test_string_bzipped = bz2.compress(test_string)
         if bz2.decompress(test_string_bzipped) == test_string:
-            print '"bz2" module is present.'
+            print('"bz2" module is present.')
         else:
             sys.stderr.write('"bzip" is present, but broken.\n')
             exit_code = 148
@@ -525,16 +528,16 @@ def main():
         sys.stderr.write('"setproctitle" is missing or broken.\n')
         exit_code = 150
     else:
-        print 'setproctitle %s' % (setproctitle.__version__,)
+        print('setproctitle %s' % (setproctitle.__version__,))
 
     try:
-        import _scandir
-        exit_code = egg_check(_scandir) | exit_code
+        from sqlite3 import dbapi2 as sqlite
     except:
-        sys.stderr.write('"_scandir" is missing.\n')
-        exit_code = 151
+        sys.stderr.write('"sqlite3" is missing or broken.\n')
+        exit_code = 153
     else:
-        print 'scandir %s' % (scandir.__version__,)
+        print('sqlite3 %s - sqlite %s' % (
+                sqlite.version, sqlite.sqlite_version))
 
     try:
         import psutil
@@ -543,7 +546,7 @@ def main():
         sys.stderr.write('"psutil" is missing or broken.\n')
         exit_code = 160
     else:
-        print 'psutil %s' % (psutil.__version__,)
+        print('psutil %s' % (psutil.__version__,))
 
     if os.name == 'nt':
         # Windows specific modules.
@@ -554,16 +557,7 @@ def main():
             sys.stderr.write('"ctypes - windll" is missing.\n')
             exit_code = 152
         else:
-            print 'ctypes %s' % (ctypes.__version__,)
-
-        try:
-            from sqlite3 import dbapi2 as sqlite
-        except:
-            sys.stderr.write('"sqlite3" is missing or broken.\n')
-            exit_code = 153
-        else:
-            print 'sqlite3 %s - sqlite %s' % (
-                    sqlite.version, sqlite.sqlite_version)
+            print('ctypes %s' % (ctypes.__version__,))
 
         try:
             import win32service
@@ -572,7 +566,7 @@ def main():
             sys.stderr.write('"pywin32" is missing or broken.\n')
             exit_code = 154
         else:
-            print '"pywin32" module is present.'
+            print('"pywin32" module is present.')
 
     else:
         # Linux / Unix stuff.
@@ -583,19 +577,10 @@ def main():
             sys.stderr.write('"crypt" is missing.\n')
             exit_code = 155
 
-        try:
-            from pysqlite2 import dbapi2 as sqlite
-        except:
-            sys.stderr.write('"pysqlite2" is missing.\n')
-            exit_code = 156
-        else:
-            print 'pysqlite2 %s - sqlite %s' % (
-                    sqlite.version, sqlite.sqlite_version)
-
         # Check for the git revision in Python's sys.version on Linux and Unix.
         try:
             git_rev_cmd = ['git', 'rev-parse', '--short=8', 'HEAD']
-            git_rev = subprocess.check_output(git_rev_cmd).strip()
+            git_rev = subprocess.check_output(git_rev_cmd).strip().decode()
         except:
             sys.stderr.write("Couldn't get the git rev for the current tree.\n")
             exit_code = 157
@@ -619,7 +604,7 @@ def main():
             sys.stderr.write('"spwd" is missing, but it should be present.\n')
             exit_code = 161
         else:
-            print '"spwd" module is present.'
+            print('"spwd" module is present.')
 
     # The readline module is built using libedit only on selected platforms.
     if BUILD_LIBEDIT:
@@ -630,7 +615,7 @@ def main():
             sys.stderr.write('"readline" is missing or broken.\n')
             exit_code = 162
         else:
-            print '"readline" module is present.'
+            print('"readline" module is present.')
 
 
     exit_code = test_dependencies() | exit_code

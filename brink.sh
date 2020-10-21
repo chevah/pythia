@@ -86,7 +86,7 @@ ARCH='not-detected-yet'
 PYTHON_CONFIGURATION='NOT-YET-DEFINED'
 PYTHON_VERSION='not.defined.yet'
 PYTHON_PLATFORM='unknown-os-and-arch'
-PYTHON_NAME='python2.7'
+PYTHON_NAME='python3.9'
 BINARY_DIST_URI='https://binary.chevah.com/production'
 PIP_INDEX='http://pypi.chevah.com'
 BASE_REQUIREMENTS=''
@@ -208,10 +208,10 @@ update_path_variables() {
     resolve_python_version
 
     if [ "${OS}" = "win" ] ; then
-        PYTHON_BIN="/lib/python.exe"
+        PYTHON_BIN="/lib/python3.exe"
         PYTHON_LIB="/lib/Lib/"
     else
-        PYTHON_BIN="/bin/python"
+        PYTHON_BIN="/bin/python3"
         PYTHON_LIB="/lib/${PYTHON_NAME}/"
     fi
 
