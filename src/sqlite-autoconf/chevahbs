@@ -21,20 +21,18 @@ chevahbs_getsources() {
 
 
 chevahbs_configure() {
-    echo "    Nothing to configure for SQLite."
+    CONF_OPTS="--disable-shared --enable-static"
+    execute ./configure --prefix="" $CONF_OPTS
 }
 
 
 chevahbs_compile() {
-    echo "    Nothing to build for SQLite."
+    execute $MAKE
 }
 
 
 chevahbs_install() {
-    # Here's where the amalgamation file is picked up from.
-    execute cp sqlite3.c ${INSTALL_DIR}/../
-    # Headers go to the usual place.
-    execute cp *.h ${INSTALL_DIR}/include/ 
+    execute $MAKE install DESTDIR=$INSTALL_DIR
 }
 
 
