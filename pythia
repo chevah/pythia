@@ -101,9 +101,6 @@ command_build() {
     build_dep $BUILD_GMP      gmp          $GMP_VERSION
     build_dep $BUILD_OPENSSL  openssl  $OPENSSL_VERSION
 
-    # SQLite build consists of getting sources and copying needed headers.
-    build sqlite-autoconf $SQLITE_VERSION
-
     build_python
 
     # Python modules that require tweaks when building.
@@ -178,6 +175,8 @@ build_python() {
         ./chevahbs Python $PYTHON_BUILD_VERSION $INSTALL_DIR
         execute popd
     else
+        # Build SQLite for 'sqlite3' module only where Python is actually built.
+        build sqlite-autoconf $SQLITE_VERSION
         build Python $PYTHON_BUILD_VERSION
     fi
 }
