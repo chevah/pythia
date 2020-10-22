@@ -50,9 +50,6 @@ jobs:
     - name: Test Python
       run: bash ./pythia test
 
-    - name: Test Compat
-      run: bash ./pythia compat
-
 
   linux:
     # 'Fail on skip-ci' action doesn't work for this runner (on 2020.10.16).
@@ -82,9 +79,6 @@ jobs:
 
     - name: Test Python
       run: ./pythia test
-
-    - name: Test Compat
-      run: ./pythia compat
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -120,9 +114,6 @@ jobs:
 
     - name: Test Python
       run: ./pythia test
-
-    - name: Test Compat
-      run: ./pythia compat
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew

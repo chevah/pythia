@@ -37,7 +37,7 @@ before_script:
   - ./brink.sh detect_os
 
 script:
-  - ./pythia build && ./pythia test && ./pythia compat
+  - ./pythia build && ./pythia test # XXX && ./pythia compat
 
 notifications:
   email:
