@@ -68,17 +68,17 @@ exit_on_error() {
 
 execute() {
     if [ $DEBUG -ne 0 ]; then
-        echo "        Executing:" $@
+        (>&2 echo "        Executing:" $@)
     fi
 
     #Make sure $@ is called in quotes as otherwise it will not work.
     "$@"
     exit_code=$?
     if [ $DEBUG -ne 0 ]; then
-        echo "        Exit code was: $exit_code"
+        (>&2 echo "        Exit code was: $exit_code")
     fi
     if [ $exit_code -ne 0 ]; then
-        echo "PWD :" $(pwd)
+        (>&2 echo "PWD :" $(pwd))
         (>&2 echo "Fail:" $@)
         exit 97
     fi
