@@ -45,14 +45,17 @@ These patches are applied at build time when added as:
 
 * ``src/$PROJECT/*.patch``
 
-An example for creating a patch for src/python/Python/Lib/site.py::
+An example for creating a patch for pristine Python 3.9.0 sources::
 
-    cd build/Python-2.7.18/
-    cp Lib/site.py Lib/site.py.orig
-    # Modify Lib/site.py as needed, then create the diff:
-    diff -ur Lib/site.py.orig Lib/site.py
+    # Unpack the sources in build sub-dir:
+    cd build
+    tar xfz ../src/Python/Python-3.9.0.tgz
+    # Copy the pristine sources as reference:
+    cp -r Python-3.9.0 Python-3.9.0.orig
+    # Modify the sources as needed, then create the diff:
+    diff -ur Python-3.9.0.orig Python-3.9.0
     # Save the diff into a file such as:
-    src/Python/site_fix.patch
+    src/Python/readline_libedit.patch
 
 Finally, edit the corresponding ``chevahbs`` script in ``/src`` to apply
 the new patch on platforms that require it before building from sources.

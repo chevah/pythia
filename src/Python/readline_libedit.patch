@@ -1,24 +1,283 @@
-diff -ur configure configure
---- configure
-+++ configure
-@@ -827,6 +827,7 @@
+diff -ur Python-3.9.0.orig/Modules/readline.c Python-3.9.0/Modules/readline.c
+--- Python-3.9.0.orig/Modules/readline.c	2020-10-23 10:35:53.619118422 +0300
++++ Python-3.9.0/Modules/readline.c	2020-10-23 10:45:12.300876632 +0300
+@@ -26,23 +26,20 @@
+ #  define RESTORE_LOCALE(sl)
+ #endif
+ 
++#ifdef WITH_EDITLINE
++#  include <editline/readline.h>
++#else
+ /* GNU readline definitions */
+-#undef HAVE_CONFIG_H /* Else readline/chardefs.h includes strings.h */
+-#include <readline/readline.h>
+-#include <readline/history.h>
++#  undef HAVE_CONFIG_H /* Else readline/chardefs.h includes strings.h */
++#  include <readline/readline.h>
++#  include <readline/history.h>
++#endif
+ 
++/* Readline 4.2 deprecated completion_matches() in favour of
+++rl_completion_matches() */
+ #ifdef HAVE_RL_COMPLETION_MATCHES
+ #define completion_matches(x, y) \
+     rl_completion_matches((x), ((rl_compentry_func_t *)(y)))
+-#else
+-#if defined(_RL_FUNCTION_TYPEDEF)
+-extern char **completion_matches(char *, rl_compentry_func_t *);
+-#else
+-
+-#if !defined(__APPLE__)
+-extern char **completion_matches(char *, CPFunction *);
+-#endif
+-#endif
+ #endif
+ 
+ /*
+@@ -50,20 +47,26 @@
+  * emulation library of editline/libedit.
+  *
+  * This emulation library is not 100% API compatible with the "real" readline
+- * and cannot be detected at compile-time,
++ * and if WITH_EDITLINE was not specified, cannot be detected at compile-time,
+  * hence we use a runtime check to detect if the Python readlinke module is
+  * linked to libedit.
+- *
+- * Currently there is one known API incompatibility:
++ */
++#if !defined(WITH_EDITLINE)
++#  define DETECT_EDITLINE
++static int using_libedit_emulation = 0;
++static const char libedit_version_tag[] = "EditLine wrapper";
++#endif
++
++#if defined(WITH_EDITLINE)
++#  define SUPPORT_EDITLINE
++/* One incompatibility of Editline:
+  * - 'get_history' has a 1-based index with GNU readline, and a 0-based
+  *   index with older versions of libedit's emulation.
+  * - Note that replace_history and remove_history use a 0-based index
+  *   with both implementations.
+  */
+-static int using_libedit_emulation = 0;
+-static const char libedit_version_tag[] = "EditLine wrapper";
+-
+ static int libedit_history_start = 0;
++#endif
+ 
+ #ifdef HAVE_RL_COMPLETION_DISPLAY_MATCHES_HOOK
+ static void
+@@ -668,25 +671,6 @@
+ \n\
+ Returns current completer function.");
+ 
+-/* Private function to get current length of history.  XXX It may be
+- * possible to replace this with a direct use of history_length instead,
+- * but it's not clear whether BSD's libedit keeps history_length up to date.
+- * See issue #8065.*/
+-
+-static int
+-_py_get_history_length(void)
+-{
+-    HISTORY_STATE *hist_st = history_get_history_state();
+-    int length = hist_st->length;
+-    /* the history docs don't say so, but the address of hist_st changes each
+-       time history_get_history_state is called which makes me think it's
+-       freshly malloc'd memory...  on the other hand, the address of the last
+-       line stays the same as long as history isn't extended, so it appears to
+-       be malloc'd but managed by the history package... */
+-    free(hist_st);
+-    return length;
+-}
+-
+ /* Exported function to get any element of history */
+ 
+ static PyObject *
+@@ -697,25 +681,24 @@
+ 
+     if (!PyArg_ParseTuple(args, "i:get_history_item", &idx))
+         return NULL;
+-    if (using_libedit_emulation) {
+-        /* Older versions of libedit's readline emulation
+-         * use 0-based indexes, while readline and newer
+-         * versions of libedit use 1-based indexes.
+-         */
+-        int length = _py_get_history_length();
+-
+-        idx = idx - 1 + libedit_history_start;
+-
+-        /*
+-         * Apple's readline emulation crashes when
+-         * the index is out of range, therefore
+-         * test for that and fail gracefully.
+-         */
+-        if (idx < (0 + libedit_history_start)
+-                || idx >= (length + libedit_history_start)) {
+-            Py_RETURN_NONE;
+-        }
++#ifdef SUPPORT_EDITLINE
++    idx = idx - 1 + libedit_history_start;
++
++    /*
++     * Apple's readline emulation crashes when
++     * the index is out of range, therefore
++     * test for that and fail gracefully.
++     */
++    /* KELLIN NOTE:
++     * The initial patch removed the 0 for some unknown to me reason
++     *
++     * if (idx < (0 + libedit_history_start)
++     */
++    if (idx < libedit_history_start
++            || idx >= (history_length + libedit_history_start)) {
++        Py_RETURN_NONE;
+     }
++#endif /* SUPPORT_EDITLINE */
+     if ((hist_ent = history_get(idx)))
+         return decode(hist_ent->line);
+     else {
+@@ -733,7 +716,7 @@
+ static PyObject *
+ get_current_history_length(PyObject *self, PyObject *noarg)
+ {
+-    return PyLong_FromLong((long)_py_get_history_length());
++    return PyLong_FromLong(history_length);
+ }
+ 
+ PyDoc_STRVAR(doc_get_current_history_length,
+@@ -1083,13 +1066,15 @@
+     /* The name must be defined before initialization */
+     rl_readline_name = "python";
+ 
++#ifdef SUPPORT_EDITLINE
+     /* the libedit readline emulation resets key bindings etc
+-     * when calling rl_initialize.  So call it upfront
++     * when calling rl_initialize.  So call it before making those settings.
+      */
++#  ifdef DETECT_EDITLINE
+     if (using_libedit_emulation)
++#  endif 
+         rl_initialize();
+-
+-    /* Detect if libedit's readline emulation uses 0-based
++    /* Detect if the backend library uses 0-based
+      * indexing or 1-based indexing.
+      */
+     add_history("1");
+@@ -1099,6 +1084,7 @@
+         libedit_history_start = 1;
+     }
+     clear_history();
++#endif /* SUPPORT_EDITLINE */
+ 
+     using_history();
+ 
+@@ -1127,7 +1113,9 @@
+     mod_state->begidx = PyLong_FromLong(0L);
+     mod_state->endidx = PyLong_FromLong(0L);
+ 
++#ifdef DETECT_EDITLINE
+     if (!using_libedit_emulation)
++#endif
+     {
+         if (!isatty(STDOUT_FILENO)) {
+             /* Issue #19884: stdout is not a terminal. Disable meta modifier
+@@ -1146,11 +1134,20 @@
+      *
+      * XXX: A bug in the readline-2.2 library causes a memory leak
+      * inside this function.  Nothing we can do about it.
++     *
++     * For Editline, just invoke the user configuration; initialization was
++     * already done above.
+      */
++#ifdef DETECT_EDITLINE
+     if (using_libedit_emulation)
+         rl_read_init_file(NULL);
+     else
+         rl_initialize();
++#elif defined(WITH_EDITLINE)
++        rl_read_init_file(NULL);
++#else
++        rl_initialize();
++#endif
+ 
+     RESTORE_LOCALE(saved_locale)
+     return 0;
+@@ -1276,14 +1273,13 @@
+     n = strlen(p);
+     if (should_auto_add_history && n > 0) {
+         const char *line;
+-        int length = _py_get_history_length();
+-        if (length > 0) {
++        if (history_length > 0) {
+             HIST_ENTRY *hist_ent;
+-            if (using_libedit_emulation) {
+-                /* handle older 0-based or newer 1-based indexing */
+-                hist_ent = history_get(length + libedit_history_start - 1);
+-            } else
+-                hist_ent = history_get(length);
++#ifdef SUPPORT_EDITLINE
++            hist_ent = history_get(history_length + libedit_history_start - 1);
++#else
++            hist_ent = history_get(history_length);
++#endif
+             line = hist_ent ? hist_ent->line : "";
+         } else
+             line = "";
+@@ -1308,10 +1304,15 @@
+ /* Initialize the module */
+ 
+ PyDoc_STRVAR(doc_module,
++#ifndef WITH_EDITLINE
+ "Importing this module enables command line editing using GNU readline.");
+-
++#endif
++#ifdef DETECT_EDITLINE
+ PyDoc_STRVAR(doc_module_le,
++#endif
++#ifdef SUPPORT_EDITLINE
+ "Importing this module enables command line editing using libedit readline.");
++#endif
+ 
+ static struct PyModuleDef readlinemodule = {
+     PyModuleDef_HEAD_INIT,
+@@ -1332,13 +1333,14 @@
+     PyObject *m;
+     readlinestate *mod_state;
+ 
++#ifdef DETECT_EDITLINE
+     if (strncmp(rl_library_version, libedit_version_tag, strlen(libedit_version_tag)) == 0) {
+         using_libedit_emulation = 1;
+     }
+ 
+     if (using_libedit_emulation)
+         readlinemodule.m_doc = doc_module_le;
+-
++#endif /* DETECT_EDITLINE */
+ 
+     m = PyModule_Create(&readlinemodule);
+ 
+diff -ur Python-3.9.0.orig/configure Python-3.9.0/configure
+--- Python-3.9.0.orig/configure	2020-10-23 10:35:53.452460203 +0300
++++ Python-3.9.0/configure	2020-10-23 10:55:42.742362204 +0300
+@@ -846,6 +846,7 @@
  with_libc
  enable_big_digits
- enable_unicode
+ with_platlibdir
 +with_readline
  with_computed_gotos
  with_ensurepip
- '
-@@ -1517,6 +1518,8 @@
-   --with-fpectl           enable SIGFPE catching
-   --with-libm=STRING      math library
-   --with-libc=STRING      C library
+ with_openssl
+@@ -1572,6 +1573,8 @@
+                           system-dependent)
+   --with-platlibdir=DIRNAME
+                           Python library directory name (default is "lib")
 +  --with(out)-readline[=editline]
 +                          use Editline for backend or disable readline module
-   --with(out)-computed-gotos
-                           Use computed gotos in evaluation loop (enabled by
+   --with-computed-gotos   enable computed gotos in evaluation loop (enabled by
                            default on supported compilers)
-@@ -13879,24 +13882,48 @@
+   --with-ensurepip[=install|upgrade|no]
+@@ -15471,24 +15474,49 @@
  
  fi
  
@@ -35,16 +294,17 @@ diff -ur configure configure
 +py_cv_lib_readline=no
  # save the value of LIBS so we don't actually link Python with readline
  LIBS_no_readline=$LIBS
-+if test "$with_readline" != no; then
-+  case "$with_readline" in
-+  editline|edit)
-+    LIBREADLINE=edit
  
 -# On some systems we need to link readline to a termcap compatible
 -# library.  NOTE: Keep the precedence of listed libraries synchronised
 -# with setup.py.
 -py_cv_lib_readline=no
 -{ $as_echo "$as_me:${as_lineno-$LINENO}: checking how to link readline libs" >&5
++if test "$with_readline" != no; then
++  case "$with_readline" in
++  editline|edit)
++    LIBREADLINE=edit
++
 +$as_echo "#define WITH_EDITLINE 1" >>confdefs.h
 +
 +    ;;
@@ -61,7 +321,7 @@ diff -ur configure configure
 +  # with setup.py.
 +  { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to link readline libs" >&5
  $as_echo_n "checking how to link readline libs... " >&6; }
--for py_libtermcap in "" ncursesw ncurses curses termcap; do
+-for py_libtermcap in "" tinfo ncursesw ncurses curses termcap; do
 -  if test -z "$py_libtermcap"; then
 -    READLINE_LIBS="-lreadline"
 -  else
@@ -80,7 +340,7 @@ diff -ur configure configure
  /* end confdefs.h.  */
  
  /* Override any GCC internal prototype to avoid an error.
-@@ -13919,31 +13946,35 @@
+@@ -15511,73 +15539,67 @@
  fi
  rm -f core conftest.err conftest.$ac_objext \
      conftest$ac_exeext conftest.$ac_ext
@@ -113,51 +373,6 @@ diff -ur configure configure
 +  fi
  fi
  
--# check for readline 2.1
--{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for rl_callback_handler_install in -lreadline" >&5
--$as_echo_n "checking for rl_callback_handler_install in -lreadline... " >&6; }
--if ${ac_cv_lib_readline_rl_callback_handler_install+:} false; then :
-+if test "$py_cv_lib_readline" = yes; then
-+  # check for readline 2.1
-+  as_ac_Lib=`$as_echo "ac_cv_lib_$LIBREADLINE''_rl_callback_handler_install" | $as_tr_sh`
-+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for rl_callback_handler_install in -l$LIBREADLINE" >&5
-+$as_echo_n "checking for rl_callback_handler_install in -l$LIBREADLINE... " >&6; }
-+if eval \${$as_ac_Lib+:} false; then :
-   $as_echo_n "(cached) " >&6
- else
-   ac_check_lib_save_LIBS=$LIBS
--LIBS="-lreadline $READLINE_LIBS $LIBS"
-+LIBS="-l$LIBREADLINE $READLINE_LIBS $LIBS"
- cat confdefs.h - <<_ACEOF >conftest.$ac_ext
- /* end confdefs.h.  */
- 
-@@ -13963,73 +13994,65 @@
- }
- _ACEOF
- if ac_fn_c_try_link "$LINENO"; then :
--  ac_cv_lib_readline_rl_callback_handler_install=yes
-+  eval "$as_ac_Lib=yes"
- else
--  ac_cv_lib_readline_rl_callback_handler_install=no
-+  eval "$as_ac_Lib=no"
- fi
- rm -f core conftest.err conftest.$ac_objext \
-     conftest$ac_exeext conftest.$ac_ext
- LIBS=$ac_check_lib_save_LIBS
- fi
--{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_readline_rl_callback_handler_install" >&5
--$as_echo "$ac_cv_lib_readline_rl_callback_handler_install" >&6; }
--if test "x$ac_cv_lib_readline_rl_callback_handler_install" = xyes; then :
-+eval ac_res=\$$as_ac_Lib
-+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-+$as_echo "$ac_res" >&6; }
-+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
- 
- $as_echo "#define HAVE_RL_CALLBACK 1" >>confdefs.h
- 
- fi
- 
- 
 -# check for readline 2.2
 -cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 -/* end confdefs.h.  */
@@ -175,6 +390,7 @@ diff -ur configure configure
 -  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 -/* end confdefs.h.  */
 -#include <readline/readline.h>
++if test "$py_cv_lib_readline" = yes; then
 +  # check for readline 2.2
 +  ac_fn_c_check_decl "$LINENO" "rl_completion_append_character" "ac_cv_have_decl_rl_completion_append_character" "
 +#include <stdio.h> /* Must be first for Gnu Readline */
@@ -190,7 +406,8 @@ diff -ur configure configure
 +"
 +if test "x$ac_cv_have_decl_rl_completion_append_character" = xyes; then :
  
- $as_echo "#define HAVE_RL_COMPLETION_APPEND_CHARACTER 1" >>confdefs.h
+-$as_echo "#define HAVE_RL_COMPLETION_APPEND_CHARACTER 1" >>confdefs.h
++  $as_echo "#define HAVE_RL_COMPLETION_APPEND_CHARACTER 1" >>confdefs.h
  
  fi
 -rm -f conftest*
@@ -236,7 +453,7 @@ diff -ur configure configure
  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
  
-@@ -14049,31 +14072,33 @@
+@@ -15597,31 +15619,34 @@
  }
  _ACEOF
  if ac_fn_c_try_link "$LINENO"; then :
@@ -254,8 +471,9 @@ diff -ur configure configure
 -$as_echo "$ac_cv_lib_readline_rl_pre_input_hook" >&6; }
 -if test "x$ac_cv_lib_readline_rl_pre_input_hook" = xyes; then :
 +eval ac_res=\$$as_ac_Lib
-+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
++          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 +$as_echo "$ac_res" >&6; }
++
 +if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
  
  $as_echo "#define HAVE_RL_PRE_INPUT_HOOK 1" >>confdefs.h
@@ -280,7 +498,7 @@ diff -ur configure configure
  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
  
-@@ -14093,31 +14118,33 @@
+@@ -15641,31 +15666,34 @@
  }
  _ACEOF
  if ac_fn_c_try_link "$LINENO"; then :
@@ -298,8 +516,9 @@ diff -ur configure configure
 -$as_echo "$ac_cv_lib_readline_rl_completion_display_matches_hook" >&6; }
 -if test "x$ac_cv_lib_readline_rl_completion_display_matches_hook" = xyes; then :
 +eval ac_res=\$$as_ac_Lib
-+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
++          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 +$as_echo "$ac_res" >&6; }
++
 +if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
  
  $as_echo "#define HAVE_RL_COMPLETION_DISPLAY_MATCHES_HOOK 1" >>confdefs.h
@@ -324,7 +543,7 @@ diff -ur configure configure
  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
  
-@@ -14137,31 +14164,33 @@
+@@ -15685,31 +15713,33 @@
  }
  _ACEOF
  if ac_fn_c_try_link "$LINENO"; then :
@@ -342,7 +561,7 @@ diff -ur configure configure
 -$as_echo "$ac_cv_lib_readline_rl_resize_terminal" >&6; }
 -if test "x$ac_cv_lib_readline_rl_resize_terminal" = xyes; then :
 +eval ac_res=\$$as_ac_Lib
-+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
++          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 +$as_echo "$ac_res" >&6; }
 +if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
  
@@ -368,7 +587,7 @@ diff -ur configure configure
  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
  
-@@ -14181,49 +14210,84 @@
+@@ -15729,59 +15759,49 @@
  }
  _ACEOF
  if ac_fn_c_try_link "$LINENO"; then :
@@ -386,8 +605,9 @@ diff -ur configure configure
 -$as_echo "$ac_cv_lib_readline_rl_completion_matches" >&6; }
 -if test "x$ac_cv_lib_readline_rl_completion_matches" = xyes; then :
 +eval ac_res=\$$as_ac_Lib
-+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
++          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 +$as_echo "$ac_res" >&6; }
++
 +if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
  
  $as_echo "#define HAVE_RL_COMPLETION_MATCHES 1" >>confdefs.h
@@ -404,6 +624,14 @@ diff -ur configure configure
 -  have_readline=yes
 -else
 -  have_readline=no
+-
+-fi
+-rm -f conftest.err conftest.i conftest.$ac_ext
+-if test $have_readline = yes
+-then
+-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-#include <readline/readline.h>
 +  # also in readline 4.2
 +  ac_fn_c_check_decl "$LINENO" "rl_catch_signals" "ac_cv_have_decl_rl_catch_signals" "
 +#include <stdio.h> /* Must be first for Gnu Readline */
@@ -412,74 +640,69 @@ diff -ur configure configure
 +#else
 +# include <readline/readline.h>
 +#endif
-+
+ 
+-_ACEOF
+-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+-  $EGREP "extern int rl_catch_signals;" >/dev/null 2>&1; then :
 +"
 +if test "x$ac_cv_have_decl_rl_catch_signals" = xyes; then :
-+
-+$as_echo "#define HAVE_RL_CATCH_SIGNAL 1" >>confdefs.h
+ 
+ $as_echo "#define HAVE_RL_CATCH_SIGNAL 1" >>confdefs.h
  
  fi
--rm -f conftest.err conftest.i conftest.$ac_ext
--if test $have_readline = yes
--then
--  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-+
-+
+-rm -f conftest*
+-
+-fi
+ 
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for append_history in -lreadline" >&5
+-$as_echo_n "checking for append_history in -lreadline... " >&6; }
+-if ${ac_cv_lib_readline_append_history+:} false; then :
 +  as_ac_Lib=`$as_echo "ac_cv_lib_$LIBREADLINE''_append_history" | $as_tr_sh`
 +{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for append_history in -l$LIBREADLINE" >&5
 +$as_echo_n "checking for append_history in -l$LIBREADLINE... " >&6; }
 +if eval \${$as_ac_Lib+:} false; then :
-+  $as_echo_n "(cached) " >&6
-+else
-+  ac_check_lib_save_LIBS=$LIBS
+   $as_echo_n "(cached) " >&6
+ else
+   ac_check_lib_save_LIBS=$LIBS
+-LIBS="-lreadline $READLINE_LIBS $LIBS"
 +LIBS="-l$LIBREADLINE $READLINE_LIBS $LIBS"
-+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
--#include <readline/readline.h>
  
-+/* Override any GCC internal prototype to avoid an error.
-+   Use char because int might match the return type of a GCC
-+   builtin and then its argument prototype would still apply.  */
-+#ifdef __cplusplus
-+extern "C"
-+#endif
-+char append_history ();
-+int
-+main ()
-+{
-+return append_history ();
-+  ;
-+  return 0;
-+}
+@@ -15801,22 +15821,24 @@
+ }
  _ACEOF
--if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
--  $EGREP "extern int rl_catch_signals;" >/dev/null 2>&1; then :
-+if ac_fn_c_try_link "$LINENO"; then :
+ if ac_fn_c_try_link "$LINENO"; then :
+-  ac_cv_lib_readline_append_history=yes
 +  eval "$as_ac_Lib=yes"
-+else
+ else
+-  ac_cv_lib_readline_append_history=no
 +  eval "$as_ac_Lib=no"
-+fi
-+rm -f core conftest.err conftest.$ac_objext \
-+    conftest$ac_exeext conftest.$ac_ext
-+LIBS=$ac_check_lib_save_LIBS
-+fi
+ fi
+ rm -f core conftest.err conftest.$ac_objext \
+     conftest$ac_exeext conftest.$ac_ext
+ LIBS=$ac_check_lib_save_LIBS
+ fi
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_readline_append_history" >&5
+-$as_echo "$ac_cv_lib_readline_append_history" >&6; }
+-if test "x$ac_cv_lib_readline_append_history" = xyes; then :
 +eval ac_res=\$$as_ac_Lib
-+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
++          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 +$as_echo "$ac_res" >&6; }
 +if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
  
--$as_echo "#define HAVE_RL_CATCH_SIGNAL 1" >>confdefs.h
-+$as_echo "#define HAVE_RL_APPEND_HISTORY 1" >>confdefs.h
- 
- fi
--rm -f conftest*
+ $as_echo "#define HAVE_RL_APPEND_HISTORY 1" >>confdefs.h
  
  fi
  
-diff -ur configure.ac configure.ac
---- configure.ac
-+++ configure.ac
-@@ -4230,92 +4230,127 @@
++fi
+ 
+ # End of readline checks: restore LIBS
+ LIBS=$LIBS_no_readline
+diff -ur Python-3.9.0.orig/configure.ac Python-3.9.0/configure.ac
+--- Python-3.9.0.orig/configure.ac	2020-10-23 10:35:53.392463243 +0300
++++ Python-3.9.0/configure.ac	2020-10-23 11:01:15.675567214 +0300
+@@ -4856,93 +4856,125 @@
    [Define this if you have flockfile(), getc_unlocked(), and funlockfile()])
  fi
  
@@ -493,13 +716,13 @@ diff -ur configure.ac configure.ac
 +py_cv_lib_readline=no
  # save the value of LIBS so we don't actually link Python with readline
  LIBS_no_readline=$LIBS
--
+ 
 -# On some systems we need to link readline to a termcap compatible
 -# library.  NOTE: Keep the precedence of listed libraries synchronised
 -# with setup.py.
 -py_cv_lib_readline=no
 -AC_MSG_CHECKING([how to link readline libs])
--for py_libtermcap in "" ncursesw ncurses curses termcap; do
+-for py_libtermcap in "" tinfo ncursesw ncurses curses termcap; do
 -  if test -z "$py_libtermcap"; then
 -    READLINE_LIBS="-lreadline"
 +if test "$with_readline" != no; then
@@ -542,17 +765,17 @@ diff -ur configure.ac configure.ac
 +    AC_MSG_RESULT([none])
    else
 -    READLINE_LIBS="-lreadline -l$py_libtermcap"
-+    AC_MSG_RESULT([$READLINE_LIBS])
-+    AC_DEFINE(HAVE_LIBREADLINE, 1,
-+      [Define to build the readline module.])
-   fi
+-  fi
 -  LIBS="$READLINE_LIBS $LIBS_no_readline"
 -  AC_LINK_IFELSE(
 -    [AC_LANG_CALL([],[readline])],
 -    [py_cv_lib_readline=yes])
 -  if test $py_cv_lib_readline = yes; then
 -    break
--  fi
++    AC_MSG_RESULT([$READLINE_LIBS])
++    AC_DEFINE(HAVE_LIBREADLINE, 1,
++      [Define to build the readline module.])
+   fi
 -done
 -# Uncomment this line if you want to use READINE_LIBS in Makefile or scripts
 -#AC_SUBST([READLINE_LIBS])
@@ -562,13 +785,8 @@ diff -ur configure.ac configure.ac
 -  AC_MSG_RESULT([$READLINE_LIBS])
 -  AC_DEFINE(HAVE_LIBREADLINE, 1,
 -    [Define if you have the readline library (-lreadline).])
--fi
--
--# check for readline 2.1
--AC_CHECK_LIB(readline, rl_callback_handler_install,
--	AC_DEFINE(HAVE_RL_CALLBACK, 1,
--        [Define if you have readline 2.1]), ,$READLINE_LIBS)
--
+ fi
+ 
 -# check for readline 2.2
 -AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <readline/readline.h>]])],
 -  [have_readline=yes],
@@ -584,45 +802,7 @@ diff -ur configure.ac configure.ac
 -  [readline/readline.h],
 -  AC_DEFINE(HAVE_RL_COMPLETION_SUPPRESS_APPEND, 1,
 -  [Define if you have rl_completion_suppress_append]), )
- fi
- 
--# check for readline 4.0
--AC_CHECK_LIB(readline, rl_pre_input_hook,
--	AC_DEFINE(HAVE_RL_PRE_INPUT_HOOK, 1,
--        [Define if you have readline 4.0]), ,$READLINE_LIBS)
--
--# also in 4.0
--AC_CHECK_LIB(readline, rl_completion_display_matches_hook,
--	AC_DEFINE(HAVE_RL_COMPLETION_DISPLAY_MATCHES_HOOK, 1,
--        [Define if you have readline 4.0]), ,$READLINE_LIBS)
--
--# also in 4.0, but not in editline
--AC_CHECK_LIB(readline, rl_resize_terminal,
--	AC_DEFINE(HAVE_RL_RESIZE_TERMINAL, 1,
--        [Define if you have readline 4.0]), ,$READLINE_LIBS)
--
--# check for readline 4.2
--AC_CHECK_LIB(readline, rl_completion_matches,
--	AC_DEFINE(HAVE_RL_COMPLETION_MATCHES, 1,
--        [Define if you have readline 4.2]), ,$READLINE_LIBS)
--
--# also in readline 4.2
--AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <readline/readline.h>]])],
--  [have_readline=yes],
--  [have_readline=no]
--)
--if test $have_readline = yes
--then
--  AC_EGREP_HEADER([extern int rl_catch_signals;],
--  [readline/readline.h],
--  AC_DEFINE(HAVE_RL_CATCH_SIGNAL, 1,
--  [Define if you can turn off readline's signal handling.]), )
 +if test "$py_cv_lib_readline" = yes; then
-+  # check for readline 2.1
-+  AC_CHECK_LIB($LIBREADLINE, rl_callback_handler_install,
-+    AC_DEFINE(HAVE_RL_CALLBACK, 1,
-+      [Define if you have readline 2.1]),,$READLINE_LIBS)
-+
 +  # check for readline 2.2
 +  AC_CHECK_DECL(rl_completion_append_character,
 +    AC_DEFINE(HAVE_RL_COMPLETION_APPEND_CHARACTER, 1,
@@ -670,7 +850,7 @@ diff -ur configure.ac configure.ac
 +  # also in readline 4.2
 +  AC_CHECK_DECL(rl_catch_signals,
 +    AC_DEFINE(HAVE_RL_CATCH_SIGNAL, 1,
-+      [Define if you can turn off readline signal handling.]),,
++      [Define if you can turn off readline's signal handling.]),,
 +    [
 +#include <stdio.h> /* Must be first for Gnu Readline */
 +#ifdef WITH_EDITLINE
@@ -685,280 +865,50 @@ diff -ur configure.ac configure.ac
 +      [Define if readline supports append_history]),,$READLINE_LIBS)
  fi
  
+-# check for readline 4.0
+-AC_CHECK_LIB(readline, rl_pre_input_hook,
+-	AC_DEFINE(HAVE_RL_PRE_INPUT_HOOK, 1,
+-        [Define if you have readline 4.0]), ,$READLINE_LIBS)
+-
+-# also in 4.0
+-AC_CHECK_LIB(readline, rl_completion_display_matches_hook,
+-	AC_DEFINE(HAVE_RL_COMPLETION_DISPLAY_MATCHES_HOOK, 1,
+-        [Define if you have readline 4.0]), ,$READLINE_LIBS)
+-
+-# also in 4.0, but not in editline
+-AC_CHECK_LIB(readline, rl_resize_terminal,
+-	AC_DEFINE(HAVE_RL_RESIZE_TERMINAL, 1,
+-        [Define if you have readline 4.0]), ,$READLINE_LIBS)
+-
+-# check for readline 4.2
+-AC_CHECK_LIB(readline, rl_completion_matches,
+-	AC_DEFINE(HAVE_RL_COMPLETION_MATCHES, 1,
+-        [Define if you have readline 4.2]), ,$READLINE_LIBS)
+-
+-# also in readline 4.2
+-AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <readline/readline.h>]])],
+-  [have_readline=yes],
+-  [have_readline=no]
+-)
+-if test $have_readline = yes
+-then
+-  AC_EGREP_HEADER([extern int rl_catch_signals;],
+-  [readline/readline.h],
+-  AC_DEFINE(HAVE_RL_CATCH_SIGNAL, 1,
+-  [Define if you can turn off readline's signal handling.]), )
+-fi
+-
+-AC_CHECK_LIB(readline, append_history,
+-	AC_DEFINE(HAVE_RL_APPEND_HISTORY, 1,
+-        [Define if readline supports append_history]), ,$READLINE_LIBS)
+-
  # End of readline checks: restore LIBS
-diff -ur Modules/readline.c Modules/readline.c
---- Modules/readline.c
-+++ Modules/readline.c
-@@ -26,45 +26,47 @@
- #  define RESTORE_LOCALE(sl)
- #endif
+ LIBS=$LIBS_no_readline
  
-+#ifdef WITH_EDITLINE
-+#  include <editline/readline.h>
-+#else
- /* GNU readline definitions */
--#undef HAVE_CONFIG_H /* Else readline/chardefs.h includes strings.h */
--#include <readline/readline.h>
--#include <readline/history.h>
-+#  undef HAVE_CONFIG_H /* Else readline/chardefs.h includes strings.h */
-+#  include <readline/readline.h>
-+#  include <readline/history.h>
-+#endif
- 
-+/* Readline 4.2 deprecated completion_matches() in favour of
-+rl_completion_matches() */
- #ifdef HAVE_RL_COMPLETION_MATCHES
- #define completion_matches(x, y) \
-     rl_completion_matches((x), ((rl_compentry_func_t *)(y)))
--#else
--#if defined(_RL_FUNCTION_TYPEDEF)
--extern char **completion_matches(char *, rl_compentry_func_t *);
--#else
--
--#if !defined(__APPLE__)
--extern char **completion_matches(char *, CPFunction *);
--#endif
--#endif
- #endif
- 
--#ifdef __APPLE__
- /*
-  * It is possible to link the readline module to the readline
-  * emulation library of editline/libedit.
-  *
-  * On OSX this emulation library is not 100% API compatible
-- * with the "real" readline and cannot be detected at compile-time,
-+ * with the "real" readline and if WITH_EDITLINE
-+ * was not specified, cannot be detected at compile-time,
-  * hence we use a runtime check to detect if we're using libedit
-- *
-- * Currently there is one known API incompatibility:
-+ */
-+#if defined(__APPLE__) && !defined(WITH_EDITLINE)
-+#  define DETECT_EDITLINE
-+static int using_libedit_emulation = 0;
-+static const char libedit_version_tag[] = "EditLine wrapper";
-+#endif
-+
-+#if defined(WITH_EDITLINE) || defined(__APPLE__)
-+#  define SUPPORT_EDITLINE
-+/* One incompatibility of Editline:
-  * - 'get_history' has a 1-based index with GNU readline, and a 0-based
-  *   index with older versions of libedit's emulation.
-  * - Note that replace_history and remove_history use a 0-based index
-  *   with both implementations.
-  */
--static int using_libedit_emulation = 0;
--static const char libedit_version_tag[] = "EditLine wrapper";
--
- static int libedit_history_start = 0;
--#endif /* __APPLE__ */
-+#endif
- 
- #ifdef HAVE_RL_COMPLETION_DISPLAY_MATCHES_HOOK
- static void
-@@ -527,25 +529,6 @@
- \n\
- Returns current completer function.");
- 
--/* Private function to get current length of history.  XXX It may be
-- * possible to replace this with a direct use of history_length instead,
-- * but it's not clear whether BSD's libedit keeps history_length up to date.
-- * See issue #8065.*/
--
--static int
--_py_get_history_length(void)
--{
--    HISTORY_STATE *hist_st = history_get_history_state();
--    int length = hist_st->length;
--    /* the history docs don't say so, but the address of hist_st changes each
--       time history_get_history_state is called which makes me think it's
--       freshly malloc'd memory...  on the other hand, the address of the last
--       line stays the same as long as history isn't extended, so it appears to
--       be malloc'd but managed by the history package... */
--    free(hist_st);
--    return length;
--}
--
- /* Exported function to get any element of history */
- 
- static PyObject *
-@@ -556,27 +539,19 @@
- 
-     if (!PyArg_ParseTuple(args, "i:get_history_item", &idx))
-         return NULL;
--#ifdef  __APPLE__
--    if (using_libedit_emulation) {
--        /* Older versions of libedit's readline emulation
--         * use 0-based indexes, while readline and newer
--         * versions of libedit use 1-based indexes.
--         */
--        int length = _py_get_history_length();
--
--        idx = idx - 1 + libedit_history_start;
--
--        /*
--         * Apple's readline emulation crashes when
--         * the index is out of range, therefore
--         * test for that and fail gracefully.
--         */
--        if (idx < (0 + libedit_history_start)
--                || idx >= (length + libedit_history_start)) {
--            Py_RETURN_NONE;
--        }
-+#ifdef SUPPORT_EDITLINE
-+    idx = idx - 1 + libedit_history_start;
-+
-+    /*
-+     * Apple's readline emulation (and maybe other versions of
-+     * Editline) crash when the index is out of range, therefore
-+     * test for that and fail gracefully.
-+     */
-+    if (idx < libedit_history_start
-+            || idx >= (history_length + libedit_history_start)) {
-+        Py_RETURN_NONE;
-     }
--#endif /* __APPLE__ */
-+#endif /* SUPPORT_EDITLINE */
-     if ((hist_ent = history_get(idx)))
-         return PyString_FromString(hist_ent->line);
-     else {
-@@ -594,7 +569,7 @@
- static PyObject *
- get_current_history_length(PyObject *self, PyObject *noarg)
- {
--    return PyInt_FromLong((long)_py_get_history_length());
-+    return PyInt_FromLong(history_length);
- }
- 
- PyDoc_STRVAR(doc_get_current_history_length,
-@@ -910,14 +885,16 @@
-         Py_FatalError("not enough memory to save locale");
- #endif
- 
--#ifdef __APPLE__
-+#ifdef SUPPORT_EDITLINE
-     /* the libedit readline emulation resets key bindings etc
--     * when calling rl_initialize.  So call it upfront
-+     * when calling rl_initialize.  So call it before making those settings.
-      */
-+#  ifdef DETECT_EDITLINE
-     if (using_libedit_emulation)
-+#  endif
-         rl_initialize();
- 
--    /* Detect if libedit's readline emulation uses 0-based
-+    /* Detect if the backend library uses 0-based
-      * indexing or 1-based indexing.
-      */
-     add_history("1");
-@@ -927,7 +904,7 @@
-         libedit_history_start = 1;
-     }
-     clear_history();
--#endif /* __APPLE__ */
-+#endif /* SUPPORT_EDITLINE */
- 
-     using_history();
- 
-@@ -961,7 +938,7 @@
-     begidx = PyInt_FromLong(0L);
-     endidx = PyInt_FromLong(0L);
- 
--#ifdef __APPLE__
-+#ifdef _SUPPORT_EDITLINE__
-     if (!using_libedit_emulation)
- #endif
-     {
-@@ -982,13 +959,20 @@
-      *
-      * XXX: A bug in the readline-2.2 library causes a memory leak
-      * inside this function.  Nothing we can do about it.
-+     *
-+     * For Editline, just invoke the user configuration; initialization was
-+     * already done above.
-      */
--#ifdef __APPLE__
-+#ifdef DETECT_EDITLINE
-     if (using_libedit_emulation)
-         rl_read_init_file(NULL);
-     else
--#endif /* __APPLE__ */
-         rl_initialize();
-+#elif defined(WITH_EDITLINE)
-+    rl_read_init_file(NULL);
-+#else
-+    rl_initialize();
-+#endif
- 
-     RESTORE_LOCALE(saved_locale)
- }
-@@ -1160,18 +1144,13 @@
-     n = strlen(p);
-     if (n > 0) {
-         const char *line;
--        int length = _py_get_history_length();
--        if (length > 0) {
--            HIST_ENTRY *hist_ent;
--#ifdef __APPLE__
--            if (using_libedit_emulation) {
--                /* handle older 0-based or newer 1-based indexing */
--                hist_ent = history_get(length + libedit_history_start - 1);
--            } else
--#endif /* __APPLE__ */
--                hist_ent = history_get(length);
--            line = hist_ent ? hist_ent->line : "";
--        } else
-+        if (history_length > 0)
-+#ifdef SUPPORT_EDITLINE
-+            line = history_get(history_length + libedit_history_start - 1)->line;
-+#else
-+            line = history_get(history_length)->line;
-+#endif
-+        else
-             line = "";
-         if (strcmp(p, line))
-             add_history(p);
-@@ -1194,19 +1173,22 @@
- /* Initialize the module */
-
- PyDoc_STRVAR(doc_module,
-+#ifndef WITH_EDITLINE
- "Importing this module enables command line editing using GNU readline.");
--
--#ifdef __APPLE__
-+#endif
-+#ifdef DETECT_EDITLINE
- PyDoc_STRVAR(doc_module_le,
-+#endif
-+#ifdef SUPPORT_EDITLINE
- "Importing this module enables command line editing using libedit readline.");
--#endif /* __APPLE__ */
-+#endif
-
- PyMODINIT_FUNC
- initreadline(void)
- {
-     PyObject *m;
-
--#ifdef __APPLE__
-+#ifdef DETECT_EDITLINE_
-     if (strncmp(rl_library_version, libedit_version_tag, strlen(libedit_version_tag)) == 0) {
-         using_libedit_emulation = 1;
-     }
-@@ -1216,7 +1198,7 @@
-                    (PyObject *)NULL, PYTHON_API_VERSION);
-     else
-
--#endif /* __APPLE__ */
-+#endif /* __DETECT_EDITLINE__ */
-
-     m = Py_InitModule4("readline", readline_methods, doc_module,
-                        (PyObject *)NULL, PYTHON_API_VERSION);
-diff -ur pyconfig.h.in pyconfig.h.in
---- pyconfig.h.in
-+++ pyconfig.h.in
-@@ -433,7 +433,7 @@
+diff -ur Python-3.9.0.orig/pyconfig.h.in Python-3.9.0/pyconfig.h.in
+--- Python-3.9.0.orig/pyconfig.h.in	2020-10-23 10:35:53.645783737 +0300
++++ Python-3.9.0/pyconfig.h.in	2020-10-23 10:36:41.496691638 +0300
+@@ -598,7 +598,7 @@
  /* Define to 1 if you have the <libintl.h> header file. */
  #undef HAVE_LIBINTL_H
  
@@ -967,22 +917,7 @@ diff -ur pyconfig.h.in pyconfig.h.in
  #undef HAVE_LIBREADLINE
  
  /* Define to 1 if you have the `resolv' library (-lresolv). */
-@@ -556,10 +556,13 @@
- /* Define to 1 if you have the `realpath' function. */
- #undef HAVE_REALPATH
- 
-+/* Define if readline supports append_history */
-+#undef HAVE_RL_APPEND_HISTORY
-+
- /* Define if you have readline 2.1 */
- #undef HAVE_RL_CALLBACK
- 
--/* Define if you can turn off readline's signal handling. */
-+/* Define if you can turn off readline signal handling. */
- #undef HAVE_RL_CATCH_SIGNAL
- 
- /* Define if you have readline 2.2 */
-@@ -1120,6 +1123,9 @@
+@@ -1536,6 +1536,9 @@
     Dyld is necessary to support frameworks. */
  #undef WITH_DYLD
  
@@ -992,40 +927,45 @@ diff -ur pyconfig.h.in pyconfig.h.in
  /* Define to 1 if libintl is needed for locale functions. */
  #undef WITH_LIBINTL
  
-diff -ur setup.py setup.py
---- setup.py
-+++ setup.py
-@@ -44,7 +44,6 @@
-     'dbm',
-     'gdbm',
-     'nis',
--    'readline',
-     'sunaudiodev',
-     ]
-
-@@ -736,9 +735,17 @@
-             missing.extend(['imageop'])
-
+diff -ur Python-3.9.0.orig/setup.py Python-3.9.0/setup.py
+--- Python-3.9.0.orig/setup.py	2020-10-23 10:35:53.392463243 +0300
++++ Python-3.9.0/setup.py	2020-10-23 11:01:58.906729487 +0300
+@@ -978,7 +978,6 @@
+ 
+     def detect_readline_curses(self):
          # readline
--        do_readline = self.compiler.find_library_file(lib_dirs, 'readline')
+-        do_readline = self.compiler.find_library_file(self.lib_dirs, 'readline')
          readline_termcap_library = ""
          curses_library = ""
+         # Cannot use os.popen here in py3k.
+@@ -986,7 +985,13 @@
+         if not os.path.exists(self.build_temp):
+             os.makedirs(self.build_temp)
+         # Determine if readline is already linked against curses or tinfo.
+-        if do_readline:
 +        if sysconfig.get_config_var('HAVE_LIBREADLINE'):
 +            if sysconfig.get_config_var('WITH_EDITLINE'):
 +                readline_lib = 'edit'
 +            else:
 +                readline_lib = 'readline'
-+            do_readline = self.compiler.find_library_file(lib_dirs,
++            do_readline = self.compiler.find_library_file(self.lib_dirs,
 +                readline_lib)
+             if CROSS_COMPILING:
+                 ret = run_command("%s -d %s | grep '(NEEDED)' > %s"
+                                 % (sysconfig.get_config_var('READELF'),
+@@ -1009,6 +1014,8 @@
+                             break
+             if os.path.exists(tmpfile):
+                 os.unlink(tmpfile)
 +        else:
 +            do_readline = False
-         # Determine if readline is already linked against curses or tinfo.
-         if do_readline and find_executable('ldd'):
-             fp = os.popen("ldd %s" % do_readline)
-@@ -789,7 +796,7 @@
+         # Issue 7384: If readline is already linked against curses,
+         # use the same library for the readline and curses modules.
+         if 'curses' in readline_termcap_library:
+@@ -1048,7 +1055,7 @@
              else:
                  readline_extra_link_args = ()
-
+ 
 -            readline_libs = ['readline']
 +            readline_libs = [readline_lib]
              if readline_termcap_library:

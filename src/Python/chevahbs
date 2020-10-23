@@ -22,24 +22,25 @@ chevahbs_getsources() {
 
 chevahbs_patch() {
     if [ "$BUILD_LIBEDIT" = "yes" ]; then
-        # Adapted from the v4 patch at https://bugs.python.org/issue13501.
+        # Adapted from https://bugs.python.org/issue13501.
         echo "Applying readline_libedit.patch:"
-        execute patch -p0 < readline_libedit.patch
+        execute patch -p 1 < readline_libedit.patch
     fi
 }
 
 
 chevahbs_configure() {
     CONFIG_ARGS="--disable-shared"
-    CONFIGURE_ENVIRONMENT=""
+
+    # This requires the patch referenced in chevahbs_patch().
+    if [ "$BUILD_LIBEDIT" = "yes" ]; then
+        CONFIG_ARGS="${CONFIG_ARGS} --with-readline=editline"
+    fi
 
     echo "Copying collected header files among Python's ones..."
     execute cp -r "$INSTALL_DIR"/include/* ./Include/
 
     case $OS in
-        macos*)
-            CONFIG_ARGS="${CONFIG_ARGS} --without-gcc"
-            ;;
         fbsd*|sol11*)
             LDFLAGS="$LDFLAGS -lncurses"
             ;;
@@ -50,11 +51,6 @@ chevahbs_configure() {
             ;;
     esac
 
-    # This requires the v4 patch from https://bugs.python.org/issue13501.
-    if [ "$BUILD_LIBEDIT" = "yes" ]; then
-        CONFIG_ARGS="${CONFIG_ARGS} --with-readline=editline"
-    fi
-
     echo "Patching the git rev id into Python's version string..."
     execute cp Modules/getbuildinfo.c Modules/getbuildinfo.c.orig
     # Don't use 'sed -i' because that's not supported on macOS 10.13.
@@ -62,17 +58,13 @@ chevahbs_configure() {
         s/gitid\ =\ \"default\"/gitid\ =\ \"$PYTHON_PACKAGE_VERSION\"/g \
         Modules/getbuildinfo.c.orig > Modules/getbuildinfo.c
     execute ./configure --prefix="" $CONFIG_ARGS
-    # These files are already created in the Python distribution,
-    # but for some strange reason, make tries to recreate them.
-    # Just touch them so that $MAKE will see them up to date.
-    execute touch Include/Python-ast.h Python/Python-ast.c
 }
 
 
 chevahbs_compile() {
     execute $MAKE
     # Don't use execute below, some tests might fail innocuously.
-    $MAKE test
+    # XXX $MAKE test
 }
 
 

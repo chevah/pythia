@@ -34,9 +34,6 @@ chevahbs_configure() {
             # Required when linking to libedit, which has a simpler configure.
             CFLAGS="$CFLAGS -xcode=pic32"
     esac
-    # Touch all files to prevent the build erroring out with:
-    # "WARNING: 'aclocal-1.15' is missing on your system."
-    execute find . -type f -exec touch -r acinclude.m4 {} +
     execute ./configure --prefix="" $CONF_OPTS
 }
 
