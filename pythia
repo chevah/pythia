@@ -94,12 +94,13 @@ command_build() {
     export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS}"
     export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH}"
 
-    build_dep $BUILD_LIBFFI   libffi    $LIBFFI_VERSION
-    build_dep $BUILD_ZLIB     zlib        $ZLIB_VERSION
-    build_dep $BUILD_BZIP2    bzip2      $BZIP2_VERSION
-    build_dep $BUILD_LIBEDIT  libedit  $LIBEDIT_VERSION
-    build_dep $BUILD_GMP      gmp          $GMP_VERSION
-    build_dep $BUILD_OPENSSL  openssl  $OPENSSL_VERSION
+    build_dep $BUILD_LIBFFI   libffi           $LIBFFI_VERSION
+    build_dep $BUILD_ZLIB     zlib             $ZLIB_VERSION
+    build_dep $BUILD_BZIP2    bzip2            $BZIP2_VERSION
+    build_dep $BUILD_LIBEDIT  libedit          $LIBEDIT_VERSION
+    build_dep $BUILD_GMP      gmp              $GMP_VERSION
+    build_dep $BUILD_SQLITE   sqlite-autoconf  $SQLITE_VERSION
+    build_dep $BUILD_OPENSSL  openssl          $OPENSSL_VERSION
 
     build_python
 
@@ -175,8 +176,6 @@ build_python() {
         ./chevahbs Python $PYTHON_BUILD_VERSION $INSTALL_DIR
         execute popd
     else
-        # Build SQLite for 'sqlite3' module only where Python is actually built.
-        build sqlite-autoconf $SQLITE_VERSION
         build Python $PYTHON_BUILD_VERSION
     fi
 }

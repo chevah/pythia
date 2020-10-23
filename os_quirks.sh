@@ -12,9 +12,10 @@ case $OS in
             export REDISTRIBUTABLE_VERSION="9.0.30729.9247"
         fi
         # On Windows, there are no actual dependency builds.
+        export BUILD_BZIP2="no"
         export BUILD_LIBEDIT="no"
         export BUILD_GMP="no"
-        export BUILD_BZIP2="no"
+        export BUILD_SQLITE="no"
         PIP_LIBRARIES="$PIP_LIBRARIES \
             gmpy2==${GMPY2_VERSION}
             pywin32==${PYWIN32_VERSION} \
