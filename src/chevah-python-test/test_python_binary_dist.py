@@ -116,23 +116,28 @@ def get_allowed_deps():
                 '/lib/x86_64-linux-gnu/libm.so.6',
                 '/lib/x86_64-linux-gnu/libnsl.so.1',
                 '/lib/x86_64-linux-gnu/libpthread.so.0',
+                '/lib/x86_64-linux-gnu/librt.so.1',
                 '/lib/x86_64-linux-gnu/libutil.so.1',
                 '/lib/x86_64-linux-gnu/libz.so.1',
                 ]
             if ubuntu_version == "1804":
                 allowed_deps.extend([
+                    '/lib/x86_64-linux-gnu/libncurses.so.5',
                     '/lib/x86_64-linux-gnu/libtinfo.so.5',
                     '/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1',
-                    '/usr/lib/x86_64-linux-gnu/libssl.so.1.1',
                     '/usr/lib/x86_64-linux-gnu/libffi.so.6',
+                    '/usr/lib/x86_64-linux-gnu/libpanel.so.5',
+                    '/usr/lib/x86_64-linux-gnu/libssl.so.1.1',
                 ])
             else:
                 # Tested on 20.04, might cover future releases as well.
                 allowed_deps.extend([
                     '/lib/x86_64-linux-gnu/libcrypto.so.1.1',
+                    '/lib/x86_64-linux-gnu/libffi.so.7',
+                    '/lib/x86_64-linux-gnu/libncursesw.so.6',
+                    '/lib/x86_64-linux-gnu/libpanelw.so.6',
                     '/lib/x86_64-linux-gnu/libssl.so.1.1',
                     '/lib/x86_64-linux-gnu/libtinfo.so.6',
-                    '/lib/x86_64-linux-gnu/libffi.so.7',
                 ])
         elif 'alpine' in CHEVAH_OS:
             # Full deps with paths, but no minor versions, for Alpine 3.12+.
@@ -325,6 +330,9 @@ def test_dependencies():
 
     unwanted_deps = get_unwanted_deps(allowed_deps, actual_deps)
     if unwanted_deps:
+        sys.stderr.write('Complete list of actual deps:\n')
+        for single_dep_to_print in actual_deps:
+            sys.stderr.write('\t{0}\n'.format(single_dep_to_print))
         sys.stderr.write('Got unwanted deps:\n')
         for single_dep_to_print in unwanted_deps:
             sys.stderr.write('\t{0}\n'.format(single_dep_to_print))
