@@ -16,7 +16,8 @@
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
 BASE_PKGS="gcc make m4 automake libtool texinfo patch wget tar coreutils unzip"
-DPKG_PKGS="$BASE_PKGS git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
+DPKG_PKGS="$BASE_PKGS \
+    git libssl-dev zlib1g-dev libffi-dev libncurses5-dev liblzma-dev"
 RPM_PKGS="$BASE_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
 # Alpine uses by default the ersatz wget/tar/sha51sum binaries from Busybox.
 APK_PKGS="gcc make m4 automake libtool texinfo patch unzip \
