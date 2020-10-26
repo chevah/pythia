@@ -88,7 +88,7 @@ command_build() {
 
     # Build stuff statically on most platforms, install headers and libs in the
     # following locations, making sure they are picked up when building Python.
-    # $CPPFLAGS is another way to ensure this, but it's not as portable.
+    # $CFLAGS/$CPPFLAGS is another way to ensure this, but it's not as portable.
     echo "#### Starting the build... ####"
     execute mkdir -p $INSTALL_DIR/{include,lib}
     export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS}"
@@ -150,13 +150,17 @@ build_dep() {
         echo "#### Building $dep_name version ${dep_version}... ####"
         build $dep_name $dep_version
         # If there's something to be done post-build, here's the place.
-        if [ $dep_name = "openssl" -a "$OS" = "lnx" ]; then
+        if [ $dep_name = "libffi" ]; then
+            # Python 3.9's setup.py can't find libffi headers in the usual way.
+            export LIBFFI_INCLUDEDIR="${INSTALL_DIR}/include"
+        elif [ $dep_name = "openssl" -a "$OS" = "lnx" ]; then
+            # On RHEL5/SLES11 x64, OpenSSL instals only to lib64/ sub-dir.
             # '-Wl,-rpath' voodoo is needed when building cryptography w/ pip.
             export LDFLAGS="-L${INSTALL_DIR}/lib64/ \
                 -Wl,-rpath,${INSTALL_DIR}/lib64/ ${LDFLAGS}"
             export PKG_CONFIG_PATH="\
                 ${INSTALL_DIR}/lib64/pkgconfig/:${PKG_CONFIG_PATH}"
-            # To make sure they're found, we're back to using CPPFLAGS.
+            # Copying includes is not enough, CFLAGS/CPPFLAGS is still needed.
             export CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include"
         fi
     elif [ $dep_boolean = "no" ]; then
