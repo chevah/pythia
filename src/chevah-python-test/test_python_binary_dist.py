@@ -139,6 +139,7 @@ def get_allowed_deps():
                     '/lib/x86_64-linux-gnu/libpanelw.so.6',
                     '/lib/x86_64-linux-gnu/libssl.so.1.1',
                     '/lib/x86_64-linux-gnu/libtinfo.so.6',
+                    '/lib/x86_64-linux-gnu/libuuid.so.1',
                 ])
         elif 'alpine' in CHEVAH_OS:
             # Full deps with paths, but no minor versions, for Alpine 3.12+.
