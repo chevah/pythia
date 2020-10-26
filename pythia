@@ -151,8 +151,9 @@ build_dep() {
         build $dep_name $dep_version
         # If there's something to be done post-build, here's the place.
         if [ $dep_name = "libffi" ]; then
-            # Python 3.9's setup.py can't find libffi headers in the usual way.
-            export LIBFFI_INCLUDEDIR="${INSTALL_DIR}/include"
+            # Ugly hack for Python 3.9's configure issues. XXX
+            sudo mkdir /lib/libffi-3.2.1
+            sudo ln -s "${INSTALL_DIR}/include" /lib/libffi-3.2.1/include
         elif [ $dep_name = "openssl" -a "$OS" = "lnx" ]; then
             # On RHEL5/SLES11 x64, OpenSSL instals only to lib64/ sub-dir.
             # '-Wl,-rpath' voodoo is needed when building cryptography w/ pip.
