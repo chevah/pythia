@@ -331,12 +331,12 @@ def test_dependencies():
         return 123
 
     unwanted_deps = get_unwanted_deps(allowed_deps, actual_deps)
+    sys.stderr.write('Complete list of actual dependencies:\n')
+    for single_dep_to_print in sorted(actual_deps):
+        sys.stderr.write('\t{0}\n'.format(single_dep_to_print))
     if unwanted_deps:
-        sys.stderr.write('Complete list of actual deps:\n')
-        for single_dep_to_print in actual_deps:
-            sys.stderr.write('\t{0}\n'.format(single_dep_to_print))
-        sys.stderr.write('Got unwanted deps:\n')
-        for single_dep_to_print in unwanted_deps:
+        sys.stderr.write('Got unwanted dependencies:\n')
+        for single_dep_to_print in sorted(unwanted_deps):
             sys.stderr.write('\t{0}\n'.format(single_dep_to_print))
         return 124
 
