@@ -13,9 +13,9 @@ diff -ur Python-3.9.0/setup.py Python-3.9.0.disabled_modules/setup.py
 +    '_dbm',
 +    '_gdbm',
 +    '_locale',
++    '_lzma',
 +    '_tkinter',
 +    '_uuid',
-+    'lzma',
 +    'nis',
 +    'readline',
 +    ]

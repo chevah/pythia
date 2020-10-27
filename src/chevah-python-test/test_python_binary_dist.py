@@ -34,6 +34,7 @@ def get_allowed_deps():
                 'libdl.so.2',
                 'libm.so.6',
                 'libpthread.so.0',
+                'librt.so.1',
                 'libutil.so.1',
                 ]
             if 'arm64' in CHEVAH_ARCH:

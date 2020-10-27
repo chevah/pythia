@@ -11,14 +11,18 @@ git:
 
 jobs:
   include:
-      # Ubuntu Server 16.04 on ARM64
+    # Ubuntu Server 16.04 on ARM64
     - os: linux
       dist: xenial
       arch: arm64
 
-      # macOS 10.13
+    # macOS 10.13
     - os: osx
       osx_image: xcode10.1
+
+    # macOS 10.14
+    - os: osx
+      osx_image: xcode11.3
 
 install:
   - |
