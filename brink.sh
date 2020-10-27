@@ -761,10 +761,7 @@ detect_os() {
         Darwin)
             ARCH=$(uname -m)
             os_version_raw=$(sw_vers -productVersion)
-            # Tested on 10.13, but this works on 10.12 too. Older versions need
-            # "-Wl,-no_weak_imports" in LDFLAGS to avoid runtime issues. More
-            # details at https://github.com/Homebrew/homebrew-core/issues/3727.
-            check_os_version "macOS" 10.12 "$os_version_raw" os_version_chevah
+            check_os_version "macOS" 10.13 "$os_version_raw" os_version_chevah
             # Build a generic package to cover all supported versions.
             OS="macos"
             ;;

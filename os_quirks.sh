@@ -49,8 +49,7 @@ case $OS in
     macos)
         export CC="clang"
         export CXX="clang++"
-        # Build as compatible as it makes sense. See brink.sh for the reason.
-        export CFLAGS="$CFLAGS -mmacosx-version-min=10.12"
+        export CFLAGS="$CFLAGS -mmacosx-version-min=10.13"
         # setup.py skips building readline by default, as it sets this to
         # "10.4", and then tries to avoid the broken readline in OS X 10.4.
         export MACOSX_DEPLOYMENT_TARGET=10.12

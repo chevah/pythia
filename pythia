@@ -154,13 +154,15 @@ build_dep() {
             # Ugly hack for Python 3.9's configure issues. XXX
             sudo mkdir /lib/libffi-3.2.1
             sudo ln -s "${INSTALL_DIR}/include" /lib/libffi-3.2.1/include
-        elif [ $dep_name = "openssl" -a "$OS" = "lnx" ]; then
-            # On RHEL5/SLES11 x64, OpenSSL instals only to lib64/ sub-dir.
-            # '-Wl,-rpath' voodoo is needed when building cryptography w/ pip.
-            export LDFLAGS="-L${INSTALL_DIR}/lib64/ \
-                -Wl,-rpath,${INSTALL_DIR}/lib64/ ${LDFLAGS}"
-            export PKG_CONFIG_PATH="\
-                ${INSTALL_DIR}/lib64/pkgconfig/:${PKG_CONFIG_PATH}"
+        elif [ $dep_name = "openssl" ]; then
+            if [ "$OS" = "lnx" ]; then
+                # On RHEL5/SLES11 x64, OpenSSL instals only to lib64/ sub-dir.
+                # '-Wl,-rpath' voodoo is needed to build cryptography w/ pip.
+                export LDFLAGS="-L${INSTALL_DIR}/lib64/ \
+                    -Wl,-rpath,${INSTALL_DIR}/lib64/ ${LDFLAGS}"
+                export PKG_CONFIG_PATH="\
+                    ${INSTALL_DIR}/lib64/pkgconfig/:${PKG_CONFIG_PATH}"
+            fi
             # Copying includes is not enough, CFLAGS/CPPFLAGS is still needed.
             export CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include"
         fi
