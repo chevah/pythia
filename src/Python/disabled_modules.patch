@@ -1,0 +1,24 @@
+diff -ur Python-3.9.0/setup.py Python-3.9.0.disabled_modules/setup.py
+--- Python-3.9.0/setup.py	2020-10-05 18:07:58.000000000 +0300
++++ Python-3.9.0.disabled_modules/setup.py	2020-10-27 11:37:14.510742595 +0200
+@@ -43,8 +43,18 @@
+ TEST_EXTENSIONS = True
+ 
+ # This global variable is used to hold the list of modules to be disabled.
+-DISABLED_MODULE_LIST = []
+-
++DISABLED_MODULE_LIST = [
++    '_curses',
++    '_curses_panel',
++    '_dbm',
++    '_gdbm',
++    '_locale',
++    '_tkinter',
++    '_uuid',
++    'lzma',
++    'nis',
++    'readline',
++    ]
+ 
+ def get_platform():
+     # Cross compiling

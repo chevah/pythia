@@ -113,9 +113,7 @@ def get_allowed_deps():
                 '/lib/x86_64-linux-gnu/libc.so.6',
                 '/lib/x86_64-linux-gnu/libcrypt.so.1',
                 '/lib/x86_64-linux-gnu/libdl.so.2',
-                '/lib/x86_64-linux-gnu/liblzma.so.5',
                 '/lib/x86_64-linux-gnu/libm.so.6',
-                '/lib/x86_64-linux-gnu/libnsl.so.1',
                 '/lib/x86_64-linux-gnu/libpthread.so.0',
                 '/lib/x86_64-linux-gnu/librt.so.1',
                 '/lib/x86_64-linux-gnu/libutil.so.1',
@@ -123,11 +121,9 @@ def get_allowed_deps():
                 ]
             if ubuntu_version == "1804":
                 allowed_deps.extend([
-                    '/lib/x86_64-linux-gnu/libncurses.so.5',
                     '/lib/x86_64-linux-gnu/libtinfo.so.5',
                     '/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1',
                     '/usr/lib/x86_64-linux-gnu/libffi.so.6',
-                    '/usr/lib/x86_64-linux-gnu/libpanel.so.5',
                     '/usr/lib/x86_64-linux-gnu/libssl.so.1.1',
                 ])
             else:
@@ -135,11 +131,8 @@ def get_allowed_deps():
                 allowed_deps.extend([
                     '/lib/x86_64-linux-gnu/libcrypto.so.1.1',
                     '/lib/x86_64-linux-gnu/libffi.so.7',
-                    '/lib/x86_64-linux-gnu/libncursesw.so.6',
-                    '/lib/x86_64-linux-gnu/libpanelw.so.6',
                     '/lib/x86_64-linux-gnu/libssl.so.1.1',
                     '/lib/x86_64-linux-gnu/libtinfo.so.6',
-                    '/lib/x86_64-linux-gnu/libuuid.so.1',
                 ])
         elif 'alpine' in CHEVAH_OS:
             # Full deps with paths, but no minor versions, for Alpine 3.12+.

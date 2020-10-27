@@ -47,18 +47,17 @@ These patches are applied at build time when added as:
 
 An example for creating a patch for pristine Python 3.9.0 sources::
 
-    # Unpack the sources in build sub-dir:
-    cd build
-    tar xfz ../src/Python/Python-3.9.0.tgz
-    # Copy the pristine sources as reference:
-    cp -r Python-3.9.0 Python-3.9.0.orig
+    # Make a copy of the sources to be patched:
+    cp -r Python-3.9.0 Python-3.9.0.disabled_modules
     # Modify the sources as needed, then create the diff:
-    diff -ur Python-3.9.0.orig Python-3.9.0
+    diff -ur Python-3.9.0/ Python-3.9.0.disabled_modules/
     # Save the diff into a file such as:
-    src/Python/readline_libedit.patch
+    src/Python/disabled_modules.patch
 
 Finally, edit the corresponding ``chevahbs`` script in ``/src`` to apply
 the new patch on platforms that require it before building from sources.
+When applying a patch on top of another patch, make sure you get the order
+right, then save the diff to the sources patched with the preceding patch.
 
 .. image:: https://github.com/chevah/pythia/workflows/GitHub-CI/badge.svg
   :target: https://github.com/chevah/pythia/actions

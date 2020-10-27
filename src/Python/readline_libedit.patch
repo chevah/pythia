@@ -1,6 +1,6 @@
-diff -ur Python-3.9.0.orig/Modules/readline.c Python-3.9.0/Modules/readline.c
---- Python-3.9.0.orig/Modules/readline.c	2020-10-23 10:35:53.619118422 +0300
-+++ Python-3.9.0/Modules/readline.c	2020-10-23 10:45:12.300876632 +0300
+diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_libedit/Modules/readline.c
+--- Python-3.9.0.disabled_modules/Modules/readline.c	2020-10-27 11:37:14.764063830 +0200
++++ Python-3.9.0.readline_libedit/Modules/readline.c	2020-10-27 11:39:50.489959259 +0200
 @@ -26,23 +26,20 @@
  #  define RESTORE_LOCALE(sl)
  #endif
@@ -257,9 +257,9 @@ diff -ur Python-3.9.0.orig/Modules/readline.c Python-3.9.0/Modules/readline.c
  
      m = PyModule_Create(&readlinemodule);
  
-diff -ur Python-3.9.0.orig/configure Python-3.9.0/configure
---- Python-3.9.0.orig/configure	2020-10-23 10:35:53.452460203 +0300
-+++ Python-3.9.0/configure	2020-10-23 10:55:42.742362204 +0300
+diff -ur Python-3.9.0.disabled_modules/configure Python-3.9.0.readline_libedit/configure
+--- Python-3.9.0.disabled_modules/configure	2020-10-27 11:37:14.584072426 +0200
++++ Python-3.9.0.readline_libedit/configure	2020-10-27 11:39:50.496625607 +0200
 @@ -846,6 +846,7 @@
  with_libc
  enable_big_digits
@@ -699,9 +699,9 @@ diff -ur Python-3.9.0.orig/configure Python-3.9.0/configure
  
  # End of readline checks: restore LIBS
  LIBS=$LIBS_no_readline
-diff -ur Python-3.9.0.orig/configure.ac Python-3.9.0/configure.ac
---- Python-3.9.0.orig/configure.ac	2020-10-23 10:35:53.392463243 +0300
-+++ Python-3.9.0/configure.ac	2020-10-23 11:01:15.675567214 +0300
+diff -ur Python-3.9.0.disabled_modules/configure.ac Python-3.9.0.readline_libedit/configure.ac
+--- Python-3.9.0.disabled_modules/configure.ac	2020-10-27 11:37:14.510742595 +0200
++++ Python-3.9.0.readline_libedit/configure.ac	2020-10-27 11:39:50.496625607 +0200
 @@ -4856,93 +4856,125 @@
    [Define this if you have flockfile(), getc_unlocked(), and funlockfile()])
  fi
@@ -905,9 +905,9 @@ diff -ur Python-3.9.0.orig/configure.ac Python-3.9.0/configure.ac
  # End of readline checks: restore LIBS
  LIBS=$LIBS_no_readline
  
-diff -ur Python-3.9.0.orig/pyconfig.h.in Python-3.9.0/pyconfig.h.in
---- Python-3.9.0.orig/pyconfig.h.in	2020-10-23 10:35:53.645783737 +0300
-+++ Python-3.9.0/pyconfig.h.in	2020-10-23 10:36:41.496691638 +0300
+diff -ur Python-3.9.0.disabled_modules/pyconfig.h.in Python-3.9.0.readline_libedit/pyconfig.h.in
+--- Python-3.9.0.disabled_modules/pyconfig.h.in	2020-10-27 11:37:14.790729223 +0200
++++ Python-3.9.0.readline_libedit/pyconfig.h.in	2020-10-27 11:39:50.496625607 +0200
 @@ -598,7 +598,7 @@
  /* Define to 1 if you have the <libintl.h> header file. */
  #undef HAVE_LIBINTL_H
@@ -927,10 +927,18 @@ diff -ur Python-3.9.0.orig/pyconfig.h.in Python-3.9.0/pyconfig.h.in
  /* Define to 1 if libintl is needed for locale functions. */
  #undef WITH_LIBINTL
  
-diff -ur Python-3.9.0.orig/setup.py Python-3.9.0/setup.py
---- Python-3.9.0.orig/setup.py	2020-10-23 10:35:53.392463243 +0300
-+++ Python-3.9.0/setup.py	2020-10-23 11:01:58.906729487 +0300
-@@ -978,7 +978,6 @@
+diff -ur Python-3.9.0.disabled_modules/setup.py Python-3.9.0.readline_libedit/setup.py
+--- Python-3.9.0.disabled_modules/setup.py	2020-10-27 11:37:14.510742595 +0200
++++ Python-3.9.0.readline_libedit/setup.py	2020-10-27 11:39:50.499958781 +0200
+@@ -53,7 +53,6 @@
+     '_uuid',
+     'lzma',
+     'nis',
+-    'readline',
+     ]
+ 
+ def get_platform():
+@@ -988,7 +987,6 @@
  
      def detect_readline_curses(self):
          # readline
@@ -938,7 +946,7 @@ diff -ur Python-3.9.0.orig/setup.py Python-3.9.0/setup.py
          readline_termcap_library = ""
          curses_library = ""
          # Cannot use os.popen here in py3k.
-@@ -986,7 +985,13 @@
+@@ -996,7 +994,13 @@
          if not os.path.exists(self.build_temp):
              os.makedirs(self.build_temp)
          # Determine if readline is already linked against curses or tinfo.
@@ -953,7 +961,7 @@ diff -ur Python-3.9.0.orig/setup.py Python-3.9.0/setup.py
              if CROSS_COMPILING:
                  ret = run_command("%s -d %s | grep '(NEEDED)' > %s"
                                  % (sysconfig.get_config_var('READELF'),
-@@ -1009,6 +1014,8 @@
+@@ -1019,6 +1023,8 @@
                              break
              if os.path.exists(tmpfile):
                  os.unlink(tmpfile)
@@ -962,7 +970,7 @@ diff -ur Python-3.9.0.orig/setup.py Python-3.9.0/setup.py
          # Issue 7384: If readline is already linked against curses,
          # use the same library for the readline and curses modules.
          if 'curses' in readline_termcap_library:
-@@ -1048,7 +1055,7 @@
+@@ -1058,7 +1064,7 @@
              else:
                  readline_extra_link_args = ()
  
