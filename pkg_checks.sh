@@ -1,26 +1,28 @@
 #!/usr/bin/env bash
 #
 # Check for the presence of required packages/commands.
-# If possible, install missing ones.
+# If possible, install missing ones, typically through sudo.
 #
 # This build requires:
 #   * a C compiler, e.g. gcc
 #   * build tools: make, m4
 #   * patch (for applying patches from src/)
-#   * git (for patching Python's version, if building it)
-#   * automake, libtool, and headers of a curses library (if building libedit)
-#   * perl 5.10.0 and Test::More 0.96 (if building OpenSSL)
-#   * wget/curl, sha512sum, tar, and unzip (for downloading and unpacking).
+#   * git (for patching Python's version, if actually building it)
+#   * automake, libtool, headers of a curses library (if building libedit)
+#   * perl 5.10.0 or newer, Test::More 0.96 or newer (if building OpenSSL)
+#   * wget/curl, sha512sum, tar, unzip (for downloading and unpacking)
 #
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
 BASE_PKGS="gcc make m4 automake libtool texinfo patch wget tar coreutils unzip"
-DPKG_PKGS="$BASE_PKGS git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
-RPM_PKGS="$BASE_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
-# Alpine uses by default the ersatz wget/tar/sha51sum binaries from Busybox.
-APK_PKGS="gcc make m4 automake libtool texinfo patch unzip \
-    git zlib-dev libffi-dev ncurses-dev linux-headers musl-dev openssl-dev"
+DPKG_PKGS="$BASE_PKGS \
+    git libssl-dev zlib1g-dev libffi-dev libncurses5-dev uuid-dev"
+RPM_PKGS="$BASE_PKGS \
+    git openssl-devel zlib-devel libffi-devel ncurses-devel libuuid-devel"
+# Alpine's ersatz wget/tar/sha51sum binaries from Busybox are good enough.
+APK_PKGS="gcc make m4 automake libtool texinfo patch unzip file musl-dev \
+    git openssl-dev zlib-dev libffi-dev ncurses-dev util-linux-dev"
 # Windows is special, but package management is possible through Chocolatey.
 # Curl, sha512sum, and unzip are bundled with MINGW.
 CHOCO_PKGS="vcpython27 make"
@@ -100,7 +102,7 @@ if [ -n "$MISSING_PACKAGES" ]; then
                 ;;
             rhel*|amzn*)
                 echo "## Installing missing rpm packages... ##"
-                execute sudo yum install $MISSING_PACKAGES
+                execute sudo yum install -y $MISSING_PACKAGES
                 ;;
             alpine*)
                 echo "## Installing missing apk packages... ##"

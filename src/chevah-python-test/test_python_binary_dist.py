@@ -36,6 +36,7 @@ def get_allowed_deps():
                 'libpthread.so.0',
                 'librt.so.1',
                 'libutil.so.1',
+                'libuuid.so.1',
                 ]
             if 'arm64' in CHEVAH_ARCH:
                 # Additional deps without paths for arm64 generic Linux builds.
@@ -60,12 +61,14 @@ def get_allowed_deps():
                 '/lib64/libnsl.so.1',
                 '/lib64/libpthread.so.0',
                 '/lib64/libresolv.so.2',
+                '/lib64/librt.so.1',
                 '/lib64/libselinux.so.1',
                 '/lib64/libutil.so.1',
+                '/lib64/libuuid.so.1',
                 '/lib64/libz.so.1',
                 ]
             rhel_version = CHEVAH_OS[4:]
-            if rhel_version.startswith(b"7"):
+            if rhel_version.startswith("7"):
                 allowed_deps.extend([
                     '/lib64/libcrypto.so.10',
                     '/lib64/libffi.so.6',
@@ -74,7 +77,7 @@ def get_allowed_deps():
                     '/lib64/libssl.so.10',
                     '/lib64/libtinfo.so.5',
                     ])
-            if rhel_version.startswith(b"8"):
+            if rhel_version.startswith("8"):
                 allowed_deps.extend([
                     '/lib64/libcrypto.so.1.1',
                     '/lib64/libffi.so.6',
@@ -101,10 +104,12 @@ def get_allowed_deps():
                 '/lib64/libpcre.so.1',
                 '/lib64/libpthread.so.0',
                 '/lib64/libresolv.so.2',
+                '/lib64/librt.so.1',
                 '/lib64/libselinux.so.1',
                 '/lib64/libssl.so.10',
                 '/lib64/libtinfo.so.6',
                 '/lib64/libutil.so.1',
+                '/lib64/libuuid.so.1',
                 '/lib64/libz.so.1',
                 ]
         elif 'ubuntu' in CHEVAH_OS:
@@ -118,6 +123,7 @@ def get_allowed_deps():
                 '/lib/x86_64-linux-gnu/libpthread.so.0',
                 '/lib/x86_64-linux-gnu/librt.so.1',
                 '/lib/x86_64-linux-gnu/libutil.so.1',
+                '/lib/x86_64-linux-gnu/libuuid.so.1',
                 '/lib/x86_64-linux-gnu/libz.so.1',
                 ]
             if ubuntu_version == "1804":
@@ -145,9 +151,7 @@ def get_allowed_deps():
                 '/lib/libuuid.so.1',
                 '/lib/libz.so.1',
                 '/usr/lib/libffi.so.7',
-                '/usr/lib/libintl.so.8',
                 '/usr/lib/libncursesw.so.6',
-                '/usr/lib/libpanelw.so.6',
                 ]
     elif platform_system == 'sunos':
         # This is the list of deps for Solaris 11 64bit builds.
@@ -325,9 +329,9 @@ def test_dependencies():
         return 123
 
     unwanted_deps = get_unwanted_deps(allowed_deps, actual_deps)
-    sys.stderr.write('Complete list of actual dependencies:\n')
+    sys.stdout.write('Complete list of dependencies:\n')
     for single_dep_to_print in sorted(actual_deps):
-        sys.stderr.write('\t{0}\n'.format(single_dep_to_print))
+        sys.stdout.write('\t{0}\n'.format(single_dep_to_print))
     if unwanted_deps:
         sys.stderr.write('Got unwanted dependencies:\n')
         for single_dep_to_print in sorted(unwanted_deps):
@@ -551,6 +555,15 @@ def main():
         exit_code = 160
     else:
         print('psutil %s' % (psutil.__version__,))
+
+    try:
+        import uuid
+        uuid.uuid4()
+    except:
+        sys.stderr.write('"uuid" is missing or broken.\n')
+        exit_code = 163
+    else:
+        print('"uuid" module is present.')
 
     if os.name == 'nt':
         # Windows specific modules.

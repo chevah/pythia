@@ -931,9 +931,9 @@ diff -ur Python-3.9.0.disabled_modules/setup.py Python-3.9.0.readline_libedit/se
 --- Python-3.9.0.disabled_modules/setup.py	2020-10-27 11:37:14.510742595 +0200
 +++ Python-3.9.0.readline_libedit/setup.py	2020-10-27 11:39:50.499958781 +0200
 @@ -53,7 +53,6 @@
-     '_uuid',
-     'lzma',
+     '_tkinter',
      'nis',
+     'ossaudiodev',
 -    'readline',
      ]
  
