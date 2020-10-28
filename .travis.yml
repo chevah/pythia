@@ -20,10 +20,6 @@ jobs:
     - os: osx
       osx_image: xcode10.1
 
-    # macOS 10.14
-    - os: osx
-      osx_image: xcode11.3
-
 install:
   - |
     case $TRAVIS_OS_NAME in

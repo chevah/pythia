@@ -158,6 +158,8 @@ build_dep() {
                 export PKG_CONFIG_PATH="\
                     ${INSTALL_DIR}/lib64/pkgconfig/:${PKG_CONFIG_PATH}"
             fi
+            # Still needed for building cryptography.
+            export CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include"
         fi
     elif [ $dep_boolean = "no" ]; then
         (>&2 echo "    Skipping building ${dep_name}...")
