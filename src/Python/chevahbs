@@ -44,6 +44,11 @@ chevahbs_configure() {
     echo "## Copying collected header files among Python's ones... ##"
     execute cp -r "$INSTALL_DIR"/include/* ./Include/
 
+    # Copying headers to Include/ is not enough to find the OpenSSL ones.
+    if [ "$BUILD_OPENSSL" = "yes" ]; then
+        CONFIG_ARGS="${CONFIG_ARGS} --with-openssl=${INSTALL_DIR}"
+    fi
+
     case $OS in
         fbsd*|sol11*)
             LDFLAGS="$LDFLAGS -lncurses"
