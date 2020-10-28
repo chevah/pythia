@@ -31,7 +31,7 @@ download_sources $NAME $VER $LINK $EXT
 download_sources manifest wiper $WIPER exe
 
 # Get Windows redists locally, to pick them up when installing.
-echo "### Collecting Windows redistributables... ###"
+echo "## Collecting Windows redistributables... ##"
 ./get_latest_redist.sh
 
 DEST_DIR=$INSTALL_DIR/lib
@@ -45,22 +45,22 @@ fi
 CURRENT_WIN_PATH=$(pwd -W | sed 's|\/|\\\\|g')
 INSTALL_WIN_PATH=$(cd $INSTALL_DIR && pwd -W | sed 's|\/|\\\\|g')
 
-echo "### Extracting MSI installer to ${INSTALL_WIN_PATH}... ###"
+echo "## Extracting MSI installer to ${INSTALL_WIN_PATH}... ##"
 execute msiexec //a $CURRENT_WIN_PATH\\$INSTALLER \
     //qn TARGETDIR=$INSTALL_WIN_PATH\\lib
 
-echo "### Copying Windows redistributables... ###"
+echo "## Copying Windows redistributables... ##"
 execute cp $REDISTRIBUTABLE_VERSION/$ARCH_DIR/* $DEST_DIR
 
-echo "### Copying manifests to use our redistributable version... ###"
+echo "## Copying manifests to use our redistributable version... ##"
 wipe_manifest ./manifest-wiper.exe $DEST_DIR/python.exe
 wipe_manifest ./manifest-wiper.exe $DEST_DIR/pythonw.exe
 wipe_manifest ./manifest-wiper.exe $DEST_DIR/python27.dll
 
-echo "### Removing installer from $DEST_DIR/$INSTALLER... ###"
+echo "## Removing installer from $DEST_DIR/$INSTALLER... ##"
 execute rm -f --verbose $DEST_DIR/$INSTALLER
 
-echo "### Adding cp65001 as an utf-8 alias... ###"
+echo "## Adding cp65001 as an utf-8 alias... ##"
 execute sed -i \
     "s|# utf_8 codec|# utf_8 codec\n    'cp65001'            : 'utf_8',|" \
     $DEST_DIR/lib/encodings/aliases.py

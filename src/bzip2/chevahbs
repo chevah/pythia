@@ -20,7 +20,7 @@ chevahbs_getsources() {
 
 chevahbs_patch() {
     # Patch to support PIC and compilers other than GCC.
-    echo "Applying cc_fpic.patch:"
+    echo "## Applying cc_fpic.patch... ##"
     execute patch -p0 < cc_fpic.patch
 }
 

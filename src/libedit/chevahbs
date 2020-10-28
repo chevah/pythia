@@ -22,7 +22,7 @@ chevahbs_patch() {
     # after exiting the repl on systems with ncurses 6.0, such as Ubuntu 16.04.
     # Patch from https://trac.macports.org/ticket/48807#comment:141.
     # Upstream bugfix (not recommended): https://gnats.netbsd.org/48957.
-    echo "Applying terminal_restore.patch:"
+    echo "## Applying terminal_restore.patch... ##"
     execute patch -p0 < terminal_restore.patch
 }
 
