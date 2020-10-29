@@ -9,28 +9,42 @@
 source ../../functions.sh
 source ../../functions_pythia.sh
 
-# The usual two arguments, e.g. "Python" and "2.7.18",
+# The usual two arguments, e.g. "Python" and "3.9.0",
 # but the installation path is also needed, because this script is special.
 NAME=$1
 VER=$2
 INSTALL_DIR=$3
 
-# Construct the relevant download link for the MSI installer.
-EXT="msi"
-if [ "$ARCH" = "x64" ]; then
-    # Upstream installer filename ends in ".msi" or ".amd64.msi".
-    EXT="amd64.msi"
+# Construct the relevant download link for the Windows version.
+EXT="ZIP"
+WIN_ARCH="amd64"
+if [ "$ARCH" = "x86" ]; then
+    WIN_ARCH="win32"
 fi
-INSTALLER="python-${VER}.${EXT}"
-LINK=https://www.python.org/ftp/python/"$VER"/"$INSTALLER"
+ARCHIVE="python-${VER}.${EXT}"
+LINK=https://www.python.org/ftp/python/"$VER"/python-"$VER"-embed-"$WIN_ARCH"."$EXT"
 
 WIPER="https://binary.chevah.com/production/sxs-manifest-wiper/manifest-wiper.exe"
 
-# Get required files locally, no need to unpack in build/ for msi/exe files.
+# Get files locally without unpacking them (thus the uppercase ZIP extension).
 download_sources $NAME $VER $LINK $EXT
 download_sources manifest wiper $WIPER exe
 
-# Get Windows redists locally, to pick them up when installing.
+# Installation consists of creating the distribution from pre-compiled binaries.
+CURRENT_WIN_PATH=$(pwd -W | sed 's|\/|\\|g')
+INSTALL_WIN_PATH=$(cd ${INSTALL_DIR}/lib && pwd -W | sed 's|\/|\\|g')
+
+echo "## Extracting ZIP archive to ${INSTALL_WIN_PATH}... ##"
+execute unzip -q $CURRENT_WIN_PATH\\$ARCHIVE -d $INSTALL_WIN_PATH
+
+echo "## Adding Python paths... ##"
+setx PYTHONPATH "${INSTALL_WIN_PATH};${INSTALL_WIN_PATH}\DLLs;${INSTALL_WIN_PATH}\lib;${INSTALL_WIN_PATH}\lib\plat-win;${INSTALL_WIN_PATH}\lib\site-packages;${INSTALL_WIN_PATH}\lib\Scripts"
+> ${INSTALL_DIR}/lib/python39._pth
+for path in "\\Python39.zip" "\\" "\\DLLs" "\\lib" "\\lib\plat-win" "\\lib\\site-packages" "\\lib\\Scripts"; do
+    echo ${INSTALL_WIN_PATH}$path >> ${INSTALL_DIR}/lib/python39._pth
+done
+
+# Get Windows redists locally, to update them where installed.
 echo "## Collecting Windows redistributables... ##"
 ./get_latest_redist.sh
 
@@ -41,26 +55,10 @@ if [ "$ARCH" = "x64" ]; then
     ARCH_DIR="amd64"
 fi
 
-# Installation consists of creating the distribution from pre-compiled binaries.
-CURRENT_WIN_PATH=$(pwd -W | sed 's|\/|\\\\|g')
-INSTALL_WIN_PATH=$(cd $INSTALL_DIR && pwd -W | sed 's|\/|\\\\|g')
-
-echo "## Extracting MSI installer to ${INSTALL_WIN_PATH}... ##"
-execute msiexec //a $CURRENT_WIN_PATH\\$INSTALLER \
-    //qn TARGETDIR=$INSTALL_WIN_PATH\\lib
-
 echo "## Copying Windows redistributables... ##"
 execute cp $REDISTRIBUTABLE_VERSION/$ARCH_DIR/* $DEST_DIR
 
 echo "## Copying manifests to use our redistributable version... ##"
 wipe_manifest ./manifest-wiper.exe $DEST_DIR/python.exe
 wipe_manifest ./manifest-wiper.exe $DEST_DIR/pythonw.exe
-wipe_manifest ./manifest-wiper.exe $DEST_DIR/python27.dll
-
-echo "## Removing installer from $DEST_DIR/$INSTALLER... ##"
-execute rm -f --verbose $DEST_DIR/$INSTALLER
-
-echo "## Adding cp65001 as an utf-8 alias... ##"
-execute sed -i \
-    "s|# utf_8 codec|# utf_8 codec\n    'cp65001'            : 'utf_8',|" \
-    $DEST_DIR/lib/encodings/aliases.py
+wipe_manifest ./manifest-wiper.exe $DEST_DIR/python39.dll
