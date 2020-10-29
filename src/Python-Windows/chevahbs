@@ -16,13 +16,12 @@ VER=$2
 INSTALL_DIR=$3
 
 # Construct the relevant download link for the Windows version.
-EXT="ZIP"
-WIN_ARCH="amd64"
+EXT="amd64.zip"
 if [ "$ARCH" = "x86" ]; then
-    WIN_ARCH="win32"
+    EXT="win32.zip"
 fi
 ARCHIVE="python-${VER}.${EXT}"
-LINK=https://www.python.org/ftp/python/"$VER"/python-"$VER"-embed-"$WIN_ARCH"."$EXT"
+LINK=https://www.python.org/ftp/python/"$VER"/python-"$VER"-embed-"$EXT"
 
 WIPER="https://binary.chevah.com/production/sxs-manifest-wiper/manifest-wiper.exe"
 
