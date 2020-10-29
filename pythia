@@ -179,6 +179,10 @@ build_python() {
         execute popd
     else
         build Python $PYTHON_BUILD_VERSION
+        echo "# Symlinking $PYTHON_VERSION binary as python... #"
+        execute pushd "$INSTALL_DIR"/bin
+        execute ln -s $PYTHON_VERSION python
+        execute popd
     fi
 }
 
