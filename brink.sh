@@ -88,7 +88,7 @@ PYTHON_VERSION='not.defined.yet'
 PYTHON_PLATFORM='unknown-os-and-arch'
 PYTHON_NAME='python3.9'
 BINARY_DIST_URI='https://binary.chevah.com/production'
-PIP_INDEX='http://pypi.chevah.com'
+PIP_INDEX='https://pypi.chevah.com'
 BASE_REQUIREMENTS=''
 
 #
@@ -139,7 +139,7 @@ clean_build() {
     echo "Cleaning pyc files ..."
 
     # Faster than '-exec rm {} \;' and supported in most OS'es,
-    # details at http://www.in-ulm.de/~mascheck/various/find/#xargs
+    # details at https://www.in-ulm.de/~mascheck/various/find/#xargs
     find ./ -name '*.pyc' -exec rm {} +
 
     # In some case pip hangs with a build folder in temp and
@@ -172,7 +172,7 @@ purge_cache() {
 delete_folder() {
     local target="$1"
     # On Windows, we use internal command prompt for maximum speed.
-    # See: http://stackoverflow.com/a/6208144/539264
+    # See: https://stackoverflow.com/a/6208144/539264
     if [ $OS = "win" -a -d $target ]; then
         cmd //c "del /f/s/q $target > nul"
         cmd //c "rmdir /s/q $target"
