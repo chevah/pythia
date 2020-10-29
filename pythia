@@ -39,9 +39,9 @@ DIST_DIR="dist"
 
 # Local variables for the build process.
 LOCAL_PYTHON_BINARY_DIST="$PYTHON_VERSION-$OS-$ARCH"
-LOCAL_PYTHON_BINARY="./$LOCAL_PYTHON_BINARY_DIST/bin/python3"
+LOCAL_PYTHON_BINARY="./$LOCAL_PYTHON_BINARY_DIST/bin/python"
 INSTALL_DIR="$PWD/$BUILD_DIR/$LOCAL_PYTHON_BINARY_DIST"
-PYTHON_BIN="$INSTALL_DIR/bin/python3"
+PYTHON_BIN="$INSTALL_DIR/bin/python"
 PYTHON_BUILD_DIR="$PYTHON_VERSION-$OS-$ARCH"
 
 # Used when building gmpy2.
@@ -125,7 +125,7 @@ command_build() {
                 safe_move bin lib/config
                 execute mkdir bin
                 # Copy back python binary
-                execute cp lib/config/bin/$PYTHON_VERSION bin/python3
+                execute cp lib/config/bin/$PYTHON_VERSION bin/python
             execute popd
             ;;
     esac
@@ -184,6 +184,7 @@ build_python() {
 
 # This gets get-pip.py
 download_get_pip() {
+    echo "## Downloading get-pip.py... ##"
     if [ ! -e "$BUILD_DIR"/get-pip.py ]; then
         execute $GET_CMD \
             "$BUILD_DIR"/get-pip.py https://bootstrap.pypa.io/get-pip.py
@@ -193,15 +194,18 @@ download_get_pip() {
 
 # Compile and install all Python extra libraries.
 command_install_python_modules() {
+    echo "#### Installing Python modules... ####"
 
     # Install latest PIP, then instruct it to get exact versions of setuptools.
     # Otherwise, get-pip.py will always try to get latest versions.
     download_get_pip
+    echo "# Installing latest pip with preferred setuptools version... #"
     execute $PYTHON_BIN "$BUILD_DIR"/get-pip.py $PIP_ARGS \
         pip==$PIP_VERSION --no-setuptools setuptools==$SETUPTOOLS_VERSION
 
     # pycparser is installed first as setup_requires is ugly.
     # https://pip.pypa.io/en/stable/reference/pip_install/#controlling-setup-requires
+    echo "# Installing pycparser with preferred setuptools version... #"
     execute $PYTHON_BIN -m pip \
         install $PIP_ARGS -U pycparser==$PYCPARSER_VERSION
 

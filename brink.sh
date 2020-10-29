@@ -208,10 +208,10 @@ update_path_variables() {
     resolve_python_version
 
     if [ "${OS}" = "win" ] ; then
-        PYTHON_BIN="/lib/python3.exe"
+        PYTHON_BIN="/lib/python.exe"
         PYTHON_LIB="/lib/Lib/"
     else
-        PYTHON_BIN="/bin/python3"
+        PYTHON_BIN="/bin/python"
         PYTHON_LIB="/lib/${PYTHON_NAME}/"
     fi
 
