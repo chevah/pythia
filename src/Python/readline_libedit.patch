@@ -1,6 +1,6 @@
-diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_libedit/Modules/readline.c
---- Python-3.9.0.disabled_modules/Modules/readline.c	2020-10-27 11:37:14.764063830 +0200
-+++ Python-3.9.0.readline_libedit/Modules/readline.c	2020-10-27 11:39:50.489959259 +0200
+diff -ur Python-3.8.6.disabled_modules/Modules/readline.c Python-3.8.6.readline_libedit/Modules/readline.c
+--- Python-3.8.6.disabled_modules/Modules/readline.c	2020-10-30 11:46:41.383354897 +0000
++++ Python-3.8.6.readline_libedit/Modules/readline.c	2020-10-30 11:45:38.462738019 +0000
 @@ -26,23 +26,20 @@
  #  define RESTORE_LOCALE(sl)
  #endif
@@ -67,7 +67,7 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
  
  #ifdef HAVE_RL_COMPLETION_DISPLAY_MATCHES_HOOK
  static void
-@@ -668,25 +671,6 @@
+@@ -663,25 +666,6 @@
  \n\
  Returns current completer function.");
  
@@ -93,7 +93,7 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
  /* Exported function to get any element of history */
  
  static PyObject *
-@@ -697,25 +681,24 @@
+@@ -692,25 +676,24 @@
  
      if (!PyArg_ParseTuple(args, "i:get_history_item", &idx))
          return NULL;
@@ -136,7 +136,7 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
      if ((hist_ent = history_get(idx)))
          return decode(hist_ent->line);
      else {
-@@ -733,7 +716,7 @@
+@@ -728,7 +711,7 @@
  static PyObject *
  get_current_history_length(PyObject *self, PyObject *noarg)
  {
@@ -145,7 +145,7 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
  }
  
  PyDoc_STRVAR(doc_get_current_history_length,
-@@ -1083,13 +1066,15 @@
+@@ -1077,13 +1060,15 @@
      /* The name must be defined before initialization */
      rl_readline_name = "python";
  
@@ -164,7 +164,7 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
       * indexing or 1-based indexing.
       */
      add_history("1");
-@@ -1099,6 +1084,7 @@
+@@ -1093,6 +1078,7 @@
          libedit_history_start = 1;
      }
      clear_history();
@@ -172,7 +172,7 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
  
      using_history();
  
-@@ -1127,7 +1113,9 @@
+@@ -1121,7 +1107,9 @@
      mod_state->begidx = PyLong_FromLong(0L);
      mod_state->endidx = PyLong_FromLong(0L);
  
@@ -182,7 +182,7 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
      {
          if (!isatty(STDOUT_FILENO)) {
              /* Issue #19884: stdout is not a terminal. Disable meta modifier
-@@ -1146,11 +1134,20 @@
+@@ -1140,11 +1128,20 @@
       *
       * XXX: A bug in the readline-2.2 library causes a memory leak
       * inside this function.  Nothing we can do about it.
@@ -202,8 +202,8 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
 +#endif
  
      RESTORE_LOCALE(saved_locale)
-     return 0;
-@@ -1276,14 +1273,13 @@
+ }
+@@ -1269,14 +1266,13 @@
      n = strlen(p);
      if (should_auto_add_history && n > 0) {
          const char *line;
@@ -224,7 +224,7 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
              line = hist_ent ? hist_ent->line : "";
          } else
              line = "";
-@@ -1308,10 +1304,15 @@
+@@ -1301,10 +1297,15 @@
  /* Initialize the module */
  
  PyDoc_STRVAR(doc_module,
@@ -241,7 +241,7 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
  
  static struct PyModuleDef readlinemodule = {
      PyModuleDef_HEAD_INIT,
-@@ -1332,13 +1333,14 @@
+@@ -1325,13 +1326,14 @@
      PyObject *m;
      readlinestate *mod_state;
  
@@ -257,27 +257,28 @@ diff -ur Python-3.9.0.disabled_modules/Modules/readline.c Python-3.9.0.readline_
  
      m = PyModule_Create(&readlinemodule);
  
-diff -ur Python-3.9.0.disabled_modules/configure Python-3.9.0.readline_libedit/configure
---- Python-3.9.0.disabled_modules/configure	2020-10-27 11:37:14.584072426 +0200
-+++ Python-3.9.0.readline_libedit/configure	2020-10-27 11:39:50.496625607 +0200
-@@ -846,6 +846,7 @@
+Only in Python-3.8.6.readline_libedit/: chevahbs
+diff -ur Python-3.8.6.disabled_modules/configure Python-3.8.6.readline_libedit/configure
+--- Python-3.8.6.disabled_modules/configure	2020-10-30 11:46:41.411355171 +0000
++++ Python-3.8.6.readline_libedit/configure	2020-10-30 11:51:32.378212607 +0000
+@@ -840,6 +840,7 @@
+ with_libm
  with_libc
  enable_big_digits
- with_platlibdir
 +with_readline
  with_computed_gotos
  with_ensurepip
  with_openssl
-@@ -1572,6 +1573,8 @@
-                           system-dependent)
-   --with-platlibdir=DIRNAME
-                           Python library directory name (default is "lib")
+@@ -1550,6 +1551,8 @@
+   --with(out)-dtrace      disable/enable DTrace support
+   --with-libm=STRING      math library
+   --with-libc=STRING      C library
 +  --with(out)-readline[=editline]
 +                          use Editline for backend or disable readline module
-   --with-computed-gotos   enable computed gotos in evaluation loop (enabled by
+   --with(out)-computed-gotos
+                           Use computed gotos in evaluation loop (enabled by
                            default on supported compilers)
-   --with-ensurepip[=install|upgrade|no]
-@@ -15471,24 +15474,49 @@
+@@ -15301,24 +15304,49 @@
  
  fi
  
@@ -340,7 +341,7 @@ diff -ur Python-3.9.0.disabled_modules/configure Python-3.9.0.readline_libedit/c
  /* end confdefs.h.  */
  
  /* Override any GCC internal prototype to avoid an error.
-@@ -15511,73 +15539,67 @@
+@@ -15341,73 +15369,67 @@
  fi
  rm -f core conftest.err conftest.$ac_objext \
      conftest$ac_exeext conftest.$ac_ext
@@ -453,7 +454,7 @@ diff -ur Python-3.9.0.disabled_modules/configure Python-3.9.0.readline_libedit/c
  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
  
-@@ -15597,31 +15619,34 @@
+@@ -15427,31 +15449,34 @@
  }
  _ACEOF
  if ac_fn_c_try_link "$LINENO"; then :
@@ -498,7 +499,7 @@ diff -ur Python-3.9.0.disabled_modules/configure Python-3.9.0.readline_libedit/c
  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
  
-@@ -15641,31 +15666,34 @@
+@@ -15471,31 +15496,34 @@
  }
  _ACEOF
  if ac_fn_c_try_link "$LINENO"; then :
@@ -543,7 +544,7 @@ diff -ur Python-3.9.0.disabled_modules/configure Python-3.9.0.readline_libedit/c
  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
  
-@@ -15685,31 +15713,33 @@
+@@ -15515,31 +15543,33 @@
  }
  _ACEOF
  if ac_fn_c_try_link "$LINENO"; then :
@@ -587,7 +588,7 @@ diff -ur Python-3.9.0.disabled_modules/configure Python-3.9.0.readline_libedit/c
  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
  
-@@ -15729,59 +15759,49 @@
+@@ -15559,59 +15589,49 @@
  }
  _ACEOF
  if ac_fn_c_try_link "$LINENO"; then :
@@ -669,7 +670,7 @@ diff -ur Python-3.9.0.disabled_modules/configure Python-3.9.0.readline_libedit/c
  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
  /* end confdefs.h.  */
  
-@@ -15801,22 +15821,24 @@
+@@ -15631,22 +15651,24 @@
  }
  _ACEOF
  if ac_fn_c_try_link "$LINENO"; then :
@@ -699,10 +700,10 @@ diff -ur Python-3.9.0.disabled_modules/configure Python-3.9.0.readline_libedit/c
  
  # End of readline checks: restore LIBS
  LIBS=$LIBS_no_readline
-diff -ur Python-3.9.0.disabled_modules/configure.ac Python-3.9.0.readline_libedit/configure.ac
---- Python-3.9.0.disabled_modules/configure.ac	2020-10-27 11:37:14.510742595 +0200
-+++ Python-3.9.0.readline_libedit/configure.ac	2020-10-27 11:39:50.496625607 +0200
-@@ -4856,93 +4856,125 @@
+diff -ur Python-3.8.6.disabled_modules/configure.ac Python-3.8.6.readline_libedit/configure.ac
+--- Python-3.8.6.disabled_modules/configure.ac	2020-10-30 11:46:41.479355837 +0000
++++ Python-3.8.6.readline_libedit/configure.ac	2020-10-30 11:45:38.470738098 +0000
+@@ -4732,93 +4732,125 @@
    [Define this if you have flockfile(), getc_unlocked(), and funlockfile()])
  fi
  
@@ -905,10 +906,11 @@ diff -ur Python-3.9.0.disabled_modules/configure.ac Python-3.9.0.readline_libedi
  # End of readline checks: restore LIBS
  LIBS=$LIBS_no_readline
  
-diff -ur Python-3.9.0.disabled_modules/pyconfig.h.in Python-3.9.0.readline_libedit/pyconfig.h.in
---- Python-3.9.0.disabled_modules/pyconfig.h.in	2020-10-27 11:37:14.790729223 +0200
-+++ Python-3.9.0.readline_libedit/pyconfig.h.in	2020-10-27 11:39:50.496625607 +0200
-@@ -598,7 +598,7 @@
+Only in Python-3.8.6.readline_libedit/: disabled_modules.patch
+diff -ur Python-3.8.6.disabled_modules/pyconfig.h.in Python-3.8.6.readline_libedit/pyconfig.h.in
+--- Python-3.8.6.disabled_modules/pyconfig.h.in	2020-10-30 11:46:41.443355485 +0000
++++ Python-3.8.6.readline_libedit/pyconfig.h.in	2020-10-30 11:45:38.474738137 +0000
+@@ -601,7 +601,7 @@
  /* Define to 1 if you have the <libintl.h> header file. */
  #undef HAVE_LIBINTL_H
  
@@ -917,7 +919,7 @@ diff -ur Python-3.9.0.disabled_modules/pyconfig.h.in Python-3.9.0.readline_libed
  #undef HAVE_LIBREADLINE
  
  /* Define to 1 if you have the `resolv' library (-lresolv). */
-@@ -1536,6 +1536,9 @@
+@@ -1533,6 +1533,9 @@
     Dyld is necessary to support frameworks. */
  #undef WITH_DYLD
  
@@ -927,18 +929,20 @@ diff -ur Python-3.9.0.disabled_modules/pyconfig.h.in Python-3.9.0.readline_libed
  /* Define to 1 if libintl is needed for locale functions. */
  #undef WITH_LIBINTL
  
-diff -ur Python-3.9.0.disabled_modules/setup.py Python-3.9.0.readline_libedit/setup.py
---- Python-3.9.0.disabled_modules/setup.py	2020-10-27 11:37:14.510742595 +0200
-+++ Python-3.9.0.readline_libedit/setup.py	2020-10-27 11:39:50.499958781 +0200
-@@ -53,7 +53,6 @@
+Only in Python-3.8.6.readline_libedit/: readline_libedit.patch
+diff -ur Python-3.8.6.disabled_modules/setup.py Python-3.8.6.readline_libedit/setup.py
+--- Python-3.8.6.disabled_modules/setup.py	2020-10-30 11:48:50.512622149 +0000
++++ Python-3.8.6.readline_libedit/setup.py	2020-10-30 11:45:38.474738137 +0000
+@@ -33,7 +33,7 @@
+     '_lzma',
      '_tkinter',
      'nis',
-     'ossaudiodev',
 -    'readline',
++    'ossaudiodev',
      ]
  
  def get_platform():
-@@ -988,7 +987,6 @@
+@@ -886,7 +886,6 @@
  
      def detect_readline_curses(self):
          # readline
@@ -946,7 +950,7 @@ diff -ur Python-3.9.0.disabled_modules/setup.py Python-3.9.0.readline_libedit/se
          readline_termcap_library = ""
          curses_library = ""
          # Cannot use os.popen here in py3k.
-@@ -996,7 +994,13 @@
+@@ -894,7 +893,13 @@
          if not os.path.exists(self.build_temp):
              os.makedirs(self.build_temp)
          # Determine if readline is already linked against curses or tinfo.
@@ -959,9 +963,9 @@ diff -ur Python-3.9.0.disabled_modules/setup.py Python-3.9.0.readline_libedit/se
 +            do_readline = self.compiler.find_library_file(self.lib_dirs,
 +                readline_lib)
              if CROSS_COMPILING:
-                 ret = run_command("%s -d %s | grep '(NEEDED)' > %s"
+                 ret = os.system("%s -d %s | grep '(NEEDED)' > %s" \
                                  % (sysconfig.get_config_var('READELF'),
-@@ -1019,6 +1023,8 @@
+@@ -917,6 +922,8 @@
                              break
              if os.path.exists(tmpfile):
                  os.unlink(tmpfile)
@@ -970,7 +974,7 @@ diff -ur Python-3.9.0.disabled_modules/setup.py Python-3.9.0.readline_libedit/se
          # Issue 7384: If readline is already linked against curses,
          # use the same library for the readline and curses modules.
          if 'curses' in readline_termcap_library:
-@@ -1058,7 +1064,7 @@
+@@ -956,7 +963,7 @@
              else:
                  readline_extra_link_args = ()
  
