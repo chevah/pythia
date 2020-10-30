@@ -9,7 +9,8 @@ source pythia.conf
 source ./functions.sh
 source ./functions_pythia.sh
 
-# Git revision to inject into Python's sys.version string through chevahbs.
+# Git revision to inject into Python's sys.version string through chevahbs
+# on non-Windows platforms. Also used for compat tests and archived in the dist.
 PYTHON_PACKAGE_VERSION="$(git rev-parse --short=8 HEAD)"
 exit_on_error $? 250
 
@@ -89,7 +90,7 @@ command_build() {
     # Build stuff statically on most platforms, install headers and libs in the
     # following locations, making sure they are picked up when building Python.
     # $CFLAGS/$CPPFLAGS is another way to ensure this, but it's not as portable.
-    execute mkdir -p $INSTALL_DIR/{include,lib}
+    execute mkdir -p "$INSTALL_DIR"
     export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS}"
     export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH}"
 

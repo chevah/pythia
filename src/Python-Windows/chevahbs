@@ -21,19 +21,14 @@ if [ "$ARCH" = "x86" ]; then
     EXT="win32.zip"
 fi
 ARCHIVE="python-${VER}.${EXT}"
-LINK=https://www.python.org/ftp/python/"$VER"/python-"$VER"-embed-"$EXT"
+LINK="https://www.python.org/ftp/python/${VER}/python-${VER}-embed-${EXT}"
 
 # Download without unpacking (uppercase ZIP extension is treated specially).
 download_sources $NAME $VER $LINK $EXT
 
 # Installation consists of unpacking the ZIP'ed embeddable distribution.
-echo "## Extracting ZIP archive to ${INSTALL_DIR}/lib... ##"
-execute unzip -q "$ARCHIVE" -d "${INSTALL_DIR}/lib"
+echo "## Extracting ZIP archive to ${INSTALL_DIR}... ##"
+execute unzip -q "$ARCHIVE" -d "${INSTALL_DIR}"
 
-echo "## Adding Python paths... ##"
-INSTALL_WIN_PATH=$(cd ${INSTALL_DIR}/lib && pwd -W | sed 's|\/|\\|g')
-setx PYTHONPATH "${INSTALL_WIN_PATH};${INSTALL_WIN_PATH}\DLLs;${INSTALL_WIN_PATH}\lib;${INSTALL_WIN_PATH}\lib\plat-win;${INSTALL_WIN_PATH}\lib\site-packages;${INSTALL_WIN_PATH}\lib\Scripts"
-> ${INSTALL_DIR}/lib/python38._pth
-for path in "\\Python38.zip" "\\" "\\DLLs" "\\lib" "\\lib\plat-win" "\\lib\\site-packages" "\\lib\\Scripts"; do
-    echo ${INSTALL_WIN_PATH}$path >> ${INSTALL_DIR}/lib/python38._pth
-done
+echo "## Adding site-packages to python*._pth file... ##"
+echo "lib\\site-packages" >> ${INSTALL_DIR}/python38._pth
