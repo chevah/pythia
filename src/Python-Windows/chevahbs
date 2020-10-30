@@ -23,41 +23,17 @@ fi
 ARCHIVE="python-${VER}.${EXT}"
 LINK=https://www.python.org/ftp/python/"$VER"/python-"$VER"-embed-"$EXT"
 
-WIPER="https://binary.chevah.com/production/sxs-manifest-wiper/manifest-wiper.exe"
-
-# Get files locally without unpacking them (thus the uppercase ZIP extension).
+# Download without unpacking (uppercase ZIP extension is treated specially).
 download_sources $NAME $VER $LINK $EXT
-download_sources manifest wiper $WIPER exe
 
-# Installation consists of creating the distribution from pre-compiled binaries.
-CURRENT_WIN_PATH=$(pwd -W | sed 's|\/|\\|g')
-INSTALL_WIN_PATH=$(cd ${INSTALL_DIR}/lib && pwd -W | sed 's|\/|\\|g')
-
-echo "## Extracting ZIP archive to ${INSTALL_WIN_PATH}... ##"
-execute unzip -q $CURRENT_WIN_PATH\\$ARCHIVE -d $INSTALL_WIN_PATH
+# Installation consists of unpacking the ZIP'ed embeddable distribution.
+echo "## Extracting ZIP archive to ${INSTALL_DIR}/lib... ##"
+execute unzip -q "$ARCHIVE" -d "${INSTALL_DIR}/lib"
 
 echo "## Adding Python paths... ##"
+INSTALL_WIN_PATH=$(cd ${INSTALL_DIR}/lib && pwd -W | sed 's|\/|\\|g')
 setx PYTHONPATH "${INSTALL_WIN_PATH};${INSTALL_WIN_PATH}\DLLs;${INSTALL_WIN_PATH}\lib;${INSTALL_WIN_PATH}\lib\plat-win;${INSTALL_WIN_PATH}\lib\site-packages;${INSTALL_WIN_PATH}\lib\Scripts"
 > ${INSTALL_DIR}/lib/python38._pth
 for path in "\\Python38.zip" "\\" "\\DLLs" "\\lib" "\\lib\plat-win" "\\lib\\site-packages" "\\lib\\Scripts"; do
     echo ${INSTALL_WIN_PATH}$path >> ${INSTALL_DIR}/lib/python38._pth
 done
-
-# Get Windows redists locally, to update them where installed.
-echo "## Collecting Windows redistributables... ##"
-./get_latest_redist.sh
-
-DEST_DIR=$INSTALL_DIR/lib
-ARCH_DIR=$ARCH
-if [ "$ARCH" = "x64" ]; then
-    # VC redist x64 DLLs actually use "amd64" in filenames.
-    ARCH_DIR="amd64"
-fi
-
-echo "## Copying Windows redistributables... ##"
-execute cp $REDISTRIBUTABLE_VERSION/$ARCH_DIR/* $DEST_DIR
-
-echo "## Copying manifests to use our redistributable version... ##"
-wipe_manifest ./manifest-wiper.exe $DEST_DIR/python.exe
-wipe_manifest ./manifest-wiper.exe $DEST_DIR/pythonw.exe
-wipe_manifest ./manifest-wiper.exe $DEST_DIR/python38.dll

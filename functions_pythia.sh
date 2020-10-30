@@ -187,23 +187,3 @@ safe_move() {
     execute cp -r $source $target
     execute rm -rf $source
 }
-
-
-#
-# Wipe the manifest of source.
-#
-wipe_manifest() {
-    local wiper=$1
-    local source=$2
-
-    echo "Extracting manifests for ${source}..."
-    execute $wiper --verbose --extract ${source}.embedded $source
-
-    echo "Patching manifests to use the newer redistributable version..."
-    execute sed -e \
-        "s|version=\"9.0.21022.8\"|version=\"${REDISTRIBUTABLE_VERSION}\"|" \
-        < ${source}.embedded \
-        > ${source}.manifest
-
-    execute rm -f --verbose ${source}.embedded
-}

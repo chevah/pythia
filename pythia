@@ -228,26 +228,6 @@ command_install_python_modules() {
     for library in $PIP_LIBRARIES ; do
         execute "$PYTHON_BIN" -m pip install $PIP_ARGS $library
     done
-
-    if [ "$OS" = "win" ]; then
-        PKG_INSTALL_DIR="$INSTALL_DIR/lib/Lib/site-packages"
-        # Adjust this when the manifest wiper moves around.
-        WIPER="src/Python-Windows/manifest-wiper.exe"
-
-        echo "# Patching pyWin32 manifests for new redistributables... #"
-        wipe_manifest $WIPER $PKG_INSTALL_DIR/win32/pythonservice.exe
-        wipe_manifest $WIPER $PKG_INSTALL_DIR/win32/perfmondata.dll
-        wipe_manifest $WIPER \
-            $PKG_INSTALL_DIR/pywin32_system32/pythoncomloader27.dll
-
-        echo "# Copying Python runtime to pyWin32 site-packages dir... #"
-        execute cp $INSTALL_DIR/lib/*CRT.manifest* $PKG_INSTALL_DIR/win32
-        execute cp $INSTALL_DIR/lib/python*.dll.* $PKG_INSTALL_DIR/win32
-        execute cp $INSTALL_DIR/lib/msvc?90.dll $PKG_INSTALL_DIR/win32
-        execute cp $PKG_INSTALL_DIR/pywin32_system32/*.dll \
-            $PKG_INSTALL_DIR/win32
-    fi
-
 }
 
 
