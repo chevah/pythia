@@ -127,7 +127,19 @@ if [ $? -ne 0 ]; then
     export PATH="$PATH:~/bin/"
 fi
 
-# To avoid having uuid module linked to system libs.
-if [ "$OS" = "ubuntu2004" ]; then
-    sudo apt purge -y uuid-dev
-fi
+# To avoid having Python's uuid module linked to system libs.
+echo "# Checking if it's possible to avoid linking to system uuid libs... #"
+case "$OS" in
+    ubuntu*)
+        execute sudo apt remove -y uuid-dev
+        ;;
+    rhel*|amzn*)
+        execute sudo yum remove -y e2fsprogs-devel libuuid-devel
+        ;;
+    alpine*)
+        execute sudo apk del util-linux-dev
+        ;;
+    *)
+        (>&2 echo "Not guarding against linking to uuid libs on this system!")
+        ;;
+esac

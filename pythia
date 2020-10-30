@@ -90,7 +90,7 @@ command_build() {
     # Build stuff statically on most platforms, install headers and libs in the
     # following locations, making sure they are picked up when building Python.
     # $CFLAGS/$CPPFLAGS is another way to ensure this, but it's not as portable.
-    execute mkdir -p "$INSTALL_DIR"
+    execute mkdir -p "$INSTALL_DIR"/{include,lib}
     export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS}"
     export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH}"
 

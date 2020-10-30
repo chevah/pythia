@@ -15,6 +15,9 @@ NAME=$1
 VER=$2
 INSTALL_DIR=$3
 
+# There's no actual building on Windows, no headers and no built libs.
+rmdir "$INSTALL_DIR"/{include,lib}
+
 # Construct the relevant download link for the Windows version.
 EXT="amd64.zip"
 if [ "$ARCH" = "x86" ]; then
