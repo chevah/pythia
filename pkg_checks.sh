@@ -23,7 +23,7 @@ APK_PKGS="gcc make m4 automake libtool texinfo patch unzip file musl-dev \
     git openssl-dev zlib-dev libffi-dev ncurses-dev"
 # Windows is special, but package management is possible through Chocolatey.
 # Curl, sha512sum, and unzip are bundled with MINGW.
-CHOCO_PKGS="make"
+CHOCO_PKGS=""
 CHOCO_PRESENT="unknown"
 
 # Check for OS packages required for the build.
@@ -90,8 +90,7 @@ if [ -n "$MISSING_PACKAGES" ]; then
     (>&2 echo "Missing required dependencies: $MISSING_PACKAGES.")
     if [ $CHOCO_PRESENT = "yes" ]; then
         echo "## Installing missing Chocolatey packages... ##"
-        # No execute here, dotnet3.5's scripts (dep of vcpython27) fail w/ bash.
-        choco install --yes $MISSING_PACKAGES
+        execute choco install --yes --no-progress $MISSING_PACKAGES
     else
         case "$OS" in
             ubuntu*)
@@ -118,10 +117,15 @@ if [ -n "$PACKAGES" ]; then
     echo "All required dependencies are present: $PACKAGES"
 fi
 
+# Windows "build" is special, following checks are for other platforms.
+if [ "$OS" = "win" ]; then
+    return
+fi
+
 # Many systems don't have this installed and it's not really need it.
 command -v makeinfo >/dev/null
 if [ $? -ne 0 ]; then
-    (>&2 echo "Missing makeinfo, trying to link it to /bin/true in ~/bin...")
+    (>&2 echo "# Missing makeinfo, linking it to /bin/true in ~/bin... #")
     execute mkdir -p ~/bin
     execute ln -s /bin/true ~/bin/makeinfo
     export PATH="$PATH:~/bin/"

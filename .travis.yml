@@ -37,8 +37,7 @@ before_script:
   - ./brink.sh detect_os
 
 script:
-  - ./pythia build && ./pythia test # XXX && ./pythia compat
-
+  - ./pythia build && ./pythia test
 notifications:
   email:
     - dumol@gmx.co.uk
