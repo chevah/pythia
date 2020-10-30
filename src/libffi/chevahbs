@@ -31,7 +31,7 @@ chevahbs_compile() {
 chevahbs_install() {
     execute $MAKE install DESTDIR=$INSTALL_DIR
     # Ugly hack for Python 3's configure issues.
-    execute sudo rm /include
+    execute sudo rm -f /include
     execute sudo ln -s "${INSTALL_DIR}/include" /include
 }
 

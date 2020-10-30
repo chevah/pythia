@@ -126,3 +126,8 @@ if [ $? -ne 0 ]; then
     execute ln -s /bin/true ~/bin/makeinfo
     export PATH="$PATH:~/bin/"
 fi
+
+# To avoid having uuid module linked to system libs.
+if [ "$OS" = "ubuntu2004" ]; then
+    sudo apt purge -y uuid-dev
+fi
