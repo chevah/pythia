@@ -20,7 +20,6 @@ case $OS in
         # gmpy2, setproctitle.
         PIP_LIBRARIES="$PIP_LIBRARIES \
             gmpy2==${GMPY2_VERSION}
-            pywin32==${PYWIN32_VERSION} \
             "
         # GitHub's "runners" don't have wget installed, curl comes with MinGW.
         export GET_CMD="curl --silent --output"

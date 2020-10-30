@@ -544,15 +544,6 @@ def main():
         else:
             print('ctypes %s' % (ctypes.__version__,))
 
-        try:
-            import win32service
-            win32service.EnumWindowStations()
-        except:
-            sys.stderr.write('"pywin32" is missing or broken.\n')
-            # XXX exit_code = 154
-        else:
-            print('"pywin32" module is present.')
-
     else:
         # Linux / Unix stuff.
         try:
