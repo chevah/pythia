@@ -549,7 +549,7 @@ def main():
             win32service.EnumWindowStations()
         except:
             sys.stderr.write('"pywin32" is missing or broken.\n')
-            exit_code = 154
+            # XXX exit_code = 154
         else:
             print('"pywin32" module is present.')
 
