@@ -30,11 +30,9 @@ chevahbs_compile() {
 
 chevahbs_install() {
     execute $MAKE install DESTDIR=$INSTALL_DIR
-    # Ugly hack for Python 3's configure issues on CentOS 5.
-    if [ "$OS" = "lnx" -a -e /boot/vmlinuz-2.6.18-412.el5 ]; then
-        execute sudo rm /include
-        execute sudo ln -s "${INSTALL_DIR}/include" /include
-    fi
+    # Ugly hack for Python 3's configure issues.
+    execute sudo rm /include
+    execute sudo ln -s "${INSTALL_DIR}/include" /include
 }
 
 select_chevahbs_command $@

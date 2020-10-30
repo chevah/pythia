@@ -36,7 +36,6 @@ def get_allowed_deps():
                 'libpthread.so.0',
                 'librt.so.1',
                 'libutil.so.1',
-                'libuuid.so.1',
                 ]
             if 'arm64' in CHEVAH_ARCH:
                 # Additional deps without paths for arm64 generic Linux builds.
@@ -64,7 +63,6 @@ def get_allowed_deps():
                 '/lib64/librt.so.1',
                 '/lib64/libselinux.so.1',
                 '/lib64/libutil.so.1',
-                '/lib64/libuuid.so.1',
                 '/lib64/libz.so.1',
                 ]
             rhel_version = CHEVAH_OS[4:]
@@ -109,7 +107,6 @@ def get_allowed_deps():
                 '/lib64/libssl.so.10',
                 '/lib64/libtinfo.so.6',
                 '/lib64/libutil.so.1',
-                '/lib64/libuuid.so.1',
                 '/lib64/libz.so.1',
                 ]
         elif 'ubuntu' in CHEVAH_OS:
@@ -123,7 +120,6 @@ def get_allowed_deps():
                 '/lib/x86_64-linux-gnu/libpthread.so.0',
                 '/lib/x86_64-linux-gnu/librt.so.1',
                 '/lib/x86_64-linux-gnu/libutil.so.1',
-                '/lib/x86_64-linux-gnu/libuuid.so.1',
                 '/lib/x86_64-linux-gnu/libz.so.1',
                 ]
             if ubuntu_version == "1804":
@@ -148,7 +144,6 @@ def get_allowed_deps():
                 '/lib/libc.musl-x86_64.so.1',
                 '/lib/libcrypto.so.1.1',
                 '/lib/libssl.so.1.1',
-                '/lib/libuuid.so.1',
                 '/lib/libz.so.1',
                 '/usr/lib/libffi.so.7',
                 '/usr/lib/libncursesw.so.6',
