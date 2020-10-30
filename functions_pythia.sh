@@ -207,25 +207,3 @@ wipe_manifest() {
 
     execute rm -f --verbose ${source}.embedded
 }
-
-
-#
-# Safety DB IDs to be ignored when using pyOpenSSL 0.13.1.
-# Reported upstream at https://github.com/pyupio/safety/issues/174.
-#
-add_ignored_safety_ids_for_pyopenssl_false_positives() {
-    # Safety ID 36533 (CVE-2018-1000807):
-    #     "Python Cryptographic Authority pyopenssl version prior to version
-    #     17.5.0 contains a CWE-416: Use After Free vulnerability in X509
-    #     object handling that can result in Use after free can lead to
-    #     possible denial of service or remote code execution.. This attack
-    #     appear to be exploitable via Depends on the calling application and
-    #     if it retains a reference to the memory.. This vulnerability appears
-    #     to have been fixed in 17.5.0."
-    # Safety ID 36534 (CVE-2018-1000808):
-    #     "Python Cryptographic Authority pyopenssl version Before 17.5.0
-    #     contains a CWE - 401 : Failure to Release Memory Before Removing Last
-    #     Reference vulnerability in PKCS #12 Store that can result in Denial
-    #     of service if memory runs low or is exhausted."
-    SAFETY_FALSE_POSITIVES_OPTS="$SAFETY_FALSE_POSITIVES_OPTS -i 36533 -i 36534"
-}

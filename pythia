@@ -254,32 +254,19 @@ command_install_python_modules() {
 help_text_test=\
 "Run own tests for the newly-build Python distribution."
 command_test() {
-    test_file="test_python_binary_dist.py"
+    local test_file="test_python_binary_dist.py"
+
+    echo "#### Executing Chevah tests... ####"
     execute cp src/chevah-python-test/$test_file "$BUILD_DIR"
     execute cp src/chevah-python-test/get_binaries_deps.sh "$BUILD_DIR"
     execute pushd "$BUILD_DIR"
-
-    echo "#### Executing Chevah tests... ####"
     execute $LOCAL_PYTHON_BINARY $test_file
 
     echo "## Testing for outdated packages and security issues... ##"
     execute $PYTHON_BIN -m pip list --outdated --format=columns
     execute $PYTHON_BIN -m pip install $PIP_ARGS safety
-    execute $PYTHON_BIN -m safety check --full-report \
-        $SAFETY_FALSE_POSITIVES_OPTS $SAFETY_IGNORED_OPTS
-    if [ -n "$SAFETY_FALSE_POSITIVES_OPTS" ]; then
-        SAFETY_FALSE_POSITIVES_IDS="\
-            $(echo $SAFETY_FALSE_POSITIVES_OPTS | sed s/\-i\ //g)"
-        echo "Following Safety DB IDs were excepted as false positives:"
-        echo "${SAFETY_FALSE_POSITIVES_IDS}"
-    fi
-    if [ -n "$SAFETY_IGNORED_OPTS" ]; then
-        SAFETY_IGNORED_IDS="\
-            $(echo $SAFETY_IGNORED_OPTS | sed s/\-i\ //g)"
-        (>&2 echo "Following Safety DB IDs were excepted from checks:")
-        (>&2 echo "${SAFETY_IGNORED_IDS}")
-    fi
-    # Avoid having output messages sometimes mangled for some reason.
+    execute $PYTHON_BIN -m safety check --full-report
+    # Avoid having output messages sometimes mangled.
     sleep 1
 
     echo "## Executing tests for included Python modules... ##"
@@ -287,28 +274,6 @@ command_test() {
     # This test requires quite some RAM, so beware of heavy swapping.
     echo "# Testing PyCryptodomex... #"
     execute $LOCAL_PYTHON_BINARY -m Cryptodome.SelfTest
-
-    echo "# Testing scandir... #"
-    # Scandir build consists of getting sources and copying the needed tests.
-    execute popd
-    build scandir $SCANDIR_VERSION
-    execute pushd "$BUILD_DIR"
-
-    # There are a series of issues with the scandir tests in Linux/Unix.
-    # Reported upstream at https://github.com/benhoyt/scandir/issues/78.
-    SCANDIR_TEST_DIR="scandir-${SCANDIR_VERSION}/test"
-    case "$OS" in
-        macos|osx|win)
-            execute $LOCAL_PYTHON_BINARY $SCANDIR_TEST_DIR/run_tests.py
-            ;;
-        *)
-            # Remaining build slaves have the required UTF-8 locale settings
-            # available, but they need to be requested for the tests to pass.
-            export LC_ALL=en_US.UTF-8
-            execute $LOCAL_PYTHON_BINARY $SCANDIR_TEST_DIR/run_tests.py
-            export LC_ALL=C
-            ;;
-    esac
 
     execute popd
 }

@@ -38,9 +38,9 @@ execute unzip -q $CURRENT_WIN_PATH\\$ARCHIVE -d $INSTALL_WIN_PATH
 
 echo "## Adding Python paths... ##"
 setx PYTHONPATH "${INSTALL_WIN_PATH};${INSTALL_WIN_PATH}\DLLs;${INSTALL_WIN_PATH}\lib;${INSTALL_WIN_PATH}\lib\plat-win;${INSTALL_WIN_PATH}\lib\site-packages;${INSTALL_WIN_PATH}\lib\Scripts"
-> ${INSTALL_DIR}/lib/python39._pth
-for path in "\\Python39.zip" "\\" "\\DLLs" "\\lib" "\\lib\plat-win" "\\lib\\site-packages" "\\lib\\Scripts"; do
-    echo ${INSTALL_WIN_PATH}$path >> ${INSTALL_DIR}/lib/python39._pth
+> ${INSTALL_DIR}/lib/python38._pth
+for path in "\\Python38.zip" "\\" "\\DLLs" "\\lib" "\\lib\plat-win" "\\lib\\site-packages" "\\lib\\Scripts"; do
+    echo ${INSTALL_WIN_PATH}$path >> ${INSTALL_DIR}/lib/python38._pth
 done
 
 # Get Windows redists locally, to update them where installed.
@@ -60,4 +60,4 @@ execute cp $REDISTRIBUTABLE_VERSION/$ARCH_DIR/* $DEST_DIR
 echo "## Copying manifests to use our redistributable version... ##"
 wipe_manifest ./manifest-wiper.exe $DEST_DIR/python.exe
 wipe_manifest ./manifest-wiper.exe $DEST_DIR/pythonw.exe
-wipe_manifest ./manifest-wiper.exe $DEST_DIR/python39.dll
+wipe_manifest ./manifest-wiper.exe $DEST_DIR/python38.dll

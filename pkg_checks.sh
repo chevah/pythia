@@ -25,7 +25,7 @@ APK_PKGS="gcc make m4 automake libtool texinfo patch unzip file musl-dev \
     git openssl-dev zlib-dev libffi-dev ncurses-dev util-linux-dev"
 # Windows is special, but package management is possible through Chocolatey.
 # Curl, sha512sum, and unzip are bundled with MINGW.
-CHOCO_PKGS="visualcpp-build-tools make"
+CHOCO_PKGS="make"
 CHOCO_PRESENT="unknown"
 
 # Check for OS packages required for the build.

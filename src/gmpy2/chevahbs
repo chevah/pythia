@@ -2,7 +2,7 @@
 #
 # Chevah Build Script for gmpy2 without MPFR and MPC library support.
 # Beware that beginning with v2.1.0, MPFR and MPC will be required.
-# On Windows, the upstream wheel is used.
+# On Windows, an upstream wheel is used, see ../../os_quirks.sh for more.
 
 # Import shared code.
 # The relative paths work in both src/blabla and build/blabla.

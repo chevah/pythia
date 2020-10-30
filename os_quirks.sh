@@ -16,6 +16,8 @@ case $OS in
         export BUILD_LIBEDIT="no"
         export BUILD_GMP="no"
         export BUILD_SQLITE="no"
+        # Wheels copied from https://www.lfd.uci.edu/~gohlke/pythonlibs/:
+        # gmpy2, setproctitle.
         PIP_LIBRARIES="$PIP_LIBRARIES \
             gmpy2==${GMPY2_VERSION}
             pywin32==${PYWIN32_VERSION} \

@@ -406,28 +406,6 @@ def main():
             cryptography.__version__, openssl_version))
 
     try:
-        from OpenSSL import SSL, crypto, rand, __version__ as pyopenssl_version
-        crypto
-        rand
-    except Exception as error:
-        sys.stderr.write('"OpenSSL" is missing. %s\n' % (error,))
-        exit_code = 135
-    else:
-        print('pyOpenSSL %s - %s' % (
-            pyopenssl_version,
-            SSL.SSLeay_version(SSL.SSLEAY_VERSION).decode(),
-            ))
-
-    try:
-        import Crypto
-        pycrypto_version = Crypto.__version__
-    except:
-        sys.stderr.write('"PyCrypto" is missing.\n')
-        exit_code = 136
-    else:
-        print('PyCrypto %s' % (pycrypto_version))
-
-    try:
         import Cryptodome
         pycryptodome_version = Cryptodome.__version__
     except:
@@ -459,16 +437,6 @@ def main():
     except:
         sys.stderr.write('"multiprocessing" is missing or broken.\n')
         exit_code = 140
-
-    # The pure-Python scandir package is always available.
-    try:
-        import scandir
-        for item in scandir.scandir('/'):
-            if item.is_dir():
-                break
-    except:
-        sys.stderr.write('"scandir" is missing or broken.\n')
-        exit_code = 141
 
     try:
         import gmpy2
