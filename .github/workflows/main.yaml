@@ -21,7 +21,7 @@ env:
 jobs:
   windows:
     # The type of runner that the job will run on
-    runs-on: ${{ matrix.windows-2016 }}
+    runs-on: windows-2016
     timeout-minutes: 20
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -47,7 +47,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: package-windows
-        path: dist/**/*.tar.tz
+        path: dist/**/*.tar.gz
 
     - name: Test Python
       run: bash ./pythia test
@@ -83,7 +83,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: package-${{ matrix.runs-on }}
-        path: dist/**/*.tar.tz
+        path: dist/**/*.tar.gz
 
     - name: Test Python
       run: bash ./pythia test
@@ -123,7 +123,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: package-macos
-        path: dist/**/*.tar.tz
+        path: dist/**/*.tar.gz
 
     - name: Test Python
       run: bash ./pythia test
