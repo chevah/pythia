@@ -27,8 +27,8 @@ Supported platforms
 * all glibc-based Linux distributions (glibc 2.5+ for x64, 2.23+ for arm64)
 * Alpine Linux 3.12
 * macOS 10.13 and newer
-* FreeBSD 11
-* OpenBSD 6.7
+* FreeBSD 12
+* OpenBSD 6.7 and newer
 * Solaris 11.4.
 
 Where not noted, supported architecture is x64 (also known as X86-64 or AMD64).

@@ -70,12 +70,17 @@ case $OS in
         export BUILD_LIBFFI="yes"
         # System includes bzip2 libs by default.
         export BUILD_BZIP2="no"
+        export GET_CMD="curl --silent --output"
+        # Install package "p5-Digest-SHA" to get shasum binary.
+        export SHA_CMD="shasum --algorithm 512 --check --status --warn"
         ;;
     obsd*)
         export CC="clang"
         export CXX="clang++"
         # libffi not available in the base system, only as port/package.
         export BUILD_LIBFFI="yes"
+        export GET_CMD="curl --silent --output"
+        export SHA_CMD="sha512 -q -c"
         ;;
     sol*)
         # By default, Sun's Studio compiler is used.
@@ -98,6 +103,8 @@ case $OS in
         # Solaris 11 is much more modern, but still has some quirks.
         # Multiple system libffi libs present, this is a problem in 11.4.
         export BUILD_LIBFFI="yes"
+        # Life's too short for all the Solaris quirks.
+        export TAR_CMD="gtar xfz"
         ;;
 esac
 

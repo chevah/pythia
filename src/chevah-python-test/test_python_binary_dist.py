@@ -186,25 +186,26 @@ def get_allowed_deps():
             '/usr/lib/libz.1.dylib',
             ]
     elif platform_system == 'freebsd':
-        # Deps for FreeBSD 11, with full path.
+        # Deps for FreeBSD 12, with full path.
         allowed_deps = [
             '/lib/libc.so.7',
             '/lib/libcrypt.so.5',
-            '/lib/libcrypto.so.8',
+            '/lib/libcrypto.so.111',
             '/lib/libdevstat.so.7',
             '/lib/libelf.so.2',
             '/lib/libkvm.so.7',
             '/lib/libm.so.5',
             '/lib/libncurses.so.8',
+            '/lib/libncursesw.so.8',
             '/lib/libthr.so.3',
             '/lib/libutil.so.9',
             '/lib/libz.so.6',
             '/usr/lib/libbz2.so.4',
             '/usr/lib/libdl.so.1',
-            '/usr/lib/libssl.so.8',
+            '/usr/lib/libssl.so.111',
          ]
     elif platform_system == 'openbsd':
-        # Deps for OpenBSD 5.8+, sans versions, these guys love to break ABIs.
+        # Deps for OpenBSD 6.7+, sans versions, these guys love to break ABIs.
         allowed_deps = [
             '/usr/lib/libc.so',
             '/usr/lib/libcrypto.so',

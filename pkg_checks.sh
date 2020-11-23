@@ -69,6 +69,12 @@ case "$OS" in
         export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
         PACKAGES="$CC make m4 git patch libtool perl curl shasum tar unzip"
         ;;
+    fbsd*)
+        PACKAGES="$CC make m4 git patch libtool curl shasum tar unzip"
+        ;;
+    obsd*)
+        PACKAGES="$CC make m4 git patch libtool curl sha512 tar unzip"
+        ;;
     lnx)
         PACKAGES="$PACKAGES perl"
         ;;
