@@ -38,6 +38,7 @@ before_script:
 
 script:
   - ./pythia build && ./pythia test
+
 notifications:
   email:
     - dumol@gmx.co.uk
