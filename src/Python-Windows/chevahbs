@@ -13,10 +13,8 @@ source ../../functions_pythia.sh
 # but the installation path is also needed, because this script is special.
 NAME=$1
 VER=$2
-INSTALL_DIR=$3
-
-# There's no actual building on Windows, no headers and no built libs.
-rmdir "$INSTALL_DIR"/{include,lib}
+# There's no intrinsic need for this, but Chevah's server likes it this way.
+INSTALL_DIR=$3/lib
 
 # Construct the relevant download link for the Windows version.
 EXT="amd64.zip"
