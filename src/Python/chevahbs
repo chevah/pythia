@@ -73,7 +73,7 @@ chevahbs_configure() {
 chevahbs_compile() {
     execute $MAKE
     # Don't use execute below, some tests might fail innocuously.
-    # XXX $MAKE test
+    $MAKE test
 }
 
 

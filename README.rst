@@ -16,6 +16,8 @@ Testing steps:
 
 Use ``./pythia help`` to discover all available commands.
 
+Note that compat tests are currently only working with the ``python2.7`` branch.
+
 
 Supported platforms
 -------------------
@@ -26,14 +28,18 @@ Supported platforms
 * Ubuntu Server 18.04 and 20.04
 * all glibc-based Linux distributions (glibc 2.5+ for x64, 2.23+ for arm64)
 * Alpine Linux 3.12
-* macOS 10.13 and newer
+* macOS 10.13 and newer.
+
+Platforms that should work, but are not regularly tested:
+
 * FreeBSD 12
 * OpenBSD 6.7 and newer
 * Solaris 11.4.
 
 Where not noted, supported architecture is x64 (also known as X86-64 or AMD64).
 
-Note that https://github.com/chevah/python-package/ supported more platforms.
+Note that https://github.com/chevah/python-package/ supported more platforms,
+but only for Python 2.7.
 
 
 Patching upstream code
@@ -59,8 +65,14 @@ the new patch on platforms that require it before building from sources.
 When applying a patch on top of another patch, make sure you get the order
 right, then save the diff to the sources patched with the preceding patch.
 
+.. image:: https://img.shields.io/badge/License-MIT-yellow.svg
+  :target: https://opensource.org/licenses/MIT
+
 .. image:: https://github.com/chevah/pythia/workflows/GitHub-CI/badge.svg
   :target: https://github.com/chevah/pythia/actions
 
 .. image:: https://travis-ci.com/chevah/pythia.svg?branch=main
   :target: https://travis-ci.com/github/chevah/pythia
+
+.. image:: https://img.shields.io/github/issues/chevah/pythia.svg
+  :target: https://github.com/chevah/pythia/issues

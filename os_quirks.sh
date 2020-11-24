@@ -7,17 +7,13 @@ case $OS in
         # On Windows, python executable is installed at a different path.
         LOCAL_PYTHON_BINARY="./${LOCAL_PYTHON_BINARY_DIST}/lib/python.exe"
         PYTHON_BIN="${INSTALL_DIR}/lib/python.exe"
-        # On Windows Server 2016, redistributables are older.
-        if [ "$ARCH" = "x86" ]; then
-            export REDISTRIBUTABLE_VERSION="9.0.30729.9247"
-        fi
         # On Windows, there are no actual dependency builds.
         export BUILD_BZIP2="no"
         export BUILD_LIBEDIT="no"
         export BUILD_GMP="no"
         export BUILD_SQLITE="no"
-        # Wheels copied from https://www.lfd.uci.edu/~gohlke/pythonlibs/:
-        # gmpy2, setproctitle.
+        # Not all wheels are sync'ed from pypi.org. Some wheels are copied from
+        # https://www.lfd.uci.edu/~gohlke/pythonlibs/: gmpy2, setproctitle.
         PIP_LIBRARIES="$PIP_LIBRARIES \
             gmpy2==${GMPY2_VERSION}
             "

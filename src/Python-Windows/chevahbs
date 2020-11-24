@@ -24,7 +24,7 @@ fi
 ARCHIVE="python-${VER}.${EXT}"
 LINK="https://www.python.org/ftp/python/${VER}/python-${VER}-embed-${EXT}"
 
-# Download without unpacking (uppercase ZIP extension is treated specially).
+# Download without unpacking (amd64.zip/win32.zip EXTs are treated specially).
 download_sources $NAME $VER $LINK $EXT
 
 # Installation consists of unpacking the ZIP'ed embeddable distribution.

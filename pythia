@@ -15,7 +15,7 @@ PYTHON_PACKAGE_VERSION="$(git rev-parse --short=8 HEAD)"
 exit_on_error $? 250
 
 # Export the variables needed by the chevahbs scripts and the test phase.
-export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION REDISTRIBUTABLE_VERSION
+export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_GMP BUILD_LIBFFI BUILD_OPENSSL
 
 # Import build env vars set by "./brink.sh detect_os" and export needed ones.
@@ -31,8 +31,7 @@ fi
 # as "x86" instead of "x64" for a certain platform.
 # $ARCH is also used when statically building libffi/GMP and for testing.
 # $OS is used when patching/configuring/building/testing.
-export ARCH
-export OS
+export ARCH OS
 
 # Sub-directories for building from sources and the final distributable.
 BUILD_DIR="build"
@@ -180,6 +179,7 @@ build_python() {
         execute popd
     else
         build Python $PYTHON_BUILD_VERSION
+        # The 'python' symlink gets packed as the 'python' binary in final dist.
         echo "# Symlinking $PYTHON_VERSION binary as python... #"
         execute pushd "$INSTALL_DIR"/bin
         execute ln -s $PYTHON_VERSION python
