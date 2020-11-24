@@ -79,7 +79,7 @@ command_clean() {
 help_text_build="Build Python binaries for current platform."
 command_build() {
     # Check for packages required to build on current OS.
-    echo "::group::Package checks"
+    echo "::group::Package/command checks"
     echo "#### Checking for required packages... ####"
     source pkg_checks.sh
     echo "::endgroup::"
@@ -148,10 +148,7 @@ build_dep() {
 
     if [ $dep_boolean = "yes" ]; then
         # This is where building happens.
-        echo "::group::Build $dep_name $dep_version"
-        echo "#### Building $dep_name version ${dep_version}... ####"
         build $dep_name $dep_version
-        echo "::endgroup::"
         # If there's something to be done post-build, here's the place.
         if [ $dep_name = "openssl" ]; then
             if [ "$OS" = "lnx" ]; then

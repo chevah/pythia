@@ -52,7 +52,7 @@ jobs:
 
     - uses: actions/upload-artifact@v2
       with:
-        name: package-${{ matrix.runs-on }}
+        name: package-win-"$(grep ^ARCH= BUILD_ENV_VARS | cut -d '=' -f 2)"
         path: dist/**/*.tar.gz
 
     - name: Test Python

@@ -82,17 +82,22 @@ download_sources(){
 # Internal function for calling build script on each source.
 #
 chevahbs_build() {
+    echo "::group::Build $@"
+    echo "#### Building $1 version $2... ####"
+
     if [ -n "$(type -t chevahbs_patch)" ]; then
         # Looks like the chevahbs script has patches to apply.
-        echo "## Patching... ##"
+        echo "## Patching $@... ##"
         chevahbs_patch $@
     fi
-    echo "## Configuring... ##"
+    echo "## Configuring $@... ##"
     chevahbs_configure $@
-    echo "## Compiling... ##"
+    echo "## Compiling $@... ##"
     chevahbs_compile $@
-    echo "## Installing... ##"
+    echo "## Installing $@... ##"
     chevahbs_install $@
+
+    echo "::endgroup::"
 }
 
 
