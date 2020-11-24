@@ -79,8 +79,10 @@ command_clean() {
 help_text_build="Build Python binaries for current platform."
 command_build() {
     # Check for packages required to build on current OS.
+    echo "::group::Package checks"
     echo "#### Checking for required packages... ####"
     source pkg_checks.sh
+    echo "::endgroup::"
 
     # Clean build dir to avoid contamination from previous builds,
     # but without removing the download archives, to speed up the build.
@@ -146,7 +148,7 @@ build_dep() {
 
     if [ $dep_boolean = "yes" ]; then
         # This is where building happens.
-        echo "::group::Build ${dep_name}."
+        echo "::group::Build $dep_name $dep_version"
         echo "#### Building $dep_name version ${dep_version}... ####"
         build $dep_name $dep_version
         echo "::endgroup::"
@@ -174,7 +176,7 @@ build_dep() {
 
 # This builds Python itself.
 build_python() {
-    echo "::group::Build Python."
+    echo "::group::Build Python $PYTHON_BUILD_VERSION"
     if [ $OS = "win" ]; then
         # Python "build" is a very special case under Windows.
         execute pushd src/Python-Windows
@@ -203,7 +205,7 @@ download_get_pip() {
 
 # Compile and install all Python extra libraries.
 command_install_python_modules() {
-    echo "::group::Install Python modules with pip."
+    echo "::group::Install Python modules with pip $PIP_VERSION"
     echo "#### Installing Python modules... ####"
 
     # Install latest PIP, then instruct it to get exact versions of setuptools.
@@ -244,7 +246,7 @@ help_text_test=\
 command_test() {
     local test_file="test_python_binary_dist.py"
 
-    echo "::group::Chevah tests."
+    echo "::group::Chevah tests"
     echo "#### Executing Chevah tests... ####"
     execute cp src/chevah-python-test/$test_file "$BUILD_DIR"
     execute cp src/chevah-python-test/get_binaries_deps.sh "$BUILD_DIR"
@@ -252,7 +254,7 @@ command_test() {
     execute $LOCAL_PYTHON_BINARY $test_file
     echo "::endgroup::"
 
-    echo "::group::Security tests."
+    echo "::group::Security tests"
     echo "## Testing for outdated packages and security issues... ##"
     execute $PYTHON_BIN -m pip list --outdated --format=columns
     execute $PYTHON_BIN -m pip install $PIP_ARGS safety
@@ -262,7 +264,7 @@ command_test() {
     # Avoid having output messages sometimes mangled.
     sleep 1
 
-    echo "::group::Python modules tests."
+    echo "::group::Python modules tests"
     echo "## Executing tests for included Python modules... ##"
     # This test requires quite some RAM, so beware of heavy swapping.
     echo "# Testing PyCryptodomex... #"
@@ -279,7 +281,7 @@ command_compat() {
     execute pushd "$BUILD_DIR"
 
     # This is quite hackish, as compat is arm-twisted to use the local version.
-    echo "::group::Compat tests."
+    echo "::group::Compat tests"
     echo '#### Running chevah/compat tests... ####'
     echo '## Removing any pre-existing compat code... ####'
     execute rm -rf compat/

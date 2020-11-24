@@ -442,7 +442,7 @@ copy_python() {
     if [ ! -s ${PYTHON_BIN} ]; then
         # We don't have a Python binary, so we install it since everything
         # else depends on it.
-        echo "::group::Get python."
+        echo "::group::Get Python"
         echo "Bootstrapping ${LOCAL_PYTHON_BINARY_DIST} environment" \
             "to ${BUILD_FOLDER}..."
         mkdir -p ${BUILD_FOLDER}
