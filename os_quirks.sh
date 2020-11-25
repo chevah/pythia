@@ -7,16 +7,12 @@ case $OS in
         # On Windows, python executable is installed at a different path.
         LOCAL_PYTHON_BINARY="./${LOCAL_PYTHON_BINARY_DIST}/lib/python.exe"
         PYTHON_BIN="${INSTALL_DIR}/lib/python.exe"
-        # On Windows, there are no actual dependency builds.
+        # There are no actual dependency builds, only binary wheels are used.
+        # But not all are from pypi.org. Wheels copied from other places:
+        #   * setproctitle from https://www.lfd.uci.edu/~gohlke/pythonlibs/
         export BUILD_BZIP2="no"
         export BUILD_LIBEDIT="no"
-        export BUILD_GMP="no"
         export BUILD_SQLITE="no"
-        # Not all wheels are sync'ed from pypi.org. Some wheels are copied from
-        # https://www.lfd.uci.edu/~gohlke/pythonlibs/: gmpy2, setproctitle.
-        PIP_LIBRARIES="$PIP_LIBRARIES \
-            gmpy2==${GMPY2_VERSION}
-            "
         # GitHub's "runners" don't have wget installed, curl comes with MinGW.
         export GET_CMD="curl --silent --output"
         # On Windows, only one of the installers is downloaded.
@@ -88,7 +84,7 @@ case $OS in
         export CFLAGS="$CFLAGS -DHAVE_DIRFD"
         # Arch-specific bits and paths.
         if [ "${ARCH%64}" = "$ARCH" ]; then
-            # GMP needs to be informed of a 32bit build.
+            # Some libs (e.g. GMP) need to be informed of a 32bit build.
             export ABI="32"
         else
             export CFLAGS="$CFLAGS -m64"
@@ -99,7 +95,7 @@ case $OS in
         # Solaris 11 is much more modern, but still has some quirks.
         # Multiple system libffi libs present, this is a problem in 11.4.
         export BUILD_LIBFFI="yes"
-        # Life's too short for all the Solaris quirks.
+        # Native tar is not that compatible, but the GNU tar should be present.
         export TAR_CMD="gtar xfz"
         ;;
 esac

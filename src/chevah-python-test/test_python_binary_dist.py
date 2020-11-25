@@ -435,20 +435,6 @@ def main():
         exit_code = 140
 
     try:
-        import gmpy2
-        print('gmpy2 %s with:' % (gmpy2.version()))
-        print('\tMP (Multiple-precision library) - %s' % (gmpy2.mp_version()))
-        print('\tMPFR (Floating-point library) - %s' % (gmpy2.mpfr_version()))
-        print('\tMPC (Complex library) - %s' % (gmpy2.mpc_version()))
-        x=gmpy2.mpz(123456789123456789)
-        if not x==gmpy2.from_binary(gmpy2.to_binary(x)):
-            sys.stderr.write('"gmpy2" is present, but broken!\n')
-            exit_code = 142
-    except:
-        sys.stderr.write('"gmpy2" is missing.\n')
-        exit_code = 143
-
-    try:
         import Cython
     except:
         sys.stderr.write('"Cython" is missing.\n')
