@@ -173,7 +173,6 @@ build_dep() {
 
 # This builds Python itself.
 build_python() {
-    echo "::group::Build Python $PYTHON_BUILD_VERSION"
     if [ $OS = "win" ]; then
         # Python "build" is a very special case under Windows.
         execute pushd src/Python-Windows
@@ -187,7 +186,6 @@ build_python() {
         execute ln -s $PYTHON_VERSION python
         execute popd
     fi
-    echo "::endgroup::"
 }
 
 # This gets get-pip.py
