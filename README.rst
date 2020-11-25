@@ -16,6 +16,8 @@ Testing steps:
 
 Use ``./pythia help`` to discover all available commands.
 
+Note that compat tests are currently only working with the ``python2.7`` branch.
+
 
 Supported platforms
 -------------------
@@ -26,14 +28,18 @@ Supported platforms
 * Ubuntu Server 18.04 and 20.04
 * all glibc-based Linux distributions (glibc 2.5+ for x64, 2.23+ for arm64)
 * Alpine Linux 3.12
-* macOS 10.13 and newer
-* FreeBSD 11
-* OpenBSD 6.7
+* macOS 10.13 and newer.
+
+Platforms that should work, but are not regularly tested:
+
+* FreeBSD 12
+* OpenBSD 6.7 and newer
 * Solaris 11.4.
 
 Where not noted, supported architecture is x64 (also known as X86-64 or AMD64).
 
-Note that https://github.com/chevah/python-package/ supported more platforms.
+Note that https://github.com/chevah/python-package/ supported more platforms,
+but only for Python 2.7.
 
 
 Patching upstream code
@@ -45,20 +51,28 @@ These patches are applied at build time when added as:
 
 * ``src/$PROJECT/*.patch``
 
-An example for creating a patch for src/python/Python/Lib/site.py::
+An example for creating a patch for pristine Python 3.9.0 sources::
 
-    cd build/Python-2.7.18/
-    cp Lib/site.py Lib/site.py.orig
-    # Modify Lib/site.py as needed, then create the diff:
-    diff -ur Lib/site.py.orig Lib/site.py
+    # Make a copy of the sources to be patched:
+    cp -r Python-3.9.0 Python-3.9.0.disabled_modules
+    # Modify the sources as needed, then create the diff:
+    diff -ur Python-3.9.0/ Python-3.9.0.disabled_modules/
     # Save the diff into a file such as:
-    src/Python/site_fix.patch
+    src/Python/disabled_modules.patch
 
 Finally, edit the corresponding ``chevahbs`` script in ``/src`` to apply
 the new patch on platforms that require it before building from sources.
+When applying a patch on top of another patch, make sure you get the order
+right, then save the diff to the sources patched with the preceding patch.
+
+.. image:: https://img.shields.io/badge/License-MIT-yellow.svg
+  :target: https://opensource.org/licenses/MIT
 
 .. image:: https://github.com/chevah/pythia/workflows/GitHub-CI/badge.svg
   :target: https://github.com/chevah/pythia/actions
 
 .. image:: https://travis-ci.com/chevah/pythia.svg?branch=main
   :target: https://travis-ci.com/github/chevah/pythia
+
+.. image:: https://img.shields.io/github/issues/chevah/pythia.svg
+  :target: https://github.com/chevah/pythia/issues

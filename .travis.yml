@@ -11,12 +11,12 @@ git:
 
 jobs:
   include:
-      # Ubuntu Server 16.04 on ARM64
+    # Ubuntu Server 16.04 on ARM64
     - os: linux
       dist: xenial
       arch: arm64
 
-      # macOS 10.13
+    # macOS 10.13
     - os: osx
       osx_image: xcode10.1
 
@@ -37,7 +37,7 @@ before_script:
   - ./brink.sh detect_os
 
 script:
-  - ./pythia build && ./pythia test && ./pythia compat
+  - ./pythia build && ./pythia test
 
 notifications:
   email:

@@ -21,11 +21,14 @@ env:
 jobs:
   windows:
     # The type of runner that the job will run on
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.runs-on }}
     strategy:
+      # Workflow won't be cancelled at the first failed job.
+      fail-fast: false
       matrix:
-        operating-system: [ windows-2019, windows-2016 ]
-    timeout-minutes: 40
+        runs-on: [ windows-2019, windows-2016 ]
+
+    timeout-minutes: 20
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Make sure there are no concurrent jobs
@@ -47,20 +50,23 @@ jobs:
     - name: Build Python
       run: bash ./pythia build
 
+    - uses: actions/upload-artifact@v2
+      with:
+        name: pythia-${{ matrix.runs-on }}
+        path: dist/**/*.tar.gz
+
     - name: Test Python
       run: bash ./pythia test
-
-    - name: Test Compat
-      run: bash ./pythia compat
 
 
   linux:
     # 'Fail on skip-ci' action doesn't work for this runner (on 2020.10.16).
-    runs-on: ${{ matrix.operating-system }}
+    runs-on: ${{ matrix.runs-on }}
     strategy:
+      fail-fast: false
       matrix:
-        operating-system: [ ubuntu-20.04, ubuntu-18.04, ubuntu-16.04 ]
-    timeout-minutes: 20
+        runs-on: [ ubuntu-20.04, ubuntu-18.04 ]
+    timeout-minutes: 40
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
@@ -75,16 +81,18 @@ jobs:
       run: sudo apt-get install libncurses5-dev
 
     - name: Detect current OS
-      run: ./brink.sh detect_os
+      run: bash ./brink.sh detect_os
 
     - name: Build Python
-      run: ./pythia build
+      run: bash ./pythia build
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: pythia-${{ matrix.runs-on }}
+        path: dist/**/*.tar.gz
 
     - name: Test Python
-      run: ./pythia test
-
-    - name: Test Compat
-      run: ./pythia compat
+      run: bash ./pythia test
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -116,13 +124,15 @@ jobs:
         sudo rm -f /usr/local/bin/{wget,curl,git}
 
     - name: Build Python
-      run: ./pythia build
+      run: bash ./pythia build
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: pythia-macos
+        path: dist/**/*.tar.gz
 
     - name: Test Python
-      run: ./pythia test
-
-    - name: Test Compat
-      run: ./pythia compat
+      run: bash ./pythia test
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew

@@ -86,9 +86,9 @@ ARCH='not-detected-yet'
 PYTHON_CONFIGURATION='NOT-YET-DEFINED'
 PYTHON_VERSION='not.defined.yet'
 PYTHON_PLATFORM='unknown-os-and-arch'
-PYTHON_NAME='python2.7'
+PYTHON_NAME='python3.8'
 BINARY_DIST_URI='https://binary.chevah.com/production'
-PIP_INDEX='http://pypi.chevah.com'
+PIP_INDEX='https://pypi.chevah.com'
 BASE_REQUIREMENTS=''
 
 #
@@ -139,7 +139,7 @@ clean_build() {
     echo "Cleaning pyc files ..."
 
     # Faster than '-exec rm {} \;' and supported in most OS'es,
-    # details at http://www.in-ulm.de/~mascheck/various/find/#xargs
+    # details at https://www.in-ulm.de/~mascheck/various/find/#xargs
     find ./ -name '*.pyc' -exec rm {} +
 
     # In some case pip hangs with a build folder in temp and
@@ -172,7 +172,7 @@ purge_cache() {
 delete_folder() {
     local target="$1"
     # On Windows, we use internal command prompt for maximum speed.
-    # See: http://stackoverflow.com/a/6208144/539264
+    # See: https://stackoverflow.com/a/6208144/539264
     if [ $OS = "win" -a -d $target ]; then
         cmd //c "del /f/s/q $target > nul"
         cmd //c "rmdir /s/q $target"
@@ -299,6 +299,8 @@ install_base_deps() {
 # * $1 - package_name and optional version.
 #
 pip_install() {
+    echo "::group::pip install $1"
+
     set +e
     # There is a bug in pip/setuptools when using custom build folders.
     # See https://github.com/pypa/pip/issues/3564
@@ -312,6 +314,9 @@ pip_install() {
             $1
 
     exit_code=$?
+
+    echo "::endgroup::"
+
     set -e
     if [ $exit_code -ne 0 ]; then
         (>&2 echo "Failed to install $1.")
@@ -437,6 +442,7 @@ copy_python() {
     if [ ! -s ${PYTHON_BIN} ]; then
         # We don't have a Python binary, so we install it since everything
         # else depends on it.
+        echo "::group::Get Python"
         echo "Bootstrapping ${LOCAL_PYTHON_BINARY_DIST} environment" \
             "to ${BUILD_FOLDER}..."
         mkdir -p ${BUILD_FOLDER}
@@ -467,6 +473,8 @@ copy_python() {
 
         echo "Copying Python distribution files... "
         cp -R ${python_distributable}/* ${BUILD_FOLDER}
+
+        echo "::endgroup::"
 
         install_base_deps
         WAS_PYTHON_JUST_INSTALLED=1
@@ -761,17 +769,14 @@ detect_os() {
         Darwin)
             ARCH=$(uname -m)
             os_version_raw=$(sw_vers -productVersion)
-            # Tested on 10.13, but this works on 10.12 too. Older versions need
-            # "-Wl,-no_weak_imports" in LDFLAGS to avoid runtime issues. More
-            # details at https://github.com/Homebrew/homebrew-core/issues/3727.
-            check_os_version "macOS" 10.12 "$os_version_raw" os_version_chevah
+            check_os_version "macOS" 10.13 "$os_version_raw" os_version_chevah
             # Build a generic package to cover all supported versions.
             OS="macos"
             ;;
         FreeBSD)
             ARCH=$(uname -m)
             os_version_raw=$(uname -r | cut -d'.' -f1)
-            check_os_version "FreeBSD" 11 "$os_version_raw" os_version_chevah
+            check_os_version "FreeBSD" 12 "$os_version_raw" os_version_chevah
             OS="fbsd${os_version_chevah}"
             ;;
         OpenBSD)
@@ -782,14 +787,9 @@ detect_os() {
             ;;
         SunOS)
             ARCH=$(isainfo -n)
-            os_version_raw=$(uname -r | cut -d'.' -f2)
-            check_os_version "Solaris" 11 "$os_version_raw" os_version_chevah
+            os_version_raw=$(uname -v)
+            check_os_version "Solaris" 11.4 "$os_version_raw" os_version_chevah
             OS="sol${os_version_chevah}"
-            check_os_version Solaris 11 "$os_version_raw" os_version_chevah
-            if [ "$minor_version" -lt 4 ]; then
-                (>&2 echo "Unsupported Solaris 11 version, 11.4 needed.")
-                exit 15
-            fi
             ;;
         *)
             (>&2 echo "Unsupported operating system: ${OS}.")

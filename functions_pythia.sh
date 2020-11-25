@@ -66,7 +66,7 @@ download_sources(){
             echo "## Unpacking archive ${archive_filename}... ##"
             execute $ZIP_CMD "$archive_filename" -d ../../build/
             ;;
-        *msi|exe)
+        exe|amd64*|win32*)
             # No need to use ../../build/"$project_name"-"$project_ver"/ here.
             echo "    Nothing to unpack for ${archive_filename}."
             ;;
@@ -103,6 +103,8 @@ build() {
     project_name="$1"
     # This has the form: "3.2.1", "1.2.11". etc.
     project_ver="$2"
+    echo "::group::Build $@"
+    echo "#### Building $1 version $2... ####"
 
     # This is where sources are unpacked, patched, and built.
     version_dir="$1"-"$2"
@@ -140,6 +142,8 @@ build() {
             execute cp Makefile "$lib_config_dir"/"$makefile_name"
         fi
     execute popd
+
+    echo "::endgroup::"
 }
 
 
@@ -186,46 +190,4 @@ safe_move() {
     target=$2
     execute cp -r $source $target
     execute rm -rf $source
-}
-
-
-#
-# Wipe the manifest of source.
-#
-wipe_manifest() {
-    local wiper=$1
-    local source=$2
-
-    echo "Extracting manifests for ${source}..."
-    execute $wiper --verbose --extract ${source}.embedded $source
-
-    echo "Patching manifests to use the newer redistributable version..."
-    execute sed -e \
-        "s|version=\"9.0.21022.8\"|version=\"${REDISTRIBUTABLE_VERSION}\"|" \
-        < ${source}.embedded \
-        > ${source}.manifest
-
-    execute rm -f --verbose ${source}.embedded
-}
-
-
-#
-# Safety DB IDs to be ignored when using pyOpenSSL 0.13.1.
-# Reported upstream at https://github.com/pyupio/safety/issues/174.
-#
-add_ignored_safety_ids_for_pyopenssl_false_positives() {
-    # Safety ID 36533 (CVE-2018-1000807):
-    #     "Python Cryptographic Authority pyopenssl version prior to version
-    #     17.5.0 contains a CWE-416: Use After Free vulnerability in X509
-    #     object handling that can result in Use after free can lead to
-    #     possible denial of service or remote code execution.. This attack
-    #     appear to be exploitable via Depends on the calling application and
-    #     if it retains a reference to the memory.. This vulnerability appears
-    #     to have been fixed in 17.5.0."
-    # Safety ID 36534 (CVE-2018-1000808):
-    #     "Python Cryptographic Authority pyopenssl version Before 17.5.0
-    #     contains a CWE - 401 : Failure to Release Memory Before Removing Last
-    #     Reference vulnerability in PKCS #12 Store that can result in Denial
-    #     of service if memory runs low or is exhausted."
-    SAFETY_FALSE_POSITIVES_OPTS="$SAFETY_FALSE_POSITIVES_OPTS -i 36533 -i 36534"
 }

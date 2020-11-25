@@ -9,58 +9,27 @@
 source ../../functions.sh
 source ../../functions_pythia.sh
 
-# The usual two arguments, e.g. "Python" and "2.7.18",
+# The usual two arguments, e.g. "Python" and "3.9.0",
 # but the installation path is also needed, because this script is special.
 NAME=$1
 VER=$2
-INSTALL_DIR=$3
+# There's no intrinsic need for this, but Chevah's server likes it this way.
+INSTALL_DIR=$3/lib
 
-# Construct the relevant download link for the MSI installer.
-EXT="msi"
-if [ "$ARCH" = "x64" ]; then
-    # Upstream installer filename ends in ".msi" or ".amd64.msi".
-    EXT="amd64.msi"
+# Construct the relevant download link for the Windows version.
+EXT="amd64.zip"
+if [ "$ARCH" = "x86" ]; then
+    EXT="win32.zip"
 fi
-INSTALLER="python-${VER}.${EXT}"
-LINK=https://www.python.org/ftp/python/"$VER"/"$INSTALLER"
+ARCHIVE="python-${VER}.${EXT}"
+LINK="https://www.python.org/ftp/python/${VER}/python-${VER}-embed-${EXT}"
 
-WIPER="https://binary.chevah.com/production/sxs-manifest-wiper/manifest-wiper.exe"
-
-# Get required files locally, no need to unpack in build/ for msi/exe files.
+# Download without unpacking (amd64.zip/win32.zip EXTs are treated specially).
 download_sources $NAME $VER $LINK $EXT
-download_sources manifest wiper $WIPER exe
 
-# Get Windows redists locally, to pick them up when installing.
-echo "### Collecting Windows redistributables... ###"
-./get_latest_redist.sh
+# Installation consists of unpacking the ZIP'ed embeddable distribution.
+echo "## Extracting ZIP archive to ${INSTALL_DIR}... ##"
+execute unzip -q "$ARCHIVE" -d "${INSTALL_DIR}"
 
-DEST_DIR=$INSTALL_DIR/lib
-ARCH_DIR=$ARCH
-if [ "$ARCH" = "x64" ]; then
-    # VC redist x64 DLLs actually use "amd64" in filenames.
-    ARCH_DIR="amd64"
-fi
-
-# Installation consists of creating the distribution from pre-compiled binaries.
-CURRENT_WIN_PATH=$(pwd -W | sed 's|\/|\\\\|g')
-INSTALL_WIN_PATH=$(cd $INSTALL_DIR && pwd -W | sed 's|\/|\\\\|g')
-
-echo "### Extracting MSI installer to ${INSTALL_WIN_PATH}... ###"
-execute msiexec //a $CURRENT_WIN_PATH\\$INSTALLER \
-    //qn TARGETDIR=$INSTALL_WIN_PATH\\lib
-
-echo "### Copying Windows redistributables... ###"
-execute cp $REDISTRIBUTABLE_VERSION/$ARCH_DIR/* $DEST_DIR
-
-echo "### Copying manifests to use our redistributable version... ###"
-wipe_manifest ./manifest-wiper.exe $DEST_DIR/python.exe
-wipe_manifest ./manifest-wiper.exe $DEST_DIR/pythonw.exe
-wipe_manifest ./manifest-wiper.exe $DEST_DIR/python27.dll
-
-echo "### Removing installer from $DEST_DIR/$INSTALLER... ###"
-execute rm -f --verbose $DEST_DIR/$INSTALLER
-
-echo "### Adding cp65001 as an utf-8 alias... ###"
-execute sed -i \
-    "s|# utf_8 codec|# utf_8 codec\n    'cp65001'            : 'utf_8',|" \
-    $DEST_DIR/lib/encodings/aliases.py
+echo "## Adding site-packages to python*._pth file... ##"
+echo "lib\\site-packages" >> ${INSTALL_DIR}/python38._pth

@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 #
 # Check for the presence of required packages/commands.
-# If possible, install missing ones.
+# If possible, install missing ones, typically through sudo.
 #
 # This build requires:
 #   * a C compiler, e.g. gcc
 #   * build tools: make, m4
 #   * patch (for applying patches from src/)
-#   * git (for patching Python's version, if building it)
-#   * automake, libtool, and headers of a curses library (if building libedit)
-#   * perl 5.10.0 and Test::More 0.96 (if building OpenSSL)
-#   * wget/curl, sha512sum, tar, and unzip (for downloading and unpacking).
+#   * git (for patching Python's version, if actually building it)
+#   * automake, libtool, headers of a curses library (if building libedit)
+#   * perl 5.10.0 or newer, Test::More 0.96 or newer (if building OpenSSL)
+#   * wget/curl, sha512sum, tar, unzip (for downloading and unpacking)
 #
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
@@ -18,11 +18,12 @@
 BASE_PKGS="gcc make m4 automake libtool texinfo patch wget tar coreutils unzip"
 DPKG_PKGS="$BASE_PKGS git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
 RPM_PKGS="$BASE_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
-APK_PKGS="$BASE_PKGS \
-    git zlib-dev libffi-dev ncurses-dev linux-headers musl-dev openssl-dev"
+# Alpine's ersatz wget/tar/sha51sum binaries from Busybox are good enough.
+APK_PKGS="gcc make m4 automake libtool texinfo patch unzip file musl-dev \
+    git openssl-dev zlib-dev libffi-dev ncurses-dev"
 # Windows is special, but package management is possible through Chocolatey.
 # Curl, sha512sum, and unzip are bundled with MINGW.
-CHOCO_PKGS="vcpython27 make"
+CHOCO_PKGS=""
 CHOCO_PRESENT="unknown"
 
 # Check for OS packages required for the build.
@@ -68,6 +69,12 @@ case "$OS" in
         export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
         PACKAGES="$CC make m4 git patch libtool perl curl shasum tar unzip"
         ;;
+    fbsd*)
+        PACKAGES="$CC make m4 git patch libtool curl shasum tar unzip"
+        ;;
+    obsd*)
+        PACKAGES="$CC make m4 git patch libtool curl sha512 tar unzip"
+        ;;
     lnx)
         PACKAGES="$PACKAGES perl"
         ;;
@@ -89,8 +96,7 @@ if [ -n "$MISSING_PACKAGES" ]; then
     (>&2 echo "Missing required dependencies: $MISSING_PACKAGES.")
     if [ $CHOCO_PRESENT = "yes" ]; then
         echo "## Installing missing Chocolatey packages... ##"
-        # No execute here, dotnet3.5's scripts (dep of vcpython27) fail w/ bash.
-        choco install --yes $MISSING_PACKAGES
+        execute choco install --yes --no-progress $MISSING_PACKAGES
     else
         case "$OS" in
             ubuntu*)
@@ -99,7 +105,7 @@ if [ -n "$MISSING_PACKAGES" ]; then
                 ;;
             rhel*|amzn*)
                 echo "## Installing missing rpm packages... ##"
-                execute sudo yum install $MISSING_PACKAGES
+                execute sudo yum install -y $MISSING_PACKAGES
                 ;;
             alpine*)
                 echo "## Installing missing apk packages... ##"
@@ -117,11 +123,33 @@ if [ -n "$PACKAGES" ]; then
     echo "All required dependencies are present: $PACKAGES"
 fi
 
+# Windows "build" is special, following checks are for other platforms.
+if [ "$OS" = "win" ]; then
+    return
+fi
+
 # Many systems don't have this installed and it's not really need it.
 command -v makeinfo >/dev/null
 if [ $? -ne 0 ]; then
-    (>&2 echo "Missing makeinfo, trying to link it to /bin/true in ~/bin...")
+    (>&2 echo "# Missing makeinfo, linking it to /bin/true in ~/bin... #")
     execute mkdir -p ~/bin
     execute ln -s /bin/true ~/bin/makeinfo
     export PATH="$PATH:~/bin/"
 fi
+
+# To avoid having Python's uuid module linked to system libs.
+echo "# Checking if it's possible to avoid linking to system uuid libs... #"
+case "$OS" in
+    ubuntu*)
+        execute sudo apt remove -y uuid-dev
+        ;;
+    rhel*|amzn*)
+        execute sudo yum remove -y e2fsprogs-devel libuuid-devel
+        ;;
+    alpine*)
+        execute sudo apk del util-linux-dev
+        ;;
+    *)
+        (>&2 echo "Not guarding against linking to uuid libs on this system!")
+        ;;
+esac

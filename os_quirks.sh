@@ -5,19 +5,17 @@
 case $OS in
     win)
         # On Windows, python executable is installed at a different path.
-        LOCAL_PYTHON_BINARY=./$LOCAL_PYTHON_BINARY_DIST/lib/python
-        PYTHON_BIN=$INSTALL_DIR/lib/python
-        # On Windows Server 2016, redistributables are older.
-        if [ "$ARCH" = "x86" ]; then
-            export REDISTRIBUTABLE_VERSION="9.0.30729.9247"
-        fi
+        LOCAL_PYTHON_BINARY="./${LOCAL_PYTHON_BINARY_DIST}/lib/python.exe"
+        PYTHON_BIN="${INSTALL_DIR}/lib/python.exe"
         # On Windows, there are no actual dependency builds.
+        export BUILD_BZIP2="no"
         export BUILD_LIBEDIT="no"
         export BUILD_GMP="no"
-        export BUILD_BZIP2="no"
+        export BUILD_SQLITE="no"
+        # Not all wheels are sync'ed from pypi.org. Some wheels are copied from
+        # https://www.lfd.uci.edu/~gohlke/pythonlibs/: gmpy2, setproctitle.
         PIP_LIBRARIES="$PIP_LIBRARIES \
             gmpy2==${GMPY2_VERSION}
-            pywin32==${PYWIN32_VERSION} \
             "
         # GitHub's "runners" don't have wget installed, curl comes with MinGW.
         export GET_CMD="curl --silent --output"
@@ -48,8 +46,7 @@ case $OS in
     macos)
         export CC="clang"
         export CXX="clang++"
-        # Build as compatible as it makes sense. See brink.sh for the reason.
-        export CFLAGS="$CFLAGS -mmacosx-version-min=10.12"
+        export CFLAGS="$CFLAGS -mmacosx-version-min=10.13"
         # setup.py skips building readline by default, as it sets this to
         # "10.4", and then tries to avoid the broken readline in OS X 10.4.
         export MACOSX_DEPLOYMENT_TARGET=10.12
@@ -69,12 +66,17 @@ case $OS in
         export BUILD_LIBFFI="yes"
         # System includes bzip2 libs by default.
         export BUILD_BZIP2="no"
+        export GET_CMD="curl --silent --output"
+        # Install package "p5-Digest-SHA" to get shasum binary.
+        export SHA_CMD="shasum --algorithm 512 --check --status --warn"
         ;;
     obsd*)
         export CC="clang"
         export CXX="clang++"
         # libffi not available in the base system, only as port/package.
         export BUILD_LIBFFI="yes"
+        export GET_CMD="curl --silent --output"
+        export SHA_CMD="sha512 -q -c"
         ;;
     sol*)
         # By default, Sun's Studio compiler is used.
@@ -97,6 +99,8 @@ case $OS in
         # Solaris 11 is much more modern, but still has some quirks.
         # Multiple system libffi libs present, this is a problem in 11.4.
         export BUILD_LIBFFI="yes"
+        # Life's too short for all the Solaris quirks.
+        export TAR_CMD="gtar xfz"
         ;;
 esac
 
