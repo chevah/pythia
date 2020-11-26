@@ -242,10 +242,12 @@ cleanup_install_dir() {
 help_text_test=\
 "Run own tests for the newly-build Python distribution."
 command_test() {
-    # After cleanup, Python's binary in /bin is named "python", not "python3.x".
-    local python_binary="${INSTALL_DIR}/bin/python"
     local test_file="test_python_binary_dist.py"
-
+    local python_binary="$PYTHON_BIN"
+    # After cleanup, Python's binary in /bin is named "python", not "python3.x".
+    if [ $OS != 'win' ]; then
+        local python_binary="$INSTALL_DIR/bin/python"
+    fi
     echo "::group::Chevah tests"
     echo "#### Executing Chevah tests... ####"
     execute cp src/chevah-python-test/$test_file "$BUILD_DIR"

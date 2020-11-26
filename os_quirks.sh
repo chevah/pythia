@@ -5,7 +5,6 @@
 case $OS in
     win)
         # On Windows, python executable is installed at a different path.
-        LOCAL_PYTHON_BINARY="./${LOCAL_PYTHON_BINARY_DIST}/lib/python.exe"
         PYTHON_BIN="${INSTALL_DIR}/lib/python.exe"
         # There are no actual dependency builds, only binary wheels are used.
         # But not all are from pypi.org. Wheels copied from other places:
