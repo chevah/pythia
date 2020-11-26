@@ -90,9 +90,6 @@ chevahbs_install() {
     esac
 
     execute $MAKE install DESTDIR=$INSTALL_DIR
-
-    # Remove test sub-dir to slim down the final dist package.
-    rm -rf "$INSTALL_DIR/lib/$PYTHON_BUILD_VERSION/test/"
 }
 
 

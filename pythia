@@ -200,6 +200,7 @@ command_install_python_modules() {
 }
 
 
+# Put stuff where it's expected and remove some of the cruft.
 cleanup_install_dir() {
     local python_lib_file="lib${PYTHON_VERSION}.a"
 
@@ -213,20 +214,28 @@ cleanup_install_dir() {
                 # Clean the build dir.
                 execute rm -rf tmp
                 execute mkdir -p lib/config
-                safe_move share lib/config
-                # Move all bin to lib/config
+                # Move all binaries to lib/config
                 safe_move bin lib/config
                 execute mkdir bin
-                # Move binary back to bin/python, then link to it.
                 execute pushd lib/config/bin/
+                    # Move Python binary back as bin/python, then link to it.
                     execute mv $PYTHON_VERSION ../../../bin/python
                     execute ln -s ../../../bin/python $PYTHON_VERSION
+                    # Make sure python3 is also a symlink (macOS issue).
+                    execute rm python3
+                    execute ln -s $PYTHON_VERSION python3
+                    # Remove the sizable sqlite3 binary.
+                    execute rm sqlite3
                 execute popd
-                # Similar trick for libpython3.*.a
+                # Symlink the copy of libpython3.*.a too.
                 execute pushd lib/$PYTHON_VERSION/config-*
                     execute rm $python_lib_file
                     execute ln -s ../../$python_lib_file
                 execute popd
+                # Remove the big test/ sub-dir.
+                execute rm -rf "lib/$PYTHON_VERSION/test/"
+                # Remove (mostly OpenSSL) docs and manuals.
+                execute rm -rf "share/{doc,info,man}"
             execute popd
             ;;
     esac

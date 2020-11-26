@@ -34,8 +34,6 @@ chevahbs_compile() {
 
 chevahbs_install() {
     execute $MAKE install
-    # Remove OpenSSL's manuals and documentation to slim down final package.
-    execute rm -rf "$INSTALL_DIR"/{man,doc}
 }
 
 
