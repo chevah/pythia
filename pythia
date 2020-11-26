@@ -104,6 +104,7 @@ command_build() {
     # Python modules installed with pip. Some are built locally.
     command_install_python_modules
 
+    echo "::group::Clean up Python install dir"
     case $OS in
         win)
             echo "    Skip cleaning install dir"
@@ -117,15 +118,26 @@ command_build() {
                 # Move all bin to lib/config
                 safe_move bin lib/config
                 execute mkdir bin
-                # Copy back python binary
-                execute cp lib/config/bin/$PYTHON_VERSION bin/python
+                # Move binary back to bin/python, then link to it.
+                execute pushd lib/config/bin/
+                    execute mv $PYTHON_VERSION ../../../bin/python
+                    execute ln -s ../../../bin/python $PYTHON_VERSION
+                execute popd
+                # Similar trick for libpython3.*.a
+                local python_lib_file="lib${PYTHON_VERSION}.a"
+                execute pushd lib/$PYTHON_VERSION/config-*
+                    execute rm $python_lib_file
+                    execute ln -s ../../$python_lib_file
+                execute popd
             execute popd
             ;;
     esac
 
-    # Output the python-package version to a dedicated file in the archive.
+    # Output Pythia's own version to a dedicated file in the archive.
     echo "${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
         > ${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHON_PACKAGE_VERSION
+
+    echo "::endgroup::"
 
     make_dist 'python' ${PYTHON_BUILD_DIR}
 }
@@ -171,7 +183,6 @@ build_python() {
         execute popd
     else
         build Python $PYTHON_BUILD_VERSION
-        # The 'python' symlink gets packed as the 'python' binary in final dist.
         echo "# Symlinking $PYTHON_VERSION binary as python... #"
         execute pushd "$INSTALL_DIR"/bin
         execute ln -s $PYTHON_VERSION python
