@@ -9,7 +9,7 @@ case $OS in
         PYTHON_BIN="${INSTALL_DIR}/lib/python.exe"
         # There are no actual dependency builds, only binary wheels are used.
         # But not all are from pypi.org. Wheels copied from other places:
-        #   * setproctitle from https://www.lfd.uci.edu/~gohlke/pythonlibs/
+        #   * "setproctitle" from https://www.lfd.uci.edu/~gohlke/pythonlibs/
         export BUILD_BZIP2="no"
         export BUILD_LIBEDIT="no"
         export BUILD_SQLITE="no"

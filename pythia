@@ -224,7 +224,6 @@ cleanup_install_dir() {
                     execute ln -s ../../../bin/python $PYTHON_VERSION
                 execute popd
                 # Similar trick for libpython3.*.a
-
                 execute pushd lib/$PYTHON_VERSION/config-*
                     execute rm $python_lib_file
                     execute ln -s ../../$python_lib_file
