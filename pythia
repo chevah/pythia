@@ -39,9 +39,8 @@ DIST_DIR="dist"
 
 # Local variables for the build process.
 LOCAL_PYTHON_BINARY_DIST="$PYTHON_VERSION-$OS-$ARCH"
-LOCAL_PYTHON_BINARY="./$LOCAL_PYTHON_BINARY_DIST/bin/python"
 INSTALL_DIR="$PWD/$BUILD_DIR/$LOCAL_PYTHON_BINARY_DIST"
-PYTHON_BIN="$INSTALL_DIR/bin/python"
+PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 PYTHON_BUILD_DIR="$PYTHON_VERSION-$OS-$ARCH"
 
 # Explicitly choose the C compiler in order to make it possible to switch
@@ -243,6 +242,8 @@ cleanup_install_dir() {
 help_text_test=\
 "Run own tests for the newly-build Python distribution."
 command_test() {
+    # After cleanup, Python's binary in /bin is named "python", not "python3.x".
+    local python_binary="${INSTALL_DIR}/bin/python"
     local test_file="test_python_binary_dist.py"
 
     echo "::group::Chevah tests"
@@ -250,14 +251,14 @@ command_test() {
     execute cp src/chevah-python-test/$test_file "$BUILD_DIR"
     execute cp src/chevah-python-test/get_binaries_deps.sh "$BUILD_DIR"
     execute pushd "$BUILD_DIR"
-    execute $LOCAL_PYTHON_BINARY $test_file
+    execute $python_binary $test_file
     echo "::endgroup::"
 
     echo "::group::Security tests"
     echo "## Testing for outdated packages and security issues... ##"
-    execute $PYTHON_BIN -m pip list --outdated --format=columns
-    execute $PYTHON_BIN -m pip install $PIP_ARGS safety
-    execute $PYTHON_BIN -m safety check --full-report
+    execute $python_binary -m pip list --outdated --format=columns
+    execute $python_binary -m pip install $PIP_ARGS safety
+    execute $python_binary -m safety check --full-report
     echo "::endgroup::"
 
     execute popd
