@@ -426,14 +426,6 @@ def main():
         exit_code = 140
 
     try:
-        import Cython
-    except:
-        sys.stderr.write('"Cython" is missing.\n')
-        exit_code = 144
-    else:
-        print('Cython %s' % (Cython.__version__,))
-
-    try:
         import subprocess32 as subprocess
         dir_output = subprocess.check_output('ls')
     except:
