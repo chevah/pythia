@@ -247,17 +247,7 @@ command_test() {
     execute $PYTHON_BIN -m safety check --full-report
     echo "::endgroup::"
 
-    # Avoid having output messages sometimes mangled.
-    sleep 1
-
-    echo "::group::Python modules tests"
-    echo "## Executing tests for included Python modules... ##"
-    # This test requires quite some RAM, so beware of heavy swapping.
-    echo "# Testing PyCryptodomex... #"
-    execute $LOCAL_PYTHON_BINARY -m Cryptodome.SelfTest
-
     execute popd
-    echo "::endgroup::"
 }
 
 

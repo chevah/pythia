@@ -402,15 +402,6 @@ def main():
             cryptography.__version__, openssl_version))
 
     try:
-        import Cryptodome
-        pycryptodome_version = Cryptodome.__version__
-    except:
-        sys.stderr.write('"PyCryptodome" is missing.\n')
-        exit_code = 137
-    else:
-        print('PyCryptodome %s' % (pycryptodome_version))
-
-    try:
         from ctypes import CDLL
         import ctypes
         CDLL
