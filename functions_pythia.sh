@@ -179,15 +179,3 @@ make_dist(){
         execute gzip $target_tar
     execute popd
 }
-
-
-# Move source to target, making sure mv will not fail if a dir
-# already exists.
-#
-# The move is done by merging the dirs.
-safe_move() {
-    source=$1
-    target=$2
-    execute cp -r $source $target
-    execute rm -rf $source
-}

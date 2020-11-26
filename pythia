@@ -215,7 +215,7 @@ cleanup_install_dir() {
                 execute rm -rf tmp
                 execute mkdir -p lib/config
                 # Move all binaries to lib/config
-                safe_move bin lib/config
+                execute mv bin/ lib/config/
                 execute mkdir bin
                 execute pushd lib/config/bin/
                     # Move Python binary back as bin/python, then link to it.
