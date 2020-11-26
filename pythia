@@ -235,7 +235,7 @@ cleanup_install_dir() {
                 # Remove the big test/ sub-dir.
                 execute rm -rf "lib/$PYTHON_VERSION/test/"
                 # Remove (mostly OpenSSL) docs and manuals.
-                execute rm -rf "share/{doc,info,man}"
+                execute rm -rf share/
             execute popd
             ;;
     esac
