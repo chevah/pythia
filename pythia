@@ -213,8 +213,8 @@ cleanup_install_dir() {
             execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
                 # Clean the build dir.
                 execute rm -rf tmp
-                execute mkdir -p lib/config
                 # Move all binaries to lib/config
+                execute mkdir -p lib/config
                 execute mv bin/ lib/config/
                 execute mkdir bin
                 execute pushd lib/config/bin/
@@ -253,10 +253,11 @@ help_text_test=\
 command_test() {
     local test_file="test_python_binary_dist.py"
     local python_binary="$PYTHON_BIN"
-    # After cleanup, Python's binary in /bin is named "python", not "python3.x".
     if [ $OS != 'win' ]; then
+        # Post-cleanup, the binary in /bin is named "python", not "python3.x".
         local python_binary="$INSTALL_DIR/bin/python"
     fi
+
     echo "::group::Chevah tests"
     echo "#### Executing Chevah tests... ####"
     execute cp src/chevah-python-test/$test_file "$BUILD_DIR"
