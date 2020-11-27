@@ -72,8 +72,9 @@ chevahbs_configure() {
 
 chevahbs_compile() {
     execute $MAKE
+    # FIXME:12: Enable Python's own tests again.
     # Don't use execute below, some tests might fail innocuously.
-    $MAKE test
+    # $MAKE test
 }
 
 

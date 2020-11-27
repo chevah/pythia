@@ -16,7 +16,7 @@ exit_on_error $? 250
 
 # Export the variables needed by the chevahbs scripts and the test phase.
 export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION
-export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_GMP BUILD_LIBFFI BUILD_OPENSSL
+export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
 # Import build env vars set by "./brink.sh detect_os" and export needed ones.
 if [ -f ./BUILD_ENV_VARS ]; then
@@ -29,7 +29,7 @@ fi
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
 # to force a 32bit build on a 64bit machine, e.g. by setting ARCH in brink.sh
 # as "x86" instead of "x64" for a certain platform.
-# $ARCH is also used when statically building libffi/GMP and for testing.
+# $ARCH is also used when "building" Python on Windows and for testing.
 # $OS is used when patching/configuring/building/testing.
 export ARCH OS
 
@@ -39,16 +39,12 @@ DIST_DIR="dist"
 
 # Local variables for the build process.
 LOCAL_PYTHON_BINARY_DIST="$PYTHON_VERSION-$OS-$ARCH"
-LOCAL_PYTHON_BINARY="./$LOCAL_PYTHON_BINARY_DIST/bin/python"
 INSTALL_DIR="$PWD/$BUILD_DIR/$LOCAL_PYTHON_BINARY_DIST"
-PYTHON_BIN="$INSTALL_DIR/bin/python"
+PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 PYTHON_BUILD_DIR="$PYTHON_VERSION-$OS-$ARCH"
 
-# Used when building gmpy2.
-export PYTHON_BIN
-
 # Explicitly choose the C compiler in order to make it possible to switch
-# between native compilers and GCC on platforms such as Solaris.
+# between native compilers and GCC on platforms such as the BSDs and Solaris.
 export CC="gcc"
 # Other needed tools (GNU flavours preferred).
 export MAKE="make"
@@ -99,48 +95,21 @@ command_build() {
     build_dep $BUILD_ZLIB     zlib             $ZLIB_VERSION
     build_dep $BUILD_BZIP2    bzip2            $BZIP2_VERSION
     build_dep $BUILD_LIBEDIT  libedit          $LIBEDIT_VERSION
-    build_dep $BUILD_GMP      gmp              $GMP_VERSION
     build_dep $BUILD_SQLITE   sqlite-autoconf  $SQLITE_VERSION
     build_dep $BUILD_OPENSSL  openssl          $OPENSSL_VERSION
 
     build_python
 
-    # Python modules that require tweaks when building.
-    if [ $OS != 'win' ]; then
-        build gmpy2 $GMPY2_VERSION
-    fi
-
     # Python modules installed with pip. Some are built locally.
     command_install_python_modules
 
-    case $OS in
-        win)
-            echo "    Skipping cleaning install dir"
-            ;;
-        *)
-            execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
-                # Clean the build dir.
-                execute rm -rf tmp
-                execute mkdir -p lib/config
-                safe_move share lib/config
-                # Move all bin to lib/config
-                safe_move bin lib/config
-                execute mkdir bin
-                # Copy back python binary
-                execute cp lib/config/bin/$PYTHON_VERSION bin/python
-            execute popd
-            ;;
-    esac
-
-    # Output the python-package version to a dedicated file in the archive.
-    echo "${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
-        > ${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHON_PACKAGE_VERSION
+    cleanup_install_dir
 
     make_dist 'python' ${PYTHON_BUILD_DIR}
 }
 
 
-# This builds Python's dependencies: libffi, bzip2, GMP, etc.
+# This builds Python's dependencies: libffi, bzip2, openssl, etc.
 build_dep() {
     local dep_boolean=$1
     local dep_name=$2
@@ -163,7 +132,7 @@ build_dep() {
             export CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include"
         fi
     elif [ $dep_boolean = "no" ]; then
-        (>&2 echo "    Skipping building ${dep_name}...")
+        (>&2 echo "    Skip building $dep_name")
     else
         (>&2 echo "Unknown env var for building ${dep_name}. Exiting!")
         exit 248
@@ -180,11 +149,6 @@ build_python() {
         execute popd
     else
         build Python $PYTHON_BUILD_VERSION
-        # The 'python' symlink gets packed as the 'python' binary in final dist.
-        echo "# Symlinking $PYTHON_VERSION binary as python... #"
-        execute pushd "$INSTALL_DIR"/bin
-        execute ln -s $PYTHON_VERSION python
-        execute popd
     fi
 }
 
@@ -217,7 +181,7 @@ command_install_python_modules() {
         install $PIP_ARGS -U pycparser==$PYCPARSER_VERSION
 
     if [ $OS = 'win' ]; then
-        echo "    Skipping makefile updating on Windows"
+        echo "    Skip makefile updating on Windows"
     else
         echo "# Updating Python config Makefile for newly-built Python... #"
         makefile="$(ls $INSTALL_DIR/lib/$PYTHON_VERSION/config*/Makefile)"
@@ -236,37 +200,80 @@ command_install_python_modules() {
 }
 
 
+# Put stuff where it's expected and remove some of the cruft.
+cleanup_install_dir() {
+    local python_lib_file="lib${PYTHON_VERSION}.a"
+
+    echo "::group::Clean up Python install dir"
+    case $OS in
+        win)
+            echo "    Skip cleaning install dir"
+            ;;
+        *)
+            execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
+                # Clean the build dir.
+                execute rm -rf tmp
+                # Move all binaries to lib/config
+                execute mkdir -p lib/config
+                execute mv bin/ lib/config/
+                execute mkdir bin
+                execute pushd lib/config/bin/
+                    # Move Python binary back as bin/python, then link to it.
+                    execute mv $PYTHON_VERSION ../../../bin/python
+                    execute ln -s ../../../bin/python $PYTHON_VERSION
+                    # Make sure python3 is also a symlink (macOS issue).
+                    execute rm python3
+                    execute ln -s $PYTHON_VERSION python3
+                    # Remove the sizable sqlite3 binary.
+                    execute rm sqlite3
+                execute popd
+                # Symlink the copy of libpython3.*.a too.
+                execute pushd lib/$PYTHON_VERSION/config-*
+                    execute rm $python_lib_file
+                    execute ln -s ../../$python_lib_file
+                execute popd
+                # Remove the big test/ sub-dir.
+                execute rm -rf "lib/$PYTHON_VERSION/test/"
+                # Remove (mostly OpenSSL) docs and manuals.
+                execute rm -rf share/
+            execute popd
+            ;;
+    esac
+
+    # Output Pythia's own version to a dedicated file in the archive.
+    echo "${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
+        > ${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHON_PACKAGE_VERSION
+
+    echo "::endgroup::"
+}
+
+
 help_text_test=\
 "Run own tests for the newly-build Python distribution."
 command_test() {
     local test_file="test_python_binary_dist.py"
+    local python_binary="$PYTHON_BIN"
+    if [ $OS != 'win' ]; then
+        # Post-cleanup, the binary in /bin is named "python", not "python3.x".
+        local python_binary="$INSTALL_DIR/bin/python"
+    fi
 
     echo "::group::Chevah tests"
     echo "#### Executing Chevah tests... ####"
     execute cp src/chevah-python-test/$test_file "$BUILD_DIR"
     execute cp src/chevah-python-test/get_binaries_deps.sh "$BUILD_DIR"
     execute pushd "$BUILD_DIR"
-    execute $LOCAL_PYTHON_BINARY $test_file
+    execute $python_binary $test_file
     echo "::endgroup::"
 
     echo "::group::Security tests"
     echo "## Testing for outdated packages and security issues... ##"
-    execute $PYTHON_BIN -m pip list --outdated --format=columns
-    execute $PYTHON_BIN -m pip install $PIP_ARGS safety
-    execute $PYTHON_BIN -m safety check --full-report
+    execute $python_binary -m pip list --outdated --format=columns
+    execute $python_binary -m pip install $PIP_ARGS safety
+    execute $python_binary -m safety check --full-report
     echo "::endgroup::"
-
-    # Avoid having output messages sometimes mangled.
-    sleep 1
-
-    echo "::group::Python modules tests"
-    echo "## Executing tests for included Python modules... ##"
-    # This test requires quite some RAM, so beware of heavy swapping.
-    echo "# Testing PyCryptodomex... #"
-    execute $LOCAL_PYTHON_BINARY -m Cryptodome.SelfTest
 
     execute popd
-    echo "::endgroup::"
 }
 
 
@@ -277,7 +284,7 @@ command_compat() {
 
     # This is quite hackish, as compat is arm-twisted to use the local version.
     echo "::group::Compat tests"
-    echo '#### Running chevah/compat tests... ####'
+    echo '#### Running chevah's compat tests... ####'
     echo '## Removing any pre-existing compat code... ####'
     execute rm -rf compat/
     execute git clone https://github.com/chevah/compat.git --depth=1 -b master
