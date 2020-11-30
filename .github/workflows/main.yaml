@@ -63,6 +63,7 @@ jobs:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
       run: |
+        Set-Service ssh-agent -StartupType Manual
         mkdir -p ~/.ssh
         mkdir -p /tmp
         ssh-keyscan -p 13022 binary.chevah.com >> ~/.ssh/known_hosts
