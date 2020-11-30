@@ -65,7 +65,7 @@ jobs:
         mkdir -p ~/.ssh
         ssh-keyscan -p 13022 binary.chevah.com >> ~/.ssh/known_hosts
         ssh-agent -a $SSH_AUTH_SOCK
-        bash ssh-add - <<< "${{ secrets.BINARY_BIN_KEY }}"
+        echo "${{ secrets.BINARY_BIN_KEY }}" | ssh-add -
 
     - name: Upload testing package
       env:
