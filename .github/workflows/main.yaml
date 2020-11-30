@@ -61,11 +61,12 @@ jobs:
     - name: Setup SSH key and known_hosts
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan -p 13022 binary.chevah.com >> ~/.ssh/known_hosts
         ssh-agent -a $SSH_AUTH_SOCK
-        echo "${{ secrets.BINARY_BIN_KEY }}" | ssh-add -
+        echo "$env:BINARY_KEY" | ssh-add -
 
     - name: Upload testing package
       env:
