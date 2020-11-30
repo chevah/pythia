@@ -65,12 +65,12 @@ jobs:
         mkdir -p ~/.ssh
         ssh-keyscan -p 13022 binary.chevah.com >> ~/.ssh/known_hosts
         ssh-agent -a $SSH_AUTH_SOCK
-        ssh-add - <<< "${{ secrets.BINARY_BIN_KEY }}"
+        bash ssh-add - <<< "${{ secrets.BINARY_BIN_KEY }}"
 
     - name: Upload testing package
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: rsync -avhP -e 'ssh -p 13022' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+      run: rsync -a -e 'ssh -p 13022' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
 
   linux:
@@ -121,7 +121,7 @@ jobs:
     - name: Upload testing package
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: rsync -avhP -e 'ssh -p 13022' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+      run: rsync -a -e 'ssh -p 13022' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -175,7 +175,7 @@ jobs:
     - name: Upload testing package
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: rsync -ah -e 'ssh -p 13022' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+      run: rsync -a -e 'ssh -p 13022' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
