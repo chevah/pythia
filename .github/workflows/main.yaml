@@ -58,14 +58,11 @@ jobs:
     - name: Test Python
       run: bash ./pythia test
 
-    - name: Install rsync
-      run: choco install --yes --no-progress rsync
-
     - name: Upload testing package
       env:
-        BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
+        BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
-        echo "$env:BINARY_KEY" > bin.key
+        echo "$env:BIN_KEY" > bin.key
         sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com:bin.chevah.com
 
 
@@ -106,9 +103,9 @@ jobs:
 
     - name: Upload testing package
       env:
-        BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
+        BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
-        echo "$BINARY_KEY" > bin.key
+        echo "$BIN_KEY" > bin.key
         sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com:bin.chevah.com
 
     # If one of the above steps fails, fire up tmate for remote debugging.
@@ -153,9 +150,9 @@ jobs:
 
     - name: Upload testing package
       env:
-        BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
+        BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
-        echo "$BINARY_KEY" > bin.key
+        echo "$BIN_KEY" > bin.key
         sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com:bin.chevah.com
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
