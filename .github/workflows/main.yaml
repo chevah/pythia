@@ -70,7 +70,7 @@ jobs:
         touch binary.key
         chmod 600 binary.key
         echo "$env:BINARY_KEY" > binary.key
-        rsync -a -e 'ssh -p 13022 -i binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+        rsync -a -e "ssh -p 13022 -i binary.key" dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
 
   linux:
@@ -117,7 +117,7 @@ jobs:
         touch binary.key
         chmod 600 binary.key
         echo "$BINARY_KEY" > binary.key
-        rsync -a -e 'ssh -p 13022 -i binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+        rsync -a -e "ssh -p 13022 -i binary.key" dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -168,7 +168,7 @@ jobs:
         touch binary.key
         chmod 600 binary.key
         echo "$BINARY_KEY" > binary.key
-        rsync -a -e 'ssh -p 13022 -i binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+        rsync -a -e "ssh -p 13022 -i binary.key" dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
