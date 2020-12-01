@@ -59,7 +59,7 @@ jobs:
       run: bash ./pythia test
 
     - name: Install rsync
-      run: choco install rsync
+      run: choco install --yes --no-progress rsync
 
     - name: Upload testing package
       env:
@@ -67,6 +67,8 @@ jobs:
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan -p 13022 binary.chevah.com > ~/.ssh/known_hosts
+        touch ~/.ssh/binary.key
+        chmod 600 ~/.ssh/binary.key
         echo "$env:BINARY_KEY" > ~/.ssh/binary.key
         rsync -a -e 'ssh -p 13022 -i ~/.ssh/binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
@@ -112,6 +114,8 @@ jobs:
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan -p 13022 binary.chevah.com > ~/.ssh/known_hosts
+        touch ~/.ssh/binary.key
+        chmod 600 ~/.ssh/binary.key
         echo "$env:BINARY_KEY" > ~/.ssh/binary.key
         rsync -a -e 'ssh -p 13022 -i ~/.ssh/binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
@@ -161,6 +165,8 @@ jobs:
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan -p 13022 binary.chevah.com > ~/.ssh/known_hosts
+        touch ~/.ssh/binary.key
+        chmod 600 ~/.ssh/binary.key
         echo "$env:BINARY_KEY" > ~/.ssh/binary.key
         rsync -a -e 'ssh -p 13022 -i ~/.ssh/binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
