@@ -179,3 +179,18 @@ make_dist(){
         execute gzip $target_tar
     execute popd
 }
+
+#
+# Construct a SFTP batch file for uploading testing packages.
+# Commands prefixed with a '-' are allowed to fail.
+#
+build_sftp_batch() {
+    echo "lcd dist/python/$OS/$ARCH/"        > sftp_batch
+    echo "cd testing/python"                >> sftp_batch
+    echo "-mkdir $OS"                       >> sftp_batch
+    echo "cd $OS"                           >> sftp_batch
+    echo "-mkdir $ARCH"                     >> sftp_batch
+    echo "cd $ARCH"                         >> sftp_batch
+    echo "put python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz" \
+                                            >> sftp_batch
+}

@@ -106,6 +106,8 @@ command_build() {
     cleanup_install_dir
 
     make_dist 'python' ${PYTHON_BUILD_DIR}
+
+    build_sftp_batch
 }
 
 

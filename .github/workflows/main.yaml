@@ -65,12 +65,8 @@ jobs:
       env:
         BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
       run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -p 13022 binary.chevah.com > ~/.ssh/known_hosts
-        touch binary.key
-        chmod 600 binary.key
-        echo "$env:BINARY_KEY" > binary.key
-        rsync -a -e "ssh -p 13022 -i binary.key" dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+        echo "$env:BINARY_KEY" > bin.key
+        sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com:bin.chevah.com
 
 
   linux:
@@ -112,12 +108,8 @@ jobs:
       env:
         BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
       run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -p 13022 binary.chevah.com > ~/.ssh/known_hosts
-        touch binary.key
-        chmod 600 binary.key
-        echo "$BINARY_KEY" > binary.key
-        rsync -a -e "ssh -p 13022 -i binary.key" dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+        echo "$BINARY_KEY" > bin.key
+        sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com:bin.chevah.com
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -163,12 +155,8 @@ jobs:
       env:
         BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
       run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -p 13022 binary.chevah.com > ~/.ssh/known_hosts
-        touch binary.key
-        chmod 600 binary.key
-        echo "$BINARY_KEY" > binary.key
-        rsync -a -e "ssh -p 13022 -i binary.key" dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+        echo "$BINARY_KEY" > bin.key
+        sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com:bin.chevah.com
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
