@@ -58,6 +58,10 @@ jobs:
     - name: Test Python
       run: bash ./pythia test
 
+    # To upload to SFTPPlus with an RSA key.
+    - name: Install upstream OpenSSH
+      run: choco install --yes --no-progress openssh
+
     - name: Upload testing package
       env:
         BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
