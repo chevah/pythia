@@ -106,20 +106,14 @@ jobs:
     - name: Test Python
       run: bash ./pythia test
 
-    # Tested to run under PowerShell.
-    - name: Setup SSH key and known_hosts
-      env:
-        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -p 13022 binary.chevah.com >> ~/.ssh/known_hosts
-        ssh-agent -a $SSH_AUTH_SOCK
-        ssh-add - <<< "${{ secrets.BINARY_BIN_KEY }}"
-
     - name: Upload testing package
       env:
-        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: rsync -a -e 'ssh -p 13022' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+        BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -p 13022 binary.chevah.com > ~/.ssh/known_hosts
+        echo "$env:BINARY_KEY" > ~/.ssh/binary.key
+        rsync -a -e 'ssh -p 13022 -i ~/.ssh/binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -161,19 +155,14 @@ jobs:
     - name: Test Python
       run: bash ./pythia test
 
-    - name: Setup SSH key and known_hosts
-      env:
-        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -p 13022 binary.chevah.com >> ~/.ssh/known_hosts
-        ssh-agent -a $SSH_AUTH_SOCK
-        ssh-add - <<< "${{ secrets.BINARY_BIN_KEY }}"
-
     - name: Upload testing package
       env:
-        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: rsync -a -e 'ssh -p 13022' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+        BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -p 13022 binary.chevah.com > ~/.ssh/known_hosts
+        echo "$env:BINARY_KEY" > ~/.ssh/binary.key
+        rsync -a -e 'ssh -p 13022 -i ~/.ssh/binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
