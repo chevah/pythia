@@ -58,16 +58,17 @@ jobs:
     - name: Test Python
       run: bash ./pythia test
 
-    - name: Setup SSH key and known_hosts
+    - name: Install rsync
+      run: choco install rsync
+
+    - name: Upload testing package
       env:
         BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan -p 13022 binary.chevah.com > ~/.ssh/known_hosts
         echo "$env:BINARY_KEY" > ~/.ssh/binary.key
-
-    - name: Upload testing package
-      run: rsync -a -e 'ssh -p 13022 -i ~/.ssh/binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+        rsync -a -e 'ssh -p 13022 -i ~/.ssh/binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
 
   linux:
