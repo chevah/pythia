@@ -69,7 +69,7 @@ jobs:
         touch bin.key
         chmod 600 bin.key
         echo "$env:BIN_KEY" > bin.key
-        sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com
+        'C:\Program Files\OpenSSH-Win64\sftp.exe' -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com
 
 
   linux:
