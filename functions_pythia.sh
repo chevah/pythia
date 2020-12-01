@@ -68,7 +68,7 @@ download_sources(){
             ;;
         exe|amd64*|win32*)
             # No need to use ../../build/"$project_name"-"$project_ver"/ here.
-            echo "    Nothing to unpack for ${archive_filename}."
+            echo "    Nothing to unpack in build/ for ${archive_filename}."
             ;;
         *)
             (>&2 echo "Unknown archive type for ${archive_filename}, exiting!")

@@ -60,21 +60,14 @@ jobs:
 
     - name: Setup SSH key and known_hosts
       env:
-        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         BINARY_KEY: ${{ secrets.BINARY_BIN_KEY }}
       run: |
-        cd 'C:\Program Files\OpenSSH-Win64\'
-        .\install-sshd.ps1
         mkdir -p ~/.ssh
-        mkdir /tmp
-        ssh-keyscan -p 13022 binary.chevah.com >> ~/.ssh/known_hosts
-        ssh-agent -a "$env:SSH_AUTH_SOCK"
-        echo "$env:BINARY_KEY" | ssh-add -
+        ssh-keyscan -p 13022 binary.chevah.com > ~/.ssh/known_hosts
+        echo "$env:BINARY_KEY" > ~/.ssh/binary.key
 
     - name: Upload testing package
-      env:
-        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: rsync -a -e 'ssh -p 13022' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
+      run: rsync -a -e 'ssh -p 13022 -i ~/.ssh/binary.key' dist/ binary-site@binary.chevah.com:binary.chevah.com/testing/
 
 
   linux:
