@@ -62,6 +62,8 @@ jobs:
       env:
         BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
+        touch bin.key
+        chmod 600 bin.key
         echo "$env:BIN_KEY" > bin.key
         sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com:bin.chevah.com
 
@@ -105,6 +107,8 @@ jobs:
       env:
         BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
+        touch bin.key
+        chmod 600 bin.key
         echo "$BIN_KEY" > bin.key
         sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com:bin.chevah.com
 
@@ -152,6 +156,8 @@ jobs:
       env:
         BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
+        touch bin.key
+        chmod 600 bin.key
         echo "$BIN_KEY" > bin.key
         sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com:bin.chevah.com
 
