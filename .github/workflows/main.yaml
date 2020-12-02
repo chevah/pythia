@@ -58,14 +58,17 @@ jobs:
     - name: Test Python
       run: bash ./pythia test
 
+    # Installs upstream OpenSSH to use an RSA key with SFTPPlus.
+    # Which is more finnicky in regards to file permissions.
     - name: Upload testing package
       env:
         BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
-        touch bin_key
-        chmod 600 bin_key
         echo "$env:BIN_KEY" > bin_key
-        true C:\progra~1\Git\usr\bin\sftp.exe -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
+        icacls .\bin_key /inheritance:r
+        icacls .\bin_key /grant:r runneradmin:"(R)"
+        choco install --yes --no-progress openssh
+        C:\Progra~1\OpenSSH-Win64\sftp.exe -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
 
     - name: Setup tunnel
       env:
