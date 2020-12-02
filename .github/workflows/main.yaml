@@ -16,7 +16,7 @@ on:
     branches: [ main ]
 
 env:
-  CHEVAH_DEBUG: 'no'
+  CHEVAH_DEBUG: 'yes'
 
 jobs:
   windows:
