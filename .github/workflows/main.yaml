@@ -115,6 +115,8 @@ jobs:
         touch bin_key
         chmod 600 bin_key
         echo "$BIN_KEY" > bin_key
+        echo "This is the key:"
+        cat bin_key
         sftp -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
 
     # If one of the above steps fails, fire up tmate for remote debugging.
@@ -164,6 +166,8 @@ jobs:
         touch bin_key
         chmod 600 bin_key
         echo "$BIN_KEY" > bin_key
+        echo "This is the key:"
+        cat bin_key
         sftp -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
