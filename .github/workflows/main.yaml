@@ -28,7 +28,7 @@ jobs:
       matrix:
         runs-on: [ windows-2019, windows-2016 ]
 
-    timeout-minutes: 20
+    timeout-minutes: 200
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Make sure there are no concurrent jobs
@@ -65,12 +65,19 @@ jobs:
         touch bin_key
         chmod 600 bin_key
         echo "$env:BIN_KEY" > bin_key
-        echo "This is the key before converting to DOS:"
-        cat bin_key
-        unix2dos bin_key
-        echo "This is the key after converting to DOS."
-        cat bin_key
-        C:\progra~1\Git\usr\bin\sftp.exe -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
+        true C:\progra~1\Git\usr\bin\sftp.exe -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
+
+    - name: Setup tunnel
+      env:
+        NGROK_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+      run: |
+        choco install --yes --no-progress ngrok
+        ngrok.exe authtoken $env:NGROK_TOKEN
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+        Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "hopasieu" -Force)
+        ngrok.exe tcp 3389
 
 
   linux:
@@ -115,8 +122,6 @@ jobs:
         touch bin_key
         chmod 600 bin_key
         echo "$BIN_KEY" > bin_key
-        echo "This is the key:"
-        cat bin_key
         sftp -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
 
     # If one of the above steps fails, fire up tmate for remote debugging.
@@ -166,8 +171,6 @@ jobs:
         touch bin_key
         chmod 600 bin_key
         echo "$BIN_KEY" > bin_key
-        echo "This is the key:"
-        cat bin_key
         sftp -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
