@@ -58,15 +58,18 @@ jobs:
     - name: Test Python
       run: bash ./pythia test
 
-    # Use Bash to write the key, as PowerShell saves output in UTF-16 LE BOM encoding, not in UTF-8.
     - name: Upload testing package
       env:
         BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
         touch bin_key
         chmod 600 bin_key
-        bash -c "echo $env:BIN_KEY" > bin_key
+        echo "$env:BIN_KEY" > bin_key
+        echo "This is the key before converting to DOS:"
+        cat bin_key
         unix2dos bin_key
+        echo "This is the key after converting to DOS."
+        cat bin_key
         C:\progra~1\Git\usr\bin\sftp.exe -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
 
 
