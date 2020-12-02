@@ -62,11 +62,11 @@ jobs:
       env:
         BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
-        touch bin.key
-        chmod 600 bin.key
-        echo "$env:BIN_KEY" > bin.key
-        unix2dos bin.key
-        C:\progra~1\Git\usr\bin\sftp.exe -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com
+        touch bin_key
+        chmod 600 bin_key
+        echo "$env:BIN_KEY" > bin_key
+        unix2dos bin_key
+        C:\progra~1\Git\usr\bin\sftp.exe -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
 
 
   linux:
@@ -108,10 +108,10 @@ jobs:
       env:
         BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
-        touch bin.key
-        chmod 600 bin.key
-        echo "$BIN_KEY" > bin.key
-        sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com
+        touch bin_key
+        chmod 600 bin_key
+        echo "$BIN_KEY" > bin_key
+        sftp -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -157,10 +157,10 @@ jobs:
       env:
         BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
       run: |
-        touch bin.key
-        chmod 600 bin.key
-        echo "$BIN_KEY" > bin.key
-        sftp -b sftp_batch -i bin.key -o StrictHostKeyChecking=no bin@bin.chevah.com
+        touch bin_key
+        chmod 600 bin_key
+        echo "$BIN_KEY" > bin_key
+        sftp -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
