@@ -15,6 +15,8 @@ on:
   pull_request:
     branches: [ main ]
 
+# Tunnel your way to GitHub's VMs through ngrok/tmate.
+# Also increase timeout-minutes for the relevant OS when debugging remotely.
 env:
   CHEVAH_DEBUG: 'yes'
 
@@ -35,8 +37,6 @@ jobs:
     - uses: chevah/auto-cancel-redundant-job@v1
     # Checks-out the repository under $GITHUB_WORKSPACE, so the job can access it
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
 
     # Skip CI for commits with a message containing the skip-ci string.
     - name: Fail on skip-ci
@@ -58,8 +58,8 @@ jobs:
     - name: Test Python
       run: bash ./pythia test
 
-    # Installs upstream OpenSSH to use an RSA key with SFTPPlus.
-    # Which is more finnicky in regards to file permissions.
+    # Installs upstream OpenSSH to use an RSA key with SFTPPlus,
+    # which is more finicky in regards to file permissions.
     - name: Upload testing package
       env:
         BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
@@ -97,8 +97,6 @@ jobs:
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
 
     - name: Fail on skip-ci
       if: ${{ github.event.after }}
@@ -142,8 +140,6 @@ jobs:
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
 
     - name: Fail on skip-ci
       if: ${{ github.event.after }}

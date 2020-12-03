@@ -16,8 +16,6 @@ case $OS in
         export GET_CMD="curl --silent --output"
         # On Windows, only one of the installers is downloaded.
         export SHA_CMD="$SHA_CMD --ignore-missing"
-        # LF gets replaced by CRLF when commiting the file to git repo.
-        execute unix2dos src/Python-Windows/sha512.sum
         ;;
     alpine*)
         # By default, the busybox ersatz binaries are used.
