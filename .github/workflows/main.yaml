@@ -15,10 +15,10 @@ on:
   pull_request:
     branches: [ main ]
 
-# Tunnel your way to GitHub's VMs through ngrok/tmate.
+# Set to 'yes' to open a tunnel to GitHub's VMs through ngrok/tmate on failures.
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 env:
-  CHEVAH_DEBUG: 'yes'
+  CHEVAH_DEBUG: 'no'
 
 jobs:
   windows:
@@ -30,7 +30,7 @@ jobs:
       matrix:
         runs-on: [ windows-2019, windows-2016 ]
 
-    timeout-minutes: 200
+    timeout-minutes: 20
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Make sure there are no concurrent jobs
@@ -53,17 +53,20 @@ jobs:
     - name: Test Python
       run: bash ./pythia test
 
-    # Installs upstream OpenSSH to use an RSA key with SFTPPlus,
+    # To use an RSA key with SFTPPlus, install upstream OpenSSH package,
     # which is more finicky in regards to file permissions.
     - name: Upload testing package
       env:
-        BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
+        BIN_PRIV_KEY: ${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}
+        BIN_HOST_KEY: ${{ secrets.SFTPPLUS_BIN_HOST_KEY }}
       run: |
-        echo "$env:BIN_KEY" > bin_key
-        icacls .\bin_key /inheritance:r
-        icacls .\bin_key /grant:r runneradmin:"(R)"
+        mkdir -p ~/.ssh/
+        echo "$env:BIN_HOST_KEY" > ~/.ssh/known_hosts
+        echo "$env:BIN_PRIV_KEY" > priv_key
+        icacls .\priv_key /inheritance:r
+        icacls .\priv_key /grant:r runneradmin:"(R)"
         choco install --yes --no-progress openssh
-        C:\Progra~1\OpenSSH-Win64\sftp.exe -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
+        C:\Progra~1\OpenSSH-Win64\sftp.exe -b sftp_batch -i priv_key bin@bin.chevah.com
 
     # Per https://github.com/nelsonjchen/reverse-rdp-windows-github-actions,
     # but using the Ngrok token as password for the runnneradmin user.
@@ -111,12 +114,15 @@ jobs:
 
     - name: Upload testing package
       env:
-        BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
+        BIN_PRIV_KEY: ${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}
+        BIN_HOST_KEY: ${{ secrets.SFTPPLUS_BIN_HOST_KEY }}
       run: |
-        touch bin_key
-        chmod 600 bin_key
-        echo "$BIN_KEY" > bin_key
-        sftp -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
+        mkdir -p ~/.ssh/
+        echo "$BIN_HOST_KEY" > ~/.ssh/known_hosts
+        touch priv_key
+        chmod 600 priv_key
+        echo "$BIN_PRIV_KEY" > priv_key
+        sftp -b sftp_batch -i priv_key bin@bin.chevah.com
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -154,12 +160,15 @@ jobs:
 
     - name: Upload testing package
       env:
-        BIN_KEY: ${{ secrets.SFTPPLUS_BIN_KEY }}
+        BIN_PRIV_KEY: ${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}
+        BIN_HOST_KEY: ${{ secrets.SFTPPLUS_BIN_HOST_KEY }}
       run: |
-        touch bin_key
-        chmod 600 bin_key
-        echo "$BIN_KEY" > bin_key
-        sftp -b sftp_batch -i bin_key -o StrictHostKeyChecking=no bin@bin.chevah.com
+        mkdir -p ~/.ssh/
+        echo "$BIN_HOST_KEY" > ~/.ssh/known_hosts
+        touch priv_key
+        chmod 600 priv_key
+        echo "$BIN_PRIV_KEY" > priv_key
+        sftp -b sftp_batch -i priv_key bin@bin.chevah.com
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
