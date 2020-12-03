@@ -47,11 +47,6 @@ jobs:
     - name: Build Python
       run: bash ./pythia build
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: pythia-${{ matrix.runs-on }}
-        path: dist/**/*.tar.gz
-
     - name: Test Python
       run: bash ./pythia test
 
@@ -108,11 +103,6 @@ jobs:
     - name: Build Python
       run: bash ./pythia build
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: pythia-${{ matrix.runs-on }}
-        path: dist/**/*.tar.gz
-
     - name: Test Python
       run: bash ./pythia test
 
@@ -155,11 +145,6 @@ jobs:
 
     - name: Build Python
       run: bash ./pythia build
-
-    - uses: actions/upload-artifact@v2
-      with:
-        name: pythia-macos
-        path: dist/**/*.tar.gz
 
     - name: Test Python
       run: bash ./pythia test
