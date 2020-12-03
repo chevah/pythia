@@ -38,11 +38,6 @@ jobs:
     # Checks-out the repository under $GITHUB_WORKSPACE, so the job can access it
     - uses: actions/checkout@v2
 
-    # Skip CI for commits with a message containing the skip-ci string.
-    - name: Fail on skip-ci
-      if: ${{ github.event.after }}
-      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
-
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
     - name: Detect current OS
       run: bash ./brink.sh detect_os
@@ -87,7 +82,6 @@ jobs:
 
 
   linux:
-    # 'Fail on skip-ci' action doesn't work for this runner (on 2020.10.16).
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
@@ -97,10 +91,6 @@ jobs:
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
-
-    - name: Fail on skip-ci
-      if: ${{ github.event.after }}
-      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
 
     - name: Install required packages
       run: sudo apt-get install libncurses5-dev
@@ -140,10 +130,6 @@ jobs:
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
-
-    - name: Fail on skip-ci
-      if: ${{ github.event.after }}
-      run: git log -1 --pretty=format:"%s" ${{ toJSON(github.event.after) }} | grep -v 'skip-ci'
 
     - name: Detect current OS
       run: ./brink.sh detect_os
