@@ -157,6 +157,8 @@ build() {
 #  * target_dir = name of the dir to be archived.
 #
 make_dist(){
+    echo "PYTHON_PACKAGE_VERSION is: $PYTHON_PACKAGE_VERSION"
+
     kind=$1
     target_dir=$2
 
