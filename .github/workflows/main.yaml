@@ -18,7 +18,7 @@ on:
 # Set to 'yes' to open a tunnel to GitHub's VMs through ngrok/tmate on failures.
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 env:
-  CHEVAH_DEBUG: 'yes'
+  CHEVAH_DEBUG: 'no'
 
 jobs:
   windows:
@@ -37,8 +37,6 @@ jobs:
     - uses: chevah/auto-cancel-redundant-job@v1
     # Checks-out the repository under $GITHUB_WORKSPACE, so the job can access it
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
 
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
     - name: Detect current OS
@@ -52,6 +50,7 @@ jobs:
 
     # To use an RSA key with SFTPPlus, install upstream OpenSSH package,
     # which is more finicky in regards to file permissions.
+    # Beware the commands in this step run under PowerShell.
     - name: Upload testing package
       env:
         BIN_PRIV_KEY: ${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}
@@ -91,8 +90,6 @@ jobs:
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
 
     - name: Install required packages
       run: sudo apt-get install libncurses5-dev
@@ -130,8 +127,6 @@ jobs:
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
 
     - name: Detect current OS
       run: ./brink.sh detect_os

@@ -11,7 +11,7 @@ source ./functions_pythia.sh
 
 # Git revision to inject into Python's sys.version string through chevahbs
 # on non-Windows platforms. Also used for compat tests and archived in the dist.
-PYTHON_PACKAGE_VERSION="$(git rev-parse --short=8 HEAD)"
+PYTHON_PACKAGE_VERSION="$(git log -n 1 --no-merges --pretty=format:%h)"
 exit_on_error $? 250
 
 # Export the variables needed by the chevahbs scripts and the test phase.
