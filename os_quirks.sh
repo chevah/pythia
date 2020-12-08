@@ -39,7 +39,7 @@ case $OS in
         export CFLAGS="$CFLAGS -mmacosx-version-min=10.13"
         # setup.py skips building readline by default, as it sets this to
         # "10.4", and then tries to avoid the broken readline in OS X 10.4.
-        export MACOSX_DEPLOYMENT_TARGET=10.12
+        export MACOSX_DEPLOYMENT_TARGET=10.13
         # System includes bzip2 libs by default.
         export BUILD_BZIP2="no"
         # 10.13 and newer come with LibreSSL instead of the old OpenSSL libs.
