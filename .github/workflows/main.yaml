@@ -54,15 +54,13 @@ jobs:
     # which is more finicky in regards to file permissions.
     # Beware the commands in this step run under PowerShell.
     - name: Upload testing package
-      env:
-        BIN_PRIV_KEY: ${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}
-        BIN_HOST_KEY: ${{ secrets.SFTPPLUS_BIN_HOST_KEY }}
       run: |
         mkdir -p ~/.ssh/
-        echo "$env:BIN_HOST_KEY" > ~/.ssh/known_hosts
-        echo "$env:BIN_PRIV_KEY" > priv_key
+        touch priv_key
         icacls .\priv_key /inheritance:r
         icacls .\priv_key /grant:r runneradmin:"(R)"
+        echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         choco install --yes --no-progress openssh
         C:\Progra~1\OpenSSH-Win64\sftp.exe -b sftp_batch -i priv_key -o StrictHostKeyChecking=yes bin@bin.chevah.com
 
@@ -108,15 +106,12 @@ jobs:
       run: bash ./pythia test
 
     - name: Upload testing package
-      env:
-        BIN_PRIV_KEY: ${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}
-        BIN_HOST_KEY: ${{ secrets.SFTPPLUS_BIN_HOST_KEY }}
       run: |
         mkdir -p ~/.ssh/
-        echo "$BIN_HOST_KEY" > ~/.ssh/known_hosts
         touch priv_key
         chmod 600 priv_key
-        echo "$BIN_PRIV_KEY" > priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         sftp -b sftp_batch -i priv_key -o StrictHostKeyChecking=yes bin@bin.chevah.com
 
     # If one of the above steps fails, fire up tmate for remote debugging.
@@ -151,15 +146,12 @@ jobs:
       run: bash ./pythia test
 
     - name: Upload testing package
-      env:
-        BIN_PRIV_KEY: ${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}
-        BIN_HOST_KEY: ${{ secrets.SFTPPLUS_BIN_HOST_KEY }}
       run: |
         mkdir -p ~/.ssh/
-        echo "$BIN_HOST_KEY" > ~/.ssh/known_hosts
         touch priv_key
         chmod 600 priv_key
-        echo "$BIN_PRIV_KEY" > priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         sftp -b sftp_batch -i priv_key -o StrictHostKeyChecking=yes bin@bin.chevah.com
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
