@@ -58,8 +58,8 @@ jobs:
         mkdir -p ~/.ssh/
         touch priv_key
         icacls .\priv_key /inheritance:r
-        icacls .\priv_key /grant:r runneradmin:"(R)"
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
+        icacls .\priv_key /grant:r runneradmin:"(R)"
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         choco install --yes --no-progress openssh
         C:\Progra~1\OpenSSH-Win64\sftp.exe -b sftp_batch -i priv_key -o StrictHostKeyChecking=yes bin@bin.chevah.com
