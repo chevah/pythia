@@ -185,12 +185,12 @@ make_dist(){
 # Commands prefixed with a '-' are allowed to fail.
 #
 build_publish_dist_sftp_batch() {
-    echo "lcd dist/python/$OS/$ARCH/"        > sftp_batch
-    echo "cd testing/python"                >> sftp_batch
-    echo "-mkdir $OS"                       >> sftp_batch
-    echo "cd $OS"                           >> sftp_batch
-    echo "-mkdir $ARCH"                     >> sftp_batch
-    echo "cd $ARCH"                         >> sftp_batch
-    echo "put python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz" \
-                                            >> sftp_batch
+    echo "lcd dist/python/$OS/$ARCH/"        > publish_dist_sftp_batch
+    echo "cd testing/python"                >> publish_dist_sftp_batch
+    echo "-mkdir $OS"                       >> publish_dist_sftp_batch
+    echo "cd $OS"                           >> publish_dist_sftp_batch
+    echo "-mkdir $ARCH"                     >> publish_dist_sftp_batch
+    echo "cd $ARCH"                         >> publish_dist_sftp_batch
+    echo "put python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part" >> publish_dist_sftp_batch
+    echo "rename python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz" >> publish_dist_sftp_batch
 }
