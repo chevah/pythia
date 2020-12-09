@@ -100,14 +100,16 @@ command_build() {
 
     build_python
 
-    # Python modules installed with pip. Some are built locally.
+    # Python modules installed with pip. Built locally if not on Windows.
     command_install_python_modules
 
     cleanup_install_dir
 
+    # Build the new package.
     make_dist 'python' ${PYTHON_BUILD_DIR}
 
-    build_sftp_batch
+    # Generate a SFTP batch for uploading the package.
+    build_publish_dist_sftp_batch
 }
 
 

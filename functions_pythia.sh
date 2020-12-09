@@ -184,7 +184,7 @@ make_dist(){
 # Construct a SFTP batch file for uploading testing packages.
 # Commands prefixed with a '-' are allowed to fail.
 #
-build_sftp_batch() {
+build_publish_dist_sftp_batch() {
     echo "lcd dist/python/$OS/$ARCH/"        > sftp_batch
     echo "cd testing/python"                >> sftp_batch
     echo "-mkdir $OS"                       >> sftp_batch
