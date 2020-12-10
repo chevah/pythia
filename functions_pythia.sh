@@ -68,7 +68,7 @@ download_sources(){
             ;;
         exe|amd64*|win32*)
             # No need to use ../../build/"$project_name"-"$project_ver"/ here.
-            echo "    Nothing to unpack for ${archive_filename}."
+            echo "    Nothing to unpack in build/ for ${archive_filename}."
             ;;
         *)
             (>&2 echo "Unknown archive type for ${archive_filename}, exiting!")
@@ -178,4 +178,19 @@ make_dist(){
         execute tar -cf $target_tar $target_dir
         execute gzip $target_tar
     execute popd
+}
+
+#
+# Construct a SFTP batch file for uploading testing packages.
+# Commands prefixed with a '-' are allowed to fail.
+#
+build_publish_dist_sftp_batch() {
+    echo "lcd dist/python/$OS/$ARCH/"        > publish_dist_sftp_batch
+    echo "cd testing/python"                >> publish_dist_sftp_batch
+    echo "-mkdir $OS"                       >> publish_dist_sftp_batch
+    echo "cd $OS"                           >> publish_dist_sftp_batch
+    echo "-mkdir $ARCH"                     >> publish_dist_sftp_batch
+    echo "cd $ARCH"                         >> publish_dist_sftp_batch
+    echo "put python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part" >> publish_dist_sftp_batch
+    echo "rename python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz" >> publish_dist_sftp_batch
 }

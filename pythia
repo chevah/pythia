@@ -11,7 +11,7 @@ source ./functions_pythia.sh
 
 # Git revision to inject into Python's sys.version string through chevahbs
 # on non-Windows platforms. Also used for compat tests and archived in the dist.
-PYTHON_PACKAGE_VERSION="$(git rev-parse --short=8 HEAD)"
+PYTHON_PACKAGE_VERSION="$(git log -n 1 --no-merges --pretty=format:%h)"
 exit_on_error $? 250
 
 # Export the variables needed by the chevahbs scripts and the test phase.
@@ -100,12 +100,16 @@ command_build() {
 
     build_python
 
-    # Python modules installed with pip. Some are built locally.
+    # Python modules installed with pip. Built locally if not on Windows.
     command_install_python_modules
 
     cleanup_install_dir
 
+    # Build the new package.
     make_dist 'python' ${PYTHON_BUILD_DIR}
+
+    # Generate a SFTP batch for uploading the package.
+    build_publish_dist_sftp_batch
 }
 
 

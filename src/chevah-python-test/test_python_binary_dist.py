@@ -520,7 +520,7 @@ def main():
 
         # Check for the git revision in Python's sys.version on Linux and Unix.
         try:
-            git_rev_cmd = ['git', 'rev-parse', '--short=8', 'HEAD']
+            git_rev_cmd = ['git', 'log', '-1', '--no-merges', '--format=%h']
             git_rev = subprocess.check_output(git_rev_cmd).strip().decode()
         except:
             sys.stderr.write("Couldn't get the git rev for the current tree.\n")
@@ -532,10 +532,6 @@ def main():
                                  "\tBin ver: {0}".format(bin_ver) + "\n"
                                  "\tGit rev: {0}".format(git_rev) + "\n")
                 exit_code = 158
-            if len(bin_ver) != 8:
-                sys.stderr.write("Bad length for binary version, expected 8!\n"
-                                 "\tBin ver: {0}".format(bin_ver) + "\n")
-                exit_code = 159
 
     if platform_system in [ 'linux', 'sunos' ]:
         try:

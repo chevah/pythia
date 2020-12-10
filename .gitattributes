@@ -1,0 +1,5 @@
+# Prevent the default "Windows-style checkouts" that leads to mysterious
+# failures when cloning with default Git settings on Windows, e.g.
+# https://github.com/chevah/pythia/issues/3. More on this at
+# https://github.com/actions/checkout/issues/135#issuecomment-613329879.
+* -text
