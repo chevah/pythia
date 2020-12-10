@@ -14,7 +14,6 @@
 # * clean - remove everything, except cache
 # * purge - remove (empty) the cache
 # * get_python - download Python distribution in cache
-# * get_agent - download Rexx/Putty distribution in cache
 #
 # It exports the following environment variables:
 # * PYTHONPATH - path to the build directory
@@ -833,12 +832,7 @@ if [ "$COMMAND" = "get_python" ] ; then
     OS=$2
     ARCH=$3
     resolve_python_version
-    get_python_dist "$BINARY_DIST_URI/python" "fallback"
-    exit 0
-fi
-
-if [ "$COMMAND" = "get_agent" ] ; then
-    get_binary_dist $2 "$BINARY_DIST_URI/agent"
+    get_python_dist "$BINARY_DIST_URI" "fallback"
     exit 0
 fi
 
