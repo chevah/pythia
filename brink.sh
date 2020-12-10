@@ -330,7 +330,6 @@ set_download_commands() {
     set +o errexit
     command -v curl > /dev/null
     if [ $? -eq 0 ]; then
-        # Using CURL for downloading Python package.
         DOWNLOAD_CMD="curl --remote-name --location"
         ONLINETEST_CMD="curl --fail --silent --head --output /dev/null"
         set -o errexit
@@ -386,14 +385,14 @@ get_python_dist() {
     local remote_base_url=$1
     local download_mode=$2
     local python_distributable=python-${PYTHON_VERSION}-${OS}-${ARCH}
-    local wget_test
+    local onlinetest_errorcode
 
     set +o errexit
     test_version_exists $remote_base_url
-    wget_test=$?
+    onlinetest_errorcode=$?
     set -o errexit
 
-    if [ $wget_test -eq 0 ]; then
+    if [ $onlinetest_errorcode -eq 0 ]; then
         # We have the requested python version.
         get_binary_dist $python_distributable $remote_base_url/${PYTHON_VERSION}
     else
