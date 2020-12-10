@@ -49,7 +49,7 @@ export CC="gcc"
 # Other needed tools (GNU flavours preferred).
 export MAKE="make"
 # $GET_CMD must save to custom filename, which must be appended before the link.
-export GET_CMD="wget --quiet -O"
+export GET_CMD="curl --silent --output"
 export SHA_CMD="sha512sum --check --status --warn"
 export TAR_CMD="tar xfz"
 export ZIP_CMD="unzip -q"

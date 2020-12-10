@@ -10,12 +10,12 @@
 #   * git (for patching Python's version, if actually building it)
 #   * automake, libtool, headers of a curses library (if building libedit)
 #   * perl 5.10.0 or newer, Test::More 0.96 or newer (if building OpenSSL)
-#   * wget/curl, sha512sum, tar, unzip (for downloading and unpacking)
+#   * curl/wget, sha512sum, tar, unzip (for downloading and unpacking)
 #
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
-BASE_PKGS="gcc make m4 automake libtool texinfo patch wget tar coreutils unzip"
+BASE_PKGS="gcc make m4 automake libtool texinfo patch curl tar coreutils unzip"
 DPKG_PKGS="$BASE_PKGS git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
 RPM_PKGS="$BASE_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
 # Alpine's ersatz wget/tar/sha51sum binaries from Busybox are good enough.
@@ -28,7 +28,7 @@ CHOCO_PRESENT="unknown"
 
 # Check for OS packages required for the build.
 MISSING_PACKAGES=""
-PACKAGES="$CC make m4 git patch wget sha512sum tar unzip"
+PACKAGES="$CC make m4 git patch curl sha512sum tar unzip"
 CHECK_CMD="command -v"
 
 choco_shim() {
