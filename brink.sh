@@ -87,7 +87,7 @@ PYTHON_CONFIGURATION='NOT-YET-DEFINED'
 PYTHON_VERSION='not.defined.yet'
 PYTHON_PLATFORM='unknown-os-and-arch'
 PYTHON_NAME='python3.8'
-BINARY_DIST_URI='https://binary.chevah.com/production'
+BINARY_DIST_URI='unknown-dist-uri'
 PIP_INDEX='https://pypi.chevah.com'
 BASE_REQUIREMENTS=''
 
@@ -376,7 +376,7 @@ test_version_exists() {
     local remote_base_url=$1
     local target_file=python-${PYTHON_VERSION}-${OS}-${ARCH}.tar.gz
 
-    $ONLINETEST_CMD $remote_base_url/${OS}/${ARCH}/$target_file
+    $ONLINETEST_CMD $remote_base_url/${PYTHON_VERSION}/$target_file
     return $?
 }
 
@@ -396,7 +396,7 @@ get_python_dist() {
 
     if [ $wget_test -eq 0 ]; then
         # We have the requested python version.
-        get_binary_dist $python_distributable $remote_base_url/${OS}/${ARCH}
+        get_binary_dist $python_distributable $remote_base_url/${PYTHON_VERSION}
     else
         (>&2 echo "Requested version was not found on the remote server.")
         (>&2 echo "$remote_base_url $python_distributable")
@@ -453,7 +453,7 @@ copy_python() {
             # We don't have a cached python distributable.
             echo "No ${LOCAL_PYTHON_BINARY_DIST} environment." \
                 "Start downloading it..."
-            get_python_dist "$BINARY_DIST_URI/python" "strict"
+            get_python_dist "$BINARY_DIST_URI" "strict"
         fi
 
         echo "Copying Python distribution files... "
@@ -476,7 +476,7 @@ copy_python() {
                 # Check if we have the to-be-updated version and fail if
                 # it does not exists.
                 set +o errexit
-                test_version_exists "$BINARY_DIST_URI/python"
+                test_version_exists "$BINARY_DIST_URI"
                 local test_version=$?
                 set -o errexit
                 if [ $test_version -ne 0 ]; then
@@ -496,7 +496,7 @@ copy_python() {
         else
             # The installed python has no version.
             set +o errexit
-            test_version_exists "$BINARY_DIST_URI/python"
+            test_version_exists "$BINARY_DIST_URI"
             local test_version=$?
             set -o errexit
             if [ $test_version -eq 0 ]; then
