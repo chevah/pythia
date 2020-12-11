@@ -29,7 +29,7 @@ case $OS in
         # To avoid linking to local libs, build own OpenSSL libs.
         export BUILD_OPENSSL="yes"
         # Generic builds on CentOS 5 have issues with Let's Encrypt certs.
-        export GET_CMD="wget --quiet --no-check-certificate -O"
+        export GET_CMD="curl --silent --insecure --output"
         ;;
     macos)
         export CC="clang"
