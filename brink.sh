@@ -95,7 +95,6 @@ BASE_REQUIREMENTS=''
 # If not, we are out of the source's root dir and brink.sh won't work.
 #
 check_source_folder() {
-
     if [ ! -e pavement.py ]; then
         (>&2 echo 'No "pavement.py" file found in current folder.')
         (>&2 echo 'Make sure you are running "brink.sh" from a source folder.')
@@ -410,7 +409,6 @@ COPY_PYTHON_RECURSIONS=0
 # Copy python to build folder from binary distribution.
 #
 copy_python() {
-
     local python_distributable="${CACHE_FOLDER}/${LOCAL_PYTHON_BINARY_DIST}"
     local python_installed_version
 
@@ -465,48 +463,29 @@ copy_python() {
         # We have a Python, but we are not sure if is the right version.
         local version_file=${BUILD_FOLDER}/lib/PYTHON_PACKAGE_VERSION
 
-        if [ -f $version_file ]; then
-            # We have a versioned distribution.
-            python_installed_version=`cat $version_file`
-            if [ "$PYTHON_VERSION" != "$python_installed_version" ]; then
-                # We have a different python installed.
+        python_installed_version=`cat $version_file`
+        if [ "$PYTHON_VERSION" != "$python_installed_version" ]; then
+            # We have a different python installed.
 
-                # Check if we have the to-be-updated version and fail if
-                # it does not exists.
-                set +o errexit
-                test_version_exists "$BINARY_DIST_URI"
-                local test_version=$?
-                set -o errexit
-                if [ $test_version -ne 0 ]; then
-                    (>&2 echo "The build is now at $python_installed_version.")
-                    (>&2 echo "Failed to find the required $PYTHON_VERSION.")
-                    (>&2 echo "Check your configuration or the remote server.")
-                    exit 6
-                fi
-
-                # Remove it and try to install it again.
-                echo "Updating Python from" \
-                    $python_installed_version to $PYTHON_VERSION
-                rm -rf ${BUILD_FOLDER}/*
-                rm -rf ${python_distributable}
-                copy_python
-            fi
-        else
-            # The installed python has no version.
+            # Check if we have the to-be-updated version and fail if
+            # it does not exists.
             set +o errexit
             test_version_exists "$BINARY_DIST_URI"
             local test_version=$?
             set -o errexit
-            if [ $test_version -eq 0 ]; then
-                echo "Updating Python from UNVERSIONED to $PYTHON_VERSION"
-                # We have a different python installed.
-                # Remove it and try to install it again.
-                rm -rf ${BUILD_FOLDER}/*
-                rm -rf ${python_distributable}
-                copy_python
-            else
-                echo "Leaving UNVERSIONED Python."
+            if [ $test_version -ne 0 ]; then
+                (>&2 echo "The build is now at $python_installed_version.")
+                (>&2 echo "Failed to find the required $PYTHON_VERSION.")
+                (>&2 echo "Check your configuration or the remote server.")
+                exit 6
             fi
+
+            # Remove it and try to install it again.
+            echo "Updating Python from" \
+                $python_installed_version to $PYTHON_VERSION
+            rm -rf ${BUILD_FOLDER}/*
+            rm -rf ${python_distributable}
+            copy_python
         fi
     fi
 
@@ -684,7 +663,6 @@ set_os_if_not_generic() {
 # In some cases we normalize or even override ARCH at the end of this function.
 #
 detect_os() {
-
     OS=$(uname -s)
 
     case "$OS" in
