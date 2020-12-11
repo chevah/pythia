@@ -186,11 +186,9 @@ make_dist(){
 #
 build_publish_dist_sftp_batch() {
     echo "lcd dist/python/$OS/$ARCH/"        > publish_dist_sftp_batch
-    echo "cd testing/python"                >> publish_dist_sftp_batch
-    echo "-mkdir $OS"                       >> publish_dist_sftp_batch
-    echo "cd $OS"                           >> publish_dist_sftp_batch
-    echo "-mkdir $ARCH"                     >> publish_dist_sftp_batch
-    echo "cd $ARCH"                         >> publish_dist_sftp_batch
+    echo "cd testing"                       >> publish_dist_sftp_batch
+    echo "-mkdir $PYTHON_PACKAGE_VERSION"   >> publish_dist_sftp_batch
+    echo "cd $PYTHON_PACKAGE_VERSION"       >> publish_dist_sftp_batch
     echo "put python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part" >> publish_dist_sftp_batch
     echo "rename python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz" >> publish_dist_sftp_batch
 }

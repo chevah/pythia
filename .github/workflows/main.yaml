@@ -67,7 +67,7 @@ jobs:
     - name: Upload testing package
       run: |
         C:\Progra~1\OpenSSH-Win64\sftp.exe -b publish_dist_sftp_batch -i priv_key -o StrictHostKeyChecking=yes bin@bin.chevah.com
-        echo "Package uploaded to https://bin.chevah.com:20443/testing/python/"
+        echo "Package uploaded to https://bin.chevah.com:20443/testing/"
 
     # Per https://github.com/nelsonjchen/reverse-rdp-windows-github-actions,
     # but using the Ngrok token as password for the runnneradmin user.
@@ -118,7 +118,7 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         sftp -b publish_dist_sftp_batch -i priv_key -o StrictHostKeyChecking=yes bin@bin.chevah.com
-        echo "Package uploaded to https://bin.chevah.com:20443/testing/python/"
+        echo "Package uploaded to https://bin.chevah.com:20443/testing/"
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -159,7 +159,7 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         sftp -b publish_dist_sftp_batch -i priv_key -o StrictHostKeyChecking=yes bin@bin.chevah.com
-        echo "Package uploaded to https://bin.chevah.com:20443/testing/python/"
+        echo "Package uploaded to https://bin.chevah.com:20443/testing/"
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
