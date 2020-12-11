@@ -185,10 +185,13 @@ make_dist(){
 # Commands prefixed with a '-' are allowed to fail.
 #
 build_publish_dist_sftp_batch() {
+    # This matches the GitHub's hierarchy for production packages.
+    local upload_version_dir="$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION"
+
     echo "lcd dist/python/$OS/$ARCH/"        > publish_dist_sftp_batch
     echo "cd testing"                       >> publish_dist_sftp_batch
-    echo "-mkdir $PYTHON_PACKAGE_VERSION"   >> publish_dist_sftp_batch
-    echo "cd $PYTHON_PACKAGE_VERSION"       >> publish_dist_sftp_batch
+    echo "-mkdir $upload_version_dir"       >> publish_dist_sftp_batch
+    echo "cd $upload_version_dir"           >> publish_dist_sftp_batch
     echo "put python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part" >> publish_dist_sftp_batch
     echo "rename python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz" >> publish_dist_sftp_batch
 }
