@@ -238,8 +238,23 @@ cleanup_install_dir() {
                     # Remove the sizable sqlite3 binary.
                     execute rm sqlite3
                 execute popd
-                # Strip all libs too.
-                execute strip lib/lib*.a
+                # OS-related binary stripping.
+                case $OS in
+                    macos)
+                        # Strip all libs except the OpenSSL ones.
+                        for lib_to_strip in lib/*.a; do
+                            if [ $lib_to_strip != "libcrypto.a" \
+                                -a $lib_to_strip != "libssl.a" ]; then
+                                execute strip $lib_to_strip
+                            fi
+                        done
+                        ;;
+                    *)
+                        execute strip lib/lib*.a
+                        # On CentOS 5 we have libs here too.
+                        execute strip lib64/lib*.a
+                        ;;
+                esac
                 # Symlink the copy of libpython3.*.a too.
                 execute pushd lib/$PYTHON_VERSION/config-*
                     execute rm $python_lib_file
