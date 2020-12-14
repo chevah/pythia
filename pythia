@@ -222,17 +222,24 @@ cleanup_install_dir() {
                 execute mv bin/ lib/config/
                 execute mkdir bin
                 execute pushd lib/config/bin/
-                    # Strip the binary.
-                    execute strip $PYTHON_VERSION
                     # Move Python binary back as bin/python, then link to it.
                     execute mv $PYTHON_VERSION ../../../bin/python
                     execute ln -s ../../../bin/python $PYTHON_VERSION
-                    # Make sure python3 is also a symlink (macOS issue).
-                    execute rm python3
-                    execute ln -s $PYTHON_VERSION python3
+                    # OS-related fixed for the Python binaries.
+                    case $OS in
+                        macos)
+                            execute rm python3
+                            execute ln -s $PYTHON_VERSION python3
+                            ;;
+                        *)
+                            execute strip $PYTHON_VERSION
+                            ;;
+                    esac
                     # Remove the sizable sqlite3 binary.
                     execute rm sqlite3
                 execute popd
+                # Strip all libs too.
+                execute strip lib/lib*.a
                 # Symlink the copy of libpython3.*.a too.
                 execute pushd lib/$PYTHON_VERSION/config-*
                     execute rm $python_lib_file
