@@ -209,15 +209,16 @@ cleanup_install_dir() {
     local python_lib_file="lib${PYTHON_VERSION}.a"
 
     echo "::group::Clean up Python install dir"
-    # Clean up the Python libs to reuce the distribution archives.
-    find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+    execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
+        echo "    Cleaning up Python's caches and compiled files..."
+        find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+    execute popd
     case $OS in
         win)
-            echo "    Skip cleaning install dir"
+            echo "    Skip further cleaning of install dir"
             ;;
         *)
             execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
-                # Clean the build dir.
                 execute rm -rf tmp
                 # Move all binaries to lib/config
                 execute mkdir -p lib/config
