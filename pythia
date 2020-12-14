@@ -209,6 +209,8 @@ cleanup_install_dir() {
     local python_lib_file="lib${PYTHON_VERSION}.a"
 
     echo "::group::Clean up Python install dir"
+    # Clean up the Python libs to reuce the distribution archives.
+    find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
     case $OS in
         win)
             echo "    Skip cleaning install dir"
@@ -251,8 +253,10 @@ cleanup_install_dir() {
                         ;;
                     *)
                         execute strip lib/lib*.a
-                        # On CentOS 5 we have libs here too.
-                        execute strip lib64/lib*.a
+                        # On CentOS 5, libffi and OpenSSL install to lib64/.
+                        if [ -d lib64 ]; then
+                            execute strip lib64/lib*.a
+                        fi
                         ;;
                 esac
                 # Symlink the copy of libpython3.*.a too.
@@ -264,8 +268,6 @@ cleanup_install_dir() {
                 execute rm -rf "lib/$PYTHON_VERSION/test/"
                 # Remove (mostly OpenSSL) docs and manuals.
                 execute rm -rf share/
-                # Clean up the Python libs to further reduce the dist files.
-                find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
             execute popd
             ;;
     esac
