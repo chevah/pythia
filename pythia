@@ -244,9 +244,8 @@ cleanup_install_dir() {
                 # OS-related binary stripping.
                 case $OS in
                     macos)
-                        # Strip all libs except the OpenSSL ones.
-                        for lib_to_strip in lib/libedit.a lib/libsqlite3.a \
-                            lib${PYTHON_VERSION}.a; do
+                        # Strip libs that can be stripped.
+                        for lib_to_strip in lib/libsqlite3.a libpython*.a; do
                             execute strip $lib_to_strip
                         done
                         ;;
