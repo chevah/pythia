@@ -245,11 +245,9 @@ cleanup_install_dir() {
                 case $OS in
                     macos)
                         # Strip all libs except the OpenSSL ones.
-                        for lib_to_strip in lib/*.a; do
-                            if [ $lib_to_strip != "libcrypto.a" \
-                                -a $lib_to_strip != "libssl.a" ]; then
-                                execute strip $lib_to_strip
-                            fi
+                        for lib_to_strip in lib/libedit.a lib/libsqlite3.a \
+                            lib${PYTHON_VERSION}.a; do
+                            execute strip $lib_to_strip
                         done
                         ;;
                     *)
