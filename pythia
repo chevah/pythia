@@ -264,6 +264,8 @@ cleanup_install_dir() {
                 execute rm -rf "lib/$PYTHON_VERSION/test/"
                 # Remove (mostly OpenSSL) docs and manuals.
                 execute rm -rf share/
+                # Clean up the Python libs to further reduce the dist files.
+                find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
             execute popd
             ;;
     esac
