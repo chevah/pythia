@@ -222,6 +222,8 @@ cleanup_install_dir() {
                 execute mv bin/ lib/config/
                 execute mkdir bin
                 execute pushd lib/config/bin/
+                    # Strip the binary.
+                    execute strip $PYTHON_VERSION
                     # Move Python binary back as bin/python, then link to it.
                     execute mv $PYTHON_VERSION ../../../bin/python
                     execute ln -s ../../../bin/python $PYTHON_VERSION
