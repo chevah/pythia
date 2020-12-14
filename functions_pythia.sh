@@ -191,6 +191,6 @@ build_publish_dist_sftp_batch() {
     # Files are uploaded with a temp name and then renamed to final name.
     echo "lcd dist/python/$OS/$ARCH/" > publish_dist_sftp_batch
     echo "-mkdir testing/$upload_version_dir" >> publish_dist_sftp_batch
-    echo "put python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part" >> publish_dist_sftp_batch
+    echo "put python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz testing/$upload_version_dir/python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part" >> publish_dist_sftp_batch
     echo "rename testing/$upload_version_dir/python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part testing/$upload_version_dir/python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz" >> publish_dist_sftp_batch
 }
