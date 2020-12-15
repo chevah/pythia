@@ -18,7 +18,7 @@ on:
 # Set to 'yes' to open a tunnel to GitHub's VMs through ngrok/tmate on failures.
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 env:
-  CHEVAH_DEBUG: 'yes'
+  CHEVAH_DEBUG: 'no'
 
 jobs:
   windows:
@@ -139,7 +139,7 @@ jobs:
       run: ./brink.sh detect_os
 
     # Some Homebrew libs pollute the build.
-    # Also make sure binaries depending on these libs are not in the way.
+    # Also make sure binaries depending on these libs are out of the way.
     - name: Hack Homebrew
       run: |
         sudo mv -v /usr/local/bin/git{,.saved}

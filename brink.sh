@@ -86,7 +86,7 @@ PYTHON_CONFIGURATION='NOT-YET-DEFINED'
 PYTHON_VERSION='not.defined.yet'
 PYTHON_PLATFORM='unknown-os-and-arch'
 PYTHON_NAME='python3.8'
-BINARY_DIST_URI='unknown-dist-uri'
+BINARY_DIST_URI='https://github.com/chevah/pythia/releases/download'
 PIP_INDEX='https://pypi.chevah.com'
 BASE_REQUIREMENTS=''
 
