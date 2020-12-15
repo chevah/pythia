@@ -231,6 +231,7 @@ cleanup_install_dir() {
                     # OS-related fixed for the Python binaries.
                     case $OS in
                         macos)
+                            # The binary is already stripped on macOS.
                             execute rm python3
                             execute ln -s $PYTHON_VERSION python3
                             ;;
@@ -241,13 +242,11 @@ cleanup_install_dir() {
                     # Remove the sizable sqlite3 binary.
                     execute rm sqlite3
                 execute popd
-                # OS-related binary stripping.
+                # OS-related stripping for libs.
                 case $OS in
                     macos)
                         # Darwin's strip command is different.
-                        for lib_to_strip in lib/libsqlite3.a libpython*.a; do
-                            execute strip -r $lib_to_strip
-                        done
+                        execute strip -r lib/lib*.a
                         ;;
                     *)
                         execute strip lib/lib*.a
