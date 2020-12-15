@@ -18,7 +18,7 @@ on:
 # Set to 'yes' to open a tunnel to GitHub's VMs through ngrok/tmate on failures.
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 env:
-  CHEVAH_DEBUG: 'no'
+  CHEVAH_DEBUG: 'yes'
 
 jobs:
   windows:

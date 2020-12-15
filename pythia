@@ -244,9 +244,9 @@ cleanup_install_dir() {
                 # OS-related binary stripping.
                 case $OS in
                     macos)
-                        # Strip libs that can be stripped.
+                        # Darwin's strip command is different.
                         for lib_to_strip in lib/libsqlite3.a libpython*.a; do
-                            execute strip $lib_to_strip
+                            execute strip -r $lib_to_strip
                         done
                         ;;
                     *)
