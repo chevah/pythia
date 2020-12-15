@@ -142,9 +142,9 @@ jobs:
     # Also make sure binaries depending on these libs are not in the way.
     - name: Hack Homebrew
       run: |
-        sudo chmod a-r /usr/local/lib/libintl*
-        sudo chmod a-r /usr/local/opt/gettext/lib/libintl*
-        sudo chmod a-x /usr/local/bin/{curl,git}
+        sudo mv -v /usr/local/bin/git{,.saved}
+        sudo chmod -v a-r /usr/local/include/libintl.h
+        sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
 
     - name: Build Python
       run: bash ./pythia build
@@ -166,9 +166,10 @@ jobs:
     - name: Unhack Homebrew
       if: failure() && env.CHEVAH_DEBUG == 'yes'
       run: |
-        sudo chmod a+x /usr/local/bin/{curl,git}
-        sudo chmod a-r /usr/local/lib/libintl*
-        sudo chmod a-r /usr/local/opt/gettext/lib/libintl*
+        sudo chmod -v a+r /usr/local/opt/gettext/lib/libintl*
+        sudo chmod -v a+r /usr/local/include/libintl.h
+        sudo mv -v /usr/local/bin/git{.saved,}
+
 
     - name: Tmate debug on failure
       if: failure() && env.CHEVAH_DEBUG == 'yes'
