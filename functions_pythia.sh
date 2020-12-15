@@ -96,6 +96,9 @@ chevahbs_build() {
 }
 
 
+#
+# Build-related stuff.
+#
 build() {
     # This has the form: "libffi", "zlib", "bzip", "libedit", etc.
     # It's present in 'src/` and contains `chevahbs`, checksums, patches.
@@ -148,12 +151,87 @@ build() {
 
 
 #
+# Put stuff where it's expected and remove some of the cruft.
+#
+cleanup_install_dir() {
+    local python_lib_file="lib${PYTHON_VERSION}.a"
+
+    echo "::group::Clean up Python install dir"
+    execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
+        echo "    Cleaning up Python's caches and compiled files..."
+        find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+    execute popd
+    case $OS in
+        win)
+            echo "    Skip further cleaning of install dir"
+            ;;
+        *)
+            execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
+                execute rm -rf tmp
+                # Move all binaries to lib/config
+                execute mkdir -p lib/config
+                execute mv bin/ lib/config/
+                execute mkdir bin
+                execute pushd lib/config/bin/
+                    # Move Python binary back as bin/python, then link to it.
+                    execute mv $PYTHON_VERSION ../../../bin/python
+                    execute ln -s ../../../bin/python $PYTHON_VERSION
+                    # OS-related fixed for the Python binaries.
+                    case $OS in
+                        macos)
+                            # The binary is already stripped on macOS.
+                            execute rm python3
+                            execute ln -s $PYTHON_VERSION python3
+                            ;;
+                        *)
+                            execute strip $PYTHON_VERSION
+                            ;;
+                    esac
+                    # Remove the sizable sqlite3 binary.
+                    execute rm sqlite3
+                execute popd
+                # OS-related stripping for libs.
+                case $OS in
+                    macos)
+                        # Darwin's strip command is different.
+                        execute strip -r lib/lib*.a
+                        ;;
+                    *)
+                        execute strip lib/lib*.a
+                        # On CentOS 5, libffi and OpenSSL install to lib64/.
+                        if [ -d lib64 ]; then
+                            execute strip lib64/lib*.a
+                        fi
+                        ;;
+                esac
+                # Symlink the copy of libpython3.*.a too.
+                execute pushd lib/$PYTHON_VERSION/config-*
+                    execute rm $python_lib_file
+                    execute ln -s ../../$python_lib_file
+                execute popd
+                # Remove the big test/ sub-dir.
+                execute rm -rf "lib/$PYTHON_VERSION/test/"
+                # Remove (mostly OpenSSL) docs and manuals.
+                execute rm -rf share/
+            execute popd
+            ;;
+    esac
+
+    # Output Pythia's own version to a dedicated file in the archive.
+    echo "${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
+        > ${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHON_PACKAGE_VERSION
+
+    echo "::endgroup::"
+}
+
+
+#
 # Create the distributable archive.
 #
 # It also generates the symlink to latest build.
 #
 # Args:
-#  * kind = (agent|python2.5)
+#  * kind = python3.8 (for example)
 #  * target_dir = name of the dir to be archived.
 #
 make_dist(){
