@@ -139,11 +139,12 @@ jobs:
       run: ./brink.sh detect_os
 
     # Some Homebrew libs pollute the build.
+    # Also make sure binaries depending on these libs are not in the way.
     - name: Hack Homebrew
       run: |
-        sudo chmod a-r /usr/local/opt/libffi/lib/libffi.7.dylib
-        sudo find /usr/local -name 'libintl*' -exec chmod a-r {} +
-        sudo rm -f /usr/local/bin/{wget,curl,git}
+        sudo chmod a-r /usr/local/lib/libintl*
+        sudo chmod a-r /usr/local/opt/gettext/lib/libintl*
+        sudo chmod a-x /usr/local/bin/{curl,git}
 
     - name: Build Python
       run: bash ./pythia build
@@ -165,8 +166,9 @@ jobs:
     - name: Unhack Homebrew
       if: failure() && env.CHEVAH_DEBUG == 'yes'
       run: |
-        sudo chmod a+r /usr/local/opt/libffi/lib/libffi.7.dylib
-        sudo find /usr/local -name 'libintl*' -exec chmod a-r {} +
+        sudo chmod a+x /usr/local/bin/{curl,git}
+        sudo chmod a-r /usr/local/lib/libintl*
+        sudo chmod a-r /usr/local/opt/gettext/lib/libintl*
 
     - name: Tmate debug on failure
       if: failure() && env.CHEVAH_DEBUG == 'yes'
