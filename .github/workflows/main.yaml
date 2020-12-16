@@ -3,9 +3,6 @@
 #
 # Don't use `-latest` for runners, pin specific OS versions instead. More at
 # https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
-#
-# When setting up for a tmate debug session, you might need to increase the
-# timeout-minutes for failing builds, as you get kicked out after the timeout.
 
 name: GitHub-CI
 
@@ -19,6 +16,7 @@ on:
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 env:
   CHEVAH_DEBUG: 'no'
+
 
 jobs:
   windows:
@@ -172,7 +170,6 @@ jobs:
         sudo chmod -v a+r /usr/local/opt/gettext/lib/libintl*
         sudo chmod -v a+r /usr/local/include/libintl.h
         sudo mv -v /usr/local/bin/git{.saved,}
-
 
     - name: Tmate debug on failure
       if: failure() && env.CHEVAH_DEBUG == 'yes'

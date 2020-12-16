@@ -263,7 +263,7 @@ make_dist(){
 # Commands prefixed with a '-' are allowed to fail.
 #
 build_publish_dist_sftp_batch() {
-    # This matches the GitHub's hierarchy for production packages.
+    # This matches the GitHub's hierarchy for releases of production packages.
     local upload_version_dir="$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION"
 
     # Files are uploaded with a temp name and then renamed to final name.
