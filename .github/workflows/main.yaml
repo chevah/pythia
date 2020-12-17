@@ -22,7 +22,6 @@ jobs:
   windows:
     # The type of runner that the job will run on
     runs-on: ${{ matrix.runs-on }}
-    if: github.event_name == 'push' && contains(toJson(github.event.commits), '[skip ci]') == false
     strategy:
       # Workflow won't be cancelled at the first failed job.
       fail-fast: false
@@ -83,7 +82,6 @@ jobs:
 
   linux:
     runs-on: ${{ matrix.runs-on }}
-    if: github.event_name == 'push' && contains(toJson(github.event.commits), '[skip ci]') == false
     strategy:
       fail-fast: false
       matrix:
@@ -122,7 +120,6 @@ jobs:
 
   macos:
     runs-on: macos-10.15
-    if: github.event_name == 'push' && contains(toJson(github.event.commits), '[skip ci]') == false
     timeout-minutes: 60
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
