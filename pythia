@@ -18,14 +18,12 @@ exit_on_error $? 250
 export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
-# Import build env vars set by "./brink.sh detect_os" and export needed ones.
-if [ -f ./BUILD_ENV_VARS ]; then
-    source ./BUILD_ENV_VARS
-else
-    (>&2 echo "Missing BUILD_ENV_VARS file!")
-    echo "Run './brink.sh detect_os' first, as per the README file..."
-    exit 249
+# Import build env vars as set by brink.sh.
+if [ ! -f ./BUILD_ENV_VARS ]; then
+    execute ./brink.sh detect_os
 fi
+source ./BUILD_ENV_VARS
+
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
 # to force a 32bit build on a 64bit machine, e.g. by setting ARCH in brink.sh
 # as "x86" instead of "x64" for a certain platform.
@@ -150,7 +148,7 @@ build_python() {
     if [ $OS = "win" ]; then
         # Python "build" is a very special case under Windows.
         execute pushd src/Python-Windows
-        ./chevahbs Python $PYTHON_BUILD_VERSION $INSTALL_DIR
+        execute ./chevahbs Python $PYTHON_BUILD_VERSION $INSTALL_DIR
         execute popd
     else
         build Python $PYTHON_BUILD_VERSION

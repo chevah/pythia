@@ -4,5 +4,6 @@
 /src/*/*.tar.gz
 /src/*/*.tgz
 /src/*/*.zip
+/publish_dist_sftp_batch
 /build-pythia/
 /cache/
