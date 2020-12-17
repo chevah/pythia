@@ -218,7 +218,7 @@ cleanup_install_dir() {
     esac
 
     # Output Pythia's own version to a dedicated file in the archive.
-    echo "${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
+    echo "${PYTHON_FULL_VERSION}" \
         > ${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHON_PACKAGE_VERSION
 
     echo "::endgroup::"
@@ -239,7 +239,7 @@ make_dist(){
     target_dir=$2
 
     target_path=../dist/${kind}/${OS}/${ARCH}
-    target_common=python-${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}-${OS}-${ARCH}
+    target_common=python-${PYTHON_FULL_VERSION}-${OS}-${ARCH}
     target_tar=${target_path}/${target_common}.tar
     target_tar_gz=${target_tar}.gz
 
@@ -264,11 +264,11 @@ make_dist(){
 #
 build_publish_dist_sftp_batch() {
     # This matches the GitHub's hierarchy for releases of production packages.
-    local upload_version_dir="$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION"
+    local upload_version_dir="$PYTHON_FULL_VERSION"
 
     # Files are uploaded with a temp name and then renamed to final name.
     echo "lcd dist/python/$OS/$ARCH/" > publish_dist_sftp_batch
     echo "-mkdir testing/$upload_version_dir" >> publish_dist_sftp_batch
-    echo "put python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz testing/$upload_version_dir/python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part" >> publish_dist_sftp_batch
-    echo "rename testing/$upload_version_dir/python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part testing/$upload_version_dir/python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz" >> publish_dist_sftp_batch
+    echo "put python-$PYTHON_FULL_VERSION-$OS-$ARCH.tar.gz testing/$upload_version_dir/python-$PYTHON_FULL_VERSION-$OS-$ARCH.tar.gz.part" >> publish_dist_sftp_batch
+    echo "rename testing/$upload_version_dir/python-$PYTHON_FULL_VERSION-$OS-$ARCH.tar.gz.part testing/$upload_version_dir/python-$PYTHON_FULL_VERSION-$OS-$ARCH.tar.gz" >> publish_dist_sftp_batch
 }

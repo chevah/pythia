@@ -13,16 +13,17 @@ source ./functions_pythia.sh
 # on non-Windows platforms. Also used for compat tests and archived in the dist.
 PYTHON_PACKAGE_VERSION="$(git log -n 1 --no-merges --pretty=format:%h)"
 exit_on_error $? 250
+PYTHON_FULL_VERSION="${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}"
 
 # Export the variables needed by the chevahbs scripts and the test phase.
-export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION
+export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION PYTHON_FULL_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
 # Import build env vars as set by brink.sh.
-if [ ! -f ./BUILD_ENV_VARS ]; then
-    execute ./brink.sh detect_os
-fi
+execute ./brink.sh detect_os
 source ./BUILD_ENV_VARS
+# And add this to be picked in GitHub Action to show full link for an upload.
+echo "PYTHON_FULL_VERSION=$PYTHON_FULL_VERSION" >> ./BUILD_ENV_VARS
 
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
 # to force a 32bit build on a 64bit machine, e.g. by setting ARCH in brink.sh
@@ -248,8 +249,7 @@ command_compat() {
     execute cp ../../brink.{conf,sh} ./
     # Patch compat to use the newly-built Python, then copy it to cache/.
     execute echo -e \
-        "\nPYTHON_CONFIGURATION=default@${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
-        >> brink.conf
+        "\nPYTHON_CONFIGURATION=default@${PYTHON_FULL_VERSION}" >> brink.conf
     execute mkdir cache
     execute cp -r ../$LOCAL_PYTHON_BINARY_DIST cache/
     # Make sure everything is done from scratch in the current dir.

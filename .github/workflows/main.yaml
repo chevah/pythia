@@ -110,7 +110,8 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         sftp -b publish_dist_sftp_batch -i priv_key -o StrictHostKeyChecking=yes github-upload@bin.chevah.com
-        echo "Package uploaded to https://bin.chevah.com:20443/testing/"
+        source BUILD_ENV_VARS
+        echo "Package uploaded to https://bin.chevah.com:20443/testing/$PYTHON_FULL_VERSION/python-$PYTHON_FULL_VERSION-$OS-$ARCH.tar.gz"
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
