@@ -4,9 +4,8 @@ Pythia - a Python Portable Package
 Build system for a portable Python distribution. 
 A derivative of https://github.com/chevah/python-package/.
 
-Building steps:
+Building step:
 
-* ``./brink.sh detect_os``
 * ``./pythia build``
 
 Testing steps:

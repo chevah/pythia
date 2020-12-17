@@ -40,9 +40,6 @@ jobs:
         fetch-depth: 2
 
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
-    - name: Detect current OS
-      run: bash ./brink.sh detect_os
-
     - name: Build Python
       run: bash ./pythia build
 
@@ -101,9 +98,6 @@ jobs:
     - name: Install required packages
       run: sudo apt-get install libncurses5-dev
 
-    - name: Detect current OS
-      run: bash ./brink.sh detect_os
-
     - name: Build Python
       run: bash ./pythia build
 
@@ -135,9 +129,6 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
-
-    - name: Detect current OS
-      run: ./brink.sh detect_os
 
     # Some Homebrew libs pollute the build.
     # Also make sure binaries depending on these libs are out of the way.
