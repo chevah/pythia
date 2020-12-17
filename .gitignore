@@ -4,5 +4,5 @@
 /src/*/*.tar.gz
 /src/*/*.tgz
 /src/*/*.zip
-/src/*/*.msi
-/src/*/*.exe
+/build-pythia/
+/cache/

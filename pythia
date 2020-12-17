@@ -49,7 +49,8 @@ export CC="gcc"
 # Other needed tools (GNU flavours preferred).
 export MAKE="make"
 # $GET_CMD must save to custom filename, which must be appended before the link.
-export GET_CMD="wget --quiet -O"
+# E.g., to use wget, GET_CMD should be "wget --quiet -O".
+export GET_CMD="curl --silent --output"
 export SHA_CMD="sha512sum --check --status --warn"
 export TAR_CMD="tar xfz"
 export ZIP_CMD="unzip -q"
@@ -66,7 +67,7 @@ command_clean() {
     if [ $# -ne 0 ]; then
         if [ $1 = "-a" ]; then
             echo "## Removing any downloads from src/... ##"
-            execute rm -fv src/*/*.{tar.gz,tgz,zip,msi,exe}
+            execute rm -fv src/*/*.{tar.gz,tgz,zip}
         fi
     fi
 }
@@ -199,54 +200,6 @@ command_install_python_modules() {
     for library in $PIP_LIBRARIES ; do
         execute "$PYTHON_BIN" -m pip install $PIP_ARGS $library
     done
-
-    echo "::endgroup::"
-}
-
-
-# Put stuff where it's expected and remove some of the cruft.
-cleanup_install_dir() {
-    local python_lib_file="lib${PYTHON_VERSION}.a"
-
-    echo "::group::Clean up Python install dir"
-    case $OS in
-        win)
-            echo "    Skip cleaning install dir"
-            ;;
-        *)
-            execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
-                # Clean the build dir.
-                execute rm -rf tmp
-                # Move all binaries to lib/config
-                execute mkdir -p lib/config
-                execute mv bin/ lib/config/
-                execute mkdir bin
-                execute pushd lib/config/bin/
-                    # Move Python binary back as bin/python, then link to it.
-                    execute mv $PYTHON_VERSION ../../../bin/python
-                    execute ln -s ../../../bin/python $PYTHON_VERSION
-                    # Make sure python3 is also a symlink (macOS issue).
-                    execute rm python3
-                    execute ln -s $PYTHON_VERSION python3
-                    # Remove the sizable sqlite3 binary.
-                    execute rm sqlite3
-                execute popd
-                # Symlink the copy of libpython3.*.a too.
-                execute pushd lib/$PYTHON_VERSION/config-*
-                    execute rm $python_lib_file
-                    execute ln -s ../../$python_lib_file
-                execute popd
-                # Remove the big test/ sub-dir.
-                execute rm -rf "lib/$PYTHON_VERSION/test/"
-                # Remove (mostly OpenSSL) docs and manuals.
-                execute rm -rf share/
-            execute popd
-            ;;
-    esac
-
-    # Output Pythia's own version to a dedicated file in the archive.
-    echo "${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
-        > ${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHON_PACKAGE_VERSION
 
     echo "::endgroup::"
 }

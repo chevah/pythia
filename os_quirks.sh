@@ -12,8 +12,6 @@ case $OS in
         export BUILD_BZIP2="no"
         export BUILD_LIBEDIT="no"
         export BUILD_SQLITE="no"
-        # GitHub's "runners" don't have wget installed, curl comes with MinGW.
-        export GET_CMD="curl --silent --output"
         # On Windows, only one of the installers is downloaded.
         export SHA_CMD="$SHA_CMD --ignore-missing"
         ;;
@@ -31,7 +29,7 @@ case $OS in
         # To avoid linking to local libs, build own OpenSSL libs.
         export BUILD_OPENSSL="yes"
         # Generic builds on CentOS 5 have issues with Let's Encrypt certs.
-        export GET_CMD="wget --quiet --no-check-certificate -O"
+        export GET_CMD="curl --silent --insecure --output"
         ;;
     macos)
         export CC="clang"
@@ -46,7 +44,6 @@ case $OS in
         # But 10.13 has version 2.2.7, while cryptography 2.9 requires 2.7.
         # Therefore, build OpenSSL for both stdlib and cryptography.
         export BUILD_OPENSSL="yes"
-        export GET_CMD="curl --silent --output"
         export SHA_CMD="shasum --algorithm 512 --check --status --warn"
         ;;
     fbsd*)
@@ -56,7 +53,6 @@ case $OS in
         export BUILD_LIBFFI="yes"
         # System includes bzip2 libs by default.
         export BUILD_BZIP2="no"
-        export GET_CMD="curl --silent --output"
         # Install package "p5-Digest-SHA" to get shasum binary.
         export SHA_CMD="shasum --algorithm 512 --check --status --warn"
         ;;
@@ -65,7 +61,6 @@ case $OS in
         export CXX="clang++"
         # libffi not available in the base system, only as port/package.
         export BUILD_LIBFFI="yes"
-        export GET_CMD="curl --silent --output"
         export SHA_CMD="sha512 -q -c"
         ;;
     sol*)
