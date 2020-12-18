@@ -238,7 +238,7 @@ make_dist(){
     kind=$1
     target_dir=$2
 
-    target_path=../dist/${kind}/${OS}/${ARCH}
+    target_path=../dist/${PYTHON_FULL_VERSION}
     target_common=python-${PYTHON_FULL_VERSION}-${OS}-${ARCH}
     target_tar=${target_path}/${target_common}.tar
     target_tar_gz=${target_tar}.gz
@@ -248,7 +248,7 @@ make_dist(){
 
     # Create a clean dist dir.
     execute rm -rf ${DIST_DIR}
-    execute mkdir -p ${DIST_DIR}/${kind}/${OS}/${ARCH}
+    execute mkdir -p ${DIST_DIR}/${PYTHON_FULL_VERSION}
 
     # Create tar inside dist dir.
     execute pushd ${BUILD_DIR}
