@@ -263,12 +263,13 @@ make_dist(){
 # Commands prefixed with a '-' are allowed to fail.
 #
 build_publish_dist_sftp_batch() {
-    # This matches the GitHub's hierarchy for releases of production packages.
-    local upload_version_dir="$PYTHON_FULL_VERSION"
+    local upload_dir="testing/${PYTHON_FULL_VERSION}"
+    local dist_file="python-${PYTHON_FULL_VERSION}-${OS}-${ARCH}.tar.gz"
+    local temp_file="${upload_dir}/${dist_file}.part"
 
     # Files are uploaded with a temp name and then renamed to final name.
-    echo "lcd dist/python/$OS/$ARCH/" > publish_dist_sftp_batch
-    echo "-mkdir testing/$upload_version_dir" >> publish_dist_sftp_batch
-    echo "put python-$PYTHON_FULL_VERSION-$OS-$ARCH.tar.gz testing/$upload_version_dir/python-$PYTHON_FULL_VERSION-$OS-$ARCH.tar.gz.part" >> publish_dist_sftp_batch
-    echo "rename testing/$upload_version_dir/python-$PYTHON_FULL_VERSION-$OS-$ARCH.tar.gz.part testing/$upload_version_dir/python-$PYTHON_FULL_VERSION-$OS-$ARCH.tar.gz" >> publish_dist_sftp_batch
+    echo "lcd $DIST_DIR/$PYTHON_FULL_VERSION/"        > publish_dist_sftp_batch
+    echo "-mkdir $upload_dir"                        >> publish_dist_sftp_batch
+    echo "put $dist_file $temp_file"                 >> publish_dist_sftp_batch
+    echo "rename $temp_file $upload_dir/$dist_file"  >> publish_dist_sftp_batch
 }

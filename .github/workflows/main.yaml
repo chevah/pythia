@@ -108,7 +108,7 @@ jobs:
         chmod 600 priv_key
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
-        ./publish_dist.sh
+        bash ./publish_dist.sh
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -146,7 +146,7 @@ jobs:
         chmod 600 priv_key
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
-        ./publish_dist.sh
+        bash ./publish_dist.sh
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
