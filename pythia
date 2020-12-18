@@ -13,17 +13,17 @@ source ./functions_pythia.sh
 # on non-Windows platforms. Also used for compat tests and archived in the dist.
 PYTHON_PACKAGE_VERSION="$(git log -n 1 --no-merges --pretty=format:%h)"
 exit_on_error $? 250
-PYTHON_FULL_VERSION="${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}"
 
 # Export the variables needed by the chevahbs scripts and the test phase.
-export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION PYTHON_FULL_VERSION
+export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
 # Import build env vars as set by brink.sh.
-execute ./brink.sh detect_os
+if [ ! -r ./BUILD_ENV_VARS ]; then
+    # This is slow on Windows, only execute it when the file is missing.
+    execute ./brink.sh detect_os
+fi
 source ./BUILD_ENV_VARS
-# And add this to be picked in GitHub Action to show full link for an upload.
-echo "PYTHON_FULL_VERSION=$PYTHON_FULL_VERSION" >> ./BUILD_ENV_VARS
 
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
 # to force a 32bit build on a 64bit machine, e.g. by setting ARCH in brink.sh
@@ -31,10 +31,6 @@ echo "PYTHON_FULL_VERSION=$PYTHON_FULL_VERSION" >> ./BUILD_ENV_VARS
 # $ARCH is also used when "building" Python on Windows and for testing.
 # $OS is used when patching/configuring/building/testing.
 export ARCH OS
-
-# Sub-directories for building from sources and the final distributable.
-BUILD_DIR="build"
-DIST_DIR="dist"
 
 # Local variables for the build process.
 LOCAL_PYTHON_BINARY_DIST="$PYTHON_VERSION-$OS-$ARCH"
@@ -106,7 +102,7 @@ command_build() {
     cleanup_install_dir
 
     # Build the new package.
-    make_dist 'python' ${PYTHON_BUILD_DIR}
+    make_dist ${PYTHON_BUILD_DIR}
 
     # Generate a SFTP batch for uploading the package.
     build_publish_dist_sftp_batch
@@ -236,6 +232,7 @@ command_test() {
 help_text_compat=\
 "Run the test suite from chevah/compat master."
 command_compat() {
+    local new_python_conf="${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}"
     execute pushd "$BUILD_DIR"
 
     # This is quite hackish, as compat is arm-twisted to use the local version.
@@ -248,8 +245,7 @@ command_compat() {
     # Copy over current brink stuff, as some changes might require it.
     execute cp ../../brink.{conf,sh} ./
     # Patch compat to use the newly-built Python, then copy it to cache/.
-    execute echo -e \
-        "\nPYTHON_CONFIGURATION=default@${PYTHON_FULL_VERSION}" >> brink.conf
+    echo -e "\nPYTHON_CONFIGURATION=default@${new_python_conf}" >> brink.conf
     execute mkdir cache
     execute cp -r ../$LOCAL_PYTHON_BINARY_DIST cache/
     # Make sure everything is done from scratch in the current dir.

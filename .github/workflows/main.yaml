@@ -58,7 +58,7 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         choco install --yes --no-progress openssh
 
-    # This uses the right per-OS command to upload and then shows final links.
+    # Uploads using the selected sftp command, then shows final links.
     - name: Upload testing package
       run: |
         bash ./publish_dist.sh
