@@ -18,7 +18,7 @@ pkg_name="python-$PYTHON_FULL_VERSION-$OS-$ARCH.tar.gz"
 # The private key comes from GitHub Secrets through the configured workflow.
 case $OS in
     win)
-        C:\Progra~1\OpenSSH-Win64\sftp.exe -b publish_dist_sftp_batch \
+        /c/Progra~1/OpenSSH-Win64/sftp.exe -b publish_dist_sftp_batch \
             -i priv_key -o StrictHostKeyChecking=yes "$dest_user"@"$dest_server"
 
         ;;
