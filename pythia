@@ -2,7 +2,7 @@
 #
 # Pythia's script for building Python.
 
-# Set versions for the software to be built.
+# Set versions for the software to be built and other defaults.
 source pythia.conf
 
 # Import shared and specific code.
@@ -33,10 +33,9 @@ source ./BUILD_ENV_VARS
 export ARCH OS
 
 # Local variables for the build process.
-LOCAL_PYTHON_BINARY_DIST="$PYTHON_VERSION-$OS-$ARCH"
-INSTALL_DIR="$PWD/$BUILD_DIR/$LOCAL_PYTHON_BINARY_DIST"
-PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 PYTHON_BUILD_DIR="$PYTHON_VERSION-$OS-$ARCH"
+INSTALL_DIR="$PWD/$BUILD_DIR/$PYTHON_BUILD_DIR"
+PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 
 # Explicitly choose the C compiler in order to make it possible to switch
 # between native compilers and GCC on platforms such as the BSDs and Solaris.
@@ -247,10 +246,10 @@ command_compat() {
     # Patch compat to use the newly-built Python, then copy it to cache/.
     echo -e "\nPYTHON_CONFIGURATION=default@${new_python_conf}" >> brink.conf
     execute mkdir cache
-    execute cp -r ../$LOCAL_PYTHON_BINARY_DIST cache/
+    execute cp -r ../"$PYTHON_BUILD_DIR" cache/
     # Make sure everything is done from scratch in the current dir.
     unset CHEVAH_CACHE CHEVAH_BUILD
-    # Some tests might fail due to causes which are not related to python.
+    # Some tests might still fail due to causes which are not related to python.
     execute ./brink.sh deps
     execute ./brink.sh test_ci
 
