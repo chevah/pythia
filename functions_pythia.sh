@@ -158,7 +158,7 @@ cleanup_install_dir() {
 
     echo "::group::Clean up Python install dir"
     execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
-        echo "    Cleaning up Python's caches and compiled files..."
+        echo "Cleaning up Python's caches and compiled files..."
         find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
     execute popd
     case $OS in
@@ -218,8 +218,8 @@ cleanup_install_dir() {
     esac
 
     # Output Pythia's own version to a dedicated file in the archive.
-    echo "${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
-        > ${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHON_PACKAGE_VERSION
+    echo "${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}" \
+        > "${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHIA_VERSION"
 
     echo "::endgroup::"
 }
@@ -228,47 +228,41 @@ cleanup_install_dir() {
 #
 # Create the distributable archive.
 #
-# It also generates the symlink to latest build.
-#
 # Args:
-#  * kind = python3.8 (for example)
 #  * target_dir = name of the dir to be archived.
 #
 make_dist(){
-    kind=$1
-    target_dir=$2
+    local target_dir=$1
+    local full_ver="${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}"
+    local target_path="../${DIST_DIR}/${full_ver}"
+    local target_tar="${target_path}/python-${full_ver}-${OS}-${ARCH}.tar"
 
-    target_path=../dist/${kind}/${OS}/${ARCH}
-    target_common=python-${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}-${OS}-${ARCH}
-    target_tar=${target_path}/${target_common}.tar
-    target_tar_gz=${target_tar}.gz
+    # Clean dist dir and only create a sub-dir for current version.
+    execute rm -rf "${DIST_DIR}"
+    execute mkdir -p "${DIST_DIR}/${full_ver}"
 
-    tar_gz_file=${target_dir}.tar.gz
-    tar_gz_source_file=${target_common}.tar.gz
-
-    # Create a clean dist dir.
-    execute rm -rf ${DIST_DIR}
-    execute mkdir -p ${DIST_DIR}/${kind}/${OS}/${ARCH}
-
-    # Create tar inside dist dir.
-    execute pushd ${BUILD_DIR}
-        echo "#### Creating $target_tar_gz from $target_dir. ####"
-        execute tar -cf $target_tar $target_dir
-        execute gzip $target_tar
+    execute pushd "${BUILD_DIR}"
+        echo "#### Creating ${target_tar}.gz from $target_dir. ####"
+        execute tar -cf "$target_tar" "$target_dir"
+        execute gzip "$target_tar"
     execute popd
 }
 
 #
 # Construct a SFTP batch file for uploading testing packages.
-# Commands prefixed with a '-' are allowed to fail.
+# Files are uploaded with a temporary name and then renamed to final name.
 #
 build_publish_dist_sftp_batch() {
-    # This matches the GitHub's hierarchy for releases of production packages.
-    local upload_version_dir="$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION"
+    local full_ver="${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}"
+    local local_dir="${DIST_DIR}/${full_ver}"
+    local upload_dir="testing/${full_ver}"
+    local pkg_file="python-${full_ver}-${OS}-${ARCH}.tar.gz"
+    local local_file="${local_dir}/${pkg_file}"
+    local dest_file="${upload_dir}/${pkg_file}"
 
-    # Files are uploaded with a temp name and then renamed to final name.
-    echo "lcd dist/python/$OS/$ARCH/" > publish_dist_sftp_batch
-    echo "-mkdir testing/$upload_version_dir" >> publish_dist_sftp_batch
-    echo "put python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz testing/$upload_version_dir/python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part" >> publish_dist_sftp_batch
-    echo "rename testing/$upload_version_dir/python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz.part testing/$upload_version_dir/python-$PYTHON_BUILD_VERSION.$PYTHON_PACKAGE_VERSION-$OS-$ARCH.tar.gz" >> publish_dist_sftp_batch
+    # The mkdir command is prefixed with '-' to allow it to fail because
+    # $upload_dir exists if this is not the first upload for this version.
+    echo "-mkdir $upload_dir"                    > build/publish_dist_sftp_batch
+    echo "put $local_file ${dest_file}.part"    >> build/publish_dist_sftp_batch
+    echo "rename ${dest_file}.part $dest_file"  >> build/publish_dist_sftp_batch
 }

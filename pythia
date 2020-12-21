@@ -2,7 +2,7 @@
 #
 # Pythia's script for building Python.
 
-# Set versions for the software to be built.
+# Set versions for the software to be built and other defaults.
 source pythia.conf
 
 # Import shared and specific code.
@@ -11,21 +11,21 @@ source ./functions_pythia.sh
 
 # Git revision to inject into Python's sys.version string through chevahbs
 # on non-Windows platforms. Also used for compat tests and archived in the dist.
-PYTHON_PACKAGE_VERSION="$(git log -n 1 --no-merges --pretty=format:%h)"
+PYTHIA_VERSION="$(git log -n 1 --no-merges --pretty=format:%h)"
 exit_on_error $? 250
 
 # Export the variables needed by the chevahbs scripts and the test phase.
-export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION
+export PYTHON_BUILD_VERSION PYTHIA_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
-# Import build env vars set by "./brink.sh detect_os" and export needed ones.
-if [ -f ./BUILD_ENV_VARS ]; then
-    source ./BUILD_ENV_VARS
-else
-    (>&2 echo "Missing BUILD_ENV_VARS file!")
-    echo "Run './brink.sh detect_os' first, as per the README file..."
-    exit 249
+
+# OS detection is slow on Windows, only execute it when the file is missing.
+if [ ! -r ./BUILD_ENV_VARS ]; then
+    execute ./brink.sh detect_os
 fi
+# Import build env vars as set by brink.sh.
+source ./BUILD_ENV_VARS
+
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
 # to force a 32bit build on a 64bit machine, e.g. by setting ARCH in brink.sh
 # as "x86" instead of "x64" for a certain platform.
@@ -33,15 +33,10 @@ fi
 # $OS is used when patching/configuring/building/testing.
 export ARCH OS
 
-# Sub-directories for building from sources and the final distributable.
-BUILD_DIR="build"
-DIST_DIR="dist"
-
 # Local variables for the build process.
-LOCAL_PYTHON_BINARY_DIST="$PYTHON_VERSION-$OS-$ARCH"
-INSTALL_DIR="$PWD/$BUILD_DIR/$LOCAL_PYTHON_BINARY_DIST"
-PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 PYTHON_BUILD_DIR="$PYTHON_VERSION-$OS-$ARCH"
+INSTALL_DIR="$PWD/$BUILD_DIR/$PYTHON_BUILD_DIR"
+PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 
 # Explicitly choose the C compiler in order to make it possible to switch
 # between native compilers and GCC on platforms such as the BSDs and Solaris.
@@ -107,7 +102,7 @@ command_build() {
     cleanup_install_dir
 
     # Build the new package.
-    make_dist 'python' ${PYTHON_BUILD_DIR}
+    make_dist ${PYTHON_BUILD_DIR}
 
     # Generate a SFTP batch for uploading the package.
     build_publish_dist_sftp_batch
@@ -150,7 +145,7 @@ build_python() {
     if [ $OS = "win" ]; then
         # Python "build" is a very special case under Windows.
         execute pushd src/Python-Windows
-        ./chevahbs Python $PYTHON_BUILD_VERSION $INSTALL_DIR
+        execute ./chevahbs Python $PYTHON_BUILD_VERSION $INSTALL_DIR
         execute popd
     else
         build Python $PYTHON_BUILD_VERSION
@@ -237,6 +232,7 @@ command_test() {
 help_text_compat=\
 "Run the test suite from chevah/compat master."
 command_compat() {
+    local new_python_conf="${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}"
     execute pushd "$BUILD_DIR"
 
     # This is quite hackish, as compat is arm-twisted to use the local version.
@@ -249,14 +245,12 @@ command_compat() {
     # Copy over current brink stuff, as some changes might require it.
     execute cp ../../brink.{conf,sh} ./
     # Patch compat to use the newly-built Python, then copy it to cache/.
-    execute echo -e \
-        "\nPYTHON_CONFIGURATION=default@${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
-        >> brink.conf
+    echo -e "\nPYTHON_CONFIGURATION=default@${new_python_conf}" >> brink.conf
     execute mkdir cache
-    execute cp -r ../$LOCAL_PYTHON_BINARY_DIST cache/
+    execute cp -r ../"$PYTHON_BUILD_DIR" cache/
     # Make sure everything is done from scratch in the current dir.
     unset CHEVAH_CACHE CHEVAH_BUILD
-    # Some tests might fail due to causes which are not related to python.
+    # Some tests might still fail due to causes not related to the new Python.
     execute ./brink.sh deps
     execute ./brink.sh test_ci
 

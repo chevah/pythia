@@ -432,7 +432,7 @@ copy_python() {
             # We have a cached distributable.
             # Check if is at the right version.
             local cache_ver_file
-            cache_ver_file=${python_distributable}/lib/PYTHON_PACKAGE_VERSION
+            cache_ver_file=${python_distributable}/lib/PYTHIA_VERSION
             cache_version='UNVERSIONED'
             if [ -f $cache_ver_file ]; then
                 cache_version=`cat $cache_ver_file`
@@ -461,7 +461,7 @@ copy_python() {
         WAS_PYTHON_JUST_INSTALLED=1
     else
         # We have a Python, but we are not sure if is the right version.
-        local version_file=${BUILD_FOLDER}/lib/PYTHON_PACKAGE_VERSION
+        local version_file=${BUILD_FOLDER}/lib/PYTHIA_VERSION
 
         python_installed_version=`cat $version_file`
         if [ "$PYTHON_VERSION" != "$python_installed_version" ]; then
