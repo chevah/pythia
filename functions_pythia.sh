@@ -266,7 +266,7 @@ build_publish_dist_sftp_batch() {
 
     # $upload_dir exists if this is not the first upload for this version,
     # so the mkdir command is prefixed with '-' to allow it to fail.
-    echo "-mkdir $upload_dir"                         > publish_dist_sftp_batch
-    echo "put $local_dir/$pkg_file $temp_file"       >> publish_dist_sftp_batch
-    echo "rename $temp_file $dest_file"              >> publish_dist_sftp_batch
+    echo "-mkdir $upload_dir"                   > build/publish_dist_sftp_batch
+    echo "put $local_dir/$pkg_file $temp_file" >> build/publish_dist_sftp_batch
+    echo "rename $temp_file $dest_file"        >> build/publish_dist_sftp_batch
 }
