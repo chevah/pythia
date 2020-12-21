@@ -235,13 +235,12 @@ make_dist(){
     local target_dir=$1
     local full_ver="${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}"
     local target_path="../${DIST_DIR}/${full_ver}"
-    local target_tar="python-${full_ver}-${OS}-${ARCH}.tar"
+    local target_tar="${target_path}/python-${full_ver}-${OS}-${ARCH}.tar"
 
-    # Create a clean dist dir.
+    # Clean dist dir and only create a sub-dir for current git revision.
     execute rm -rf "${DIST_DIR}"
     execute mkdir -p "${DIST_DIR}/${full_ver}"
 
-    # Create tar inside dist dir.
     execute pushd "${BUILD_DIR}"
         echo "#### Creating ${target_tar}.gz from $target_dir. ####"
         execute tar -cf "$target_tar" "$target_dir"
