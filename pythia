@@ -11,11 +11,11 @@ source ./functions_pythia.sh
 
 # Git revision to inject into Python's sys.version string through chevahbs
 # on non-Windows platforms. Also used for compat tests and archived in the dist.
-PYTHON_PACKAGE_VERSION="$(git log -n 1 --no-merges --pretty=format:%h)"
+PYTHIA_VERSION="$(git log -n 1 --no-merges --pretty=format:%h)"
 exit_on_error $? 250
 
 # Export the variables needed by the chevahbs scripts and the test phase.
-export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION
+export PYTHON_BUILD_VERSION PYTHIA_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
 
@@ -232,7 +232,7 @@ command_test() {
 help_text_compat=\
 "Run the test suite from chevah/compat master."
 command_compat() {
-    local new_python_conf="${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}"
+    local new_python_conf="${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}"
     execute pushd "$BUILD_DIR"
 
     # This is quite hackish, as compat is arm-twisted to use the local version.

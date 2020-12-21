@@ -218,8 +218,8 @@ cleanup_install_dir() {
     esac
 
     # Output Pythia's own version to a dedicated file in the archive.
-    echo "${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}" \
-        > "${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHON_PACKAGE_VERSION"
+    echo "${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}" \
+        > "${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHIA_VERSION"
 
     echo "::endgroup::"
 }
@@ -233,7 +233,7 @@ cleanup_install_dir() {
 #
 make_dist(){
     local target_dir=$1
-    local full_ver="${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}"
+    local full_ver="${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}"
     local target_path="../${DIST_DIR}/${full_ver}"
     local target_tar="${target_path}/python-${full_ver}-${OS}-${ARCH}.tar"
 
@@ -253,7 +253,7 @@ make_dist(){
 # Files are uploaded with a temp name and then renamed to final name.
 #
 build_publish_dist_sftp_batch() {
-    local full_ver="${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}"
+    local full_ver="${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}"
     local local_dir="${DIST_DIR}/${full_ver}"
     local upload_dir="testing/${full_ver}"
     local pkg_file="python-${full_ver}-${OS}-${ARCH}.tar.gz"
