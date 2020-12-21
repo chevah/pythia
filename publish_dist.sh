@@ -16,7 +16,7 @@ root_link="https://${dest_server}:20443/testing"
 sftp_opts="\
     -b build/publish_dist_sftp_batch -i priv_key -o StrictHostKeyChecking=yes"
 
-# Get OS var and set sftp command accordingly.
+# Get $OS var and set sftp command accordingly.
 source BUILD_ENV_VARS
 case $OS in
     win)
@@ -30,7 +30,7 @@ esac
 
 $sftp_cmd $sftp_opts ${dest_user}@${dest_server}
 
-# Get DIST_DIR.
+# Get $DIST_DIR.
 source pythia.conf
 
 # As dist/ is rebuilt on every build, it should only have 1 sub-dir with 1 pkg.

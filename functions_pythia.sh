@@ -158,7 +158,7 @@ cleanup_install_dir() {
 
     echo "::group::Clean up Python install dir"
     execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
-        echo "    Cleaning up Python's caches and compiled files..."
+        echo "Cleaning up Python's caches and compiled files..."
         find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
     execute popd
     case $OS in
@@ -237,7 +237,7 @@ make_dist(){
     local target_path="../${DIST_DIR}/${full_ver}"
     local target_tar="${target_path}/python-${full_ver}-${OS}-${ARCH}.tar"
 
-    # Clean dist dir and only create a sub-dir for current git revision.
+    # Clean dist dir and only create a sub-dir for current version.
     execute rm -rf "${DIST_DIR}"
     execute mkdir -p "${DIST_DIR}/${full_ver}"
 
@@ -250,7 +250,7 @@ make_dist(){
 
 #
 # Construct a SFTP batch file for uploading testing packages.
-# Files are uploaded with a temp name and then renamed to final name.
+# Files are uploaded with a temporary name and then renamed to final name.
 #
 build_publish_dist_sftp_batch() {
     local full_ver="${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}"
@@ -260,8 +260,8 @@ build_publish_dist_sftp_batch() {
     local local_file="${local_dir}/${pkg_file}"
     local dest_file="${upload_dir}/${pkg_file}"
 
-    # $upload_dir exists if this is not the first upload for this version,
-    # so the mkdir command is prefixed with '-' to allow it to fail.
+    # The mkdir command is prefixed with '-' to allow it to fail because
+    # $upload_dir exists if this is not the first upload for this version.
     echo "-mkdir $upload_dir"                    > build/publish_dist_sftp_batch
     echo "put $local_file ${dest_file}.part"    >> build/publish_dist_sftp_batch
     echo "rename ${dest_file}.part $dest_file"  >> build/publish_dist_sftp_batch
