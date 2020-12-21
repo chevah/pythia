@@ -18,11 +18,12 @@ exit_on_error $? 250
 export PYTHON_BUILD_VERSION PYTHON_PACKAGE_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
-# Import build env vars as set by brink.sh.
+
+# This is slow on Windows, only execute it when the file is missing.
 if [ ! -r ./BUILD_ENV_VARS ]; then
-    # This is slow on Windows, only execute it when the file is missing.
     execute ./brink.sh detect_os
 fi
+# Import build env vars as set by brink.sh.
 source ./BUILD_ENV_VARS
 
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
@@ -249,7 +250,7 @@ command_compat() {
     execute cp -r ../"$PYTHON_BUILD_DIR" cache/
     # Make sure everything is done from scratch in the current dir.
     unset CHEVAH_CACHE CHEVAH_BUILD
-    # Some tests might still fail due to causes which are not related to python.
+    # Some tests might still fail due to causes not related to the new Python.
     execute ./brink.sh deps
     execute ./brink.sh test_ci
 

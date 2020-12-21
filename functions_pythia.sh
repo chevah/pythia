@@ -235,9 +235,7 @@ make_dist(){
     local target_dir=$1
     local full_ver="${PYTHON_BUILD_VERSION}.${PYTHON_PACKAGE_VERSION}"
     local target_path="../${DIST_DIR}/${full_ver}"
-    local target_common="python-${full_ver}-${OS}-${ARCH}"
-    local target_tar=${target_path}/${target_common}.tar
-    local target_tar_gz=${target_tar}.gz
+    local target_tar="python-${full_ver}-${OS}-${ARCH}.tar"
 
     # Create a clean dist dir.
     execute rm -rf "${DIST_DIR}"
@@ -245,7 +243,7 @@ make_dist(){
 
     # Create tar inside dist dir.
     execute pushd "${BUILD_DIR}"
-        echo "#### Creating $target_tar_gz from $target_dir. ####"
+        echo "#### Creating ${target_tar}.gz from $target_dir. ####"
         execute tar -cf "$target_tar" "$target_dir"
         execute gzip "$target_tar"
     execute popd
@@ -260,13 +258,12 @@ build_publish_dist_sftp_batch() {
     local local_dir="${DIST_DIR}/${full_ver}"
     local upload_dir="testing/${full_ver}"
     local pkg_file="python-${full_ver}-${OS}-${ARCH}.tar.gz"
+    local local_file="${local_dir}/${pkg_file}"
     local dest_file="${upload_dir}/${pkg_file}"
-    local temp_file="${dest_file}.part"
-
 
     # $upload_dir exists if this is not the first upload for this version,
     # so the mkdir command is prefixed with '-' to allow it to fail.
-    echo "-mkdir $upload_dir"                   > build/publish_dist_sftp_batch
-    echo "put $local_dir/$pkg_file $temp_file" >> build/publish_dist_sftp_batch
-    echo "rename $temp_file $dest_file"        >> build/publish_dist_sftp_batch
+    echo "-mkdir $upload_dir"                    > build/publish_dist_sftp_batch
+    echo "put $local_file ${dest_file}.part"    >> build/publish_dist_sftp_batch
+    echo "rename ${dest_file}.part $dest_file"  >> build/publish_dist_sftp_batch
 }

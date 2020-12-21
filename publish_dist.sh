@@ -20,7 +20,7 @@ sftp_opts="\
 source BUILD_ENV_VARS
 case $OS in
     win)
-        # Upstream SFTP is needed and installed through GitHub actions.
+        # To use an RSA key, upstream SFTP is installed through GitHub actions.
         sftp_cmd="/c/Progra~1/OpenSSH-Win64/sftp.exe"
         ;;
     *)
@@ -33,9 +33,10 @@ $sftp_cmd $sftp_opts ${dest_user}@${dest_server}
 # Get DIST_DIR.
 source pythia.conf
 
-# Local hierarchy matches the remote one.
+# As dist/ is rebuilt on every build, it should only have 1 sub-dir with 1 pkg.
 upload_dir=$(cd $DIST_DIR && ls -1)
 pkg_name=$(cd $DIST_DIR/$upload_dir && ls -1)
 
+# Local hierarchy matches the remote one.
 echo "Package $pkg_name uploaded to: ${root_link}/${upload_dir}/"
 echo "Direct link: ${root_link}/${upload_dir}/${pkg_name}"

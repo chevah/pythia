@@ -58,10 +58,9 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         choco install --yes --no-progress openssh
 
-    # Uploads using the selected sftp command, then shows final links.
+    # Uploads using a (per-OS selected) sftp command, then shows final links.
     - name: Upload testing package
-      run: |
-        bash ./publish_dist.sh
+      run: bash ./publish_dist.sh
 
     # Per https://github.com/nelsonjchen/reverse-rdp-windows-github-actions,
     # but using the Ngrok token as password for the runnneradmin user.
