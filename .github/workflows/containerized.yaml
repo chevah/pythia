@@ -36,7 +36,7 @@ jobs:
     - name: Clone repo independently
       run: |
         cd ~chevah
-        sudo -H -u chevah git clone https://${{ secrets.PUBLIC_CI_CONTAINERS_DUMOL }}@github.com/chevah/pythia.git
+        sudo -H -u chevah git clone https://github.com/chevah/pythia.git
         cd pythia
         sudo -H -u chevah git checkout ${GITHUB_HEAD_REF}
 
@@ -59,6 +59,7 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~chevah/.ssh/known_hosts
         sudo -H -u chevah bash ./publish_dist.sh
+        rm priv_key
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure

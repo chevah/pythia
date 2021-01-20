@@ -57,6 +57,7 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         choco install --yes --no-progress openssh
+        rm priv_key
 
     # Uploads using a (per-OS selected) sftp command, then shows final links.
     - name: Upload testing package
@@ -108,6 +109,7 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         bash ./publish_dist.sh
+        rm priv_key
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
@@ -146,6 +148,7 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         bash ./publish_dist.sh
+        rm priv_key
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
