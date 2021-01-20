@@ -1,0 +1,54 @@
+#
+# GitHub actions for building and testing.
+#
+# Use `-latest` for runners spinning up containers for best support. More at
+# https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
+
+name: GitHub-CI-Containerized
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Set to 'yes' to open a tunnel to GitHub's VMs through tmate on failures.
+# Also increase timeout-minutes for the relevant OS when debugging remotely.
+env:
+  CHEVAH_DEBUG: 'no'
+
+
+jobs:
+  alpine-312:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:3.12
+    timeout-minutes: 40
+    steps:
+    - uses: chevah/auto-cancel-redundant-job@v1
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Install required packages
+      run: apk add bash gcc make m4 automake libtool texinfo patch unzip file musl-dev git openssl-dev zlib-dev libffi-dev ncurses-dev
+
+    - name: Build Python
+      run: bash ./pythia build
+
+    - name: Test Python
+      run: bash ./pythia test
+
+    - name: Upload testing package
+      run: |
+        mkdir -pv ~/.ssh/
+        touch priv_key
+        chmod 600 priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
+        bash ./publish_dist.sh
+
+    # If one of the above steps fails, fire up tmate for remote debugging.
+    - name: Tmate debug on failure
+      if: failure() && env.CHEVAH_DEBUG == 'yes'
+      uses: mxschmitt/action-tmate@v2
