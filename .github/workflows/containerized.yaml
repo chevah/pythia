@@ -29,7 +29,7 @@ jobs:
 
     - name: Clone repo independently
       run: |
-        apk add git
+        apk add git bash
         git clone https://github.com/chevah/pythia.git
         cd pythia
         git checkout ${GITHUB_HEAD_REF}
