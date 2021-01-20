@@ -26,27 +26,39 @@ jobs:
     timeout-minutes: 40
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
 
     - name: Install required packages
       run: apk add bash gcc make m4 automake libtool texinfo patch unzip file musl-dev git openssl-dev zlib-dev libffi-dev ncurses-dev
 
+    - name: Prepare non-root user setup
+      run: useradd -m -G wheel chevah
+
+    - name: Clone repo independently
+      run: |
+        cd ~chevah
+        sudo -H -u chevah git clone https://${{ secrets.PUBLIC_CI_CONTAINERS_DUMOL }}@github.com/chevah/server.git
+        cd server
+        sudo -H -u chevah git checkout ${GITHUB_HEAD_REF}
+
     - name: Build Python
-      run: bash ./pythia build
+      run: |
+        cd ~chevah/pythia
+        sudo -H -u chevah bash ./pythia build
 
     - name: Test Python
-      run: bash ./pythia test
+      run: |
+        cd ~chevah/pythia
+        sudo -H -u chevah bash ./pythia test
 
     - name: Upload testing package
       run: |
-        mkdir -pv ~/.ssh/
-        touch priv_key
+        cd ~chevah/pythia
+        sudo -H -u chevah mkdir -pv ~chevah/.ssh/
+        sudo -H -u chevah touch priv_key
         chmod 600 priv_key
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
-        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
-        bash ./publish_dist.sh
+        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~chevah/.ssh/known_hosts
+        sudo -H -u chevah bash ./publish_dist.sh
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
