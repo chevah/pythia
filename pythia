@@ -49,6 +49,9 @@ export GET_CMD="curl --silent --output"
 export SHA_CMD="sha512sum --check --status --warn"
 export TAR_CMD="tar xfz"
 export ZIP_CMD="unzip -q"
+if [ x$(id -u) != "x0" ]; then
+    export SUDO_CMD="sudo"
+fi
 
 # OS quirks.
 source os_quirks.sh

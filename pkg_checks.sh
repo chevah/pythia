@@ -31,10 +31,12 @@ MISSING_PACKAGES=""
 PACKAGES="$CC make m4 git patch curl sha512sum tar unzip"
 CHECK_CMD="command -v"
 
+
 choco_shim() {
     local pkg=$1
     choco list --local-only --limit-output | grep -iq ^"${pkg}|"
 }
+
 
 # $CHECK_CMD should exit with 0 only when checked packages is installed.
 case "$OS" in
@@ -101,15 +103,15 @@ if [ -n "$MISSING_PACKAGES" ]; then
         case "$OS" in
             ubuntu*)
                 echo "## Installing missing dpkg packages... ##"
-                execute sudo apt install -y $MISSING_PACKAGES
+                execute $SUDO_CMD apt install -y $MISSING_PACKAGES
                 ;;
             rhel*|amzn*)
                 echo "## Installing missing rpm packages... ##"
-                execute sudo yum install -y $MISSING_PACKAGES
+                execute $SUDO_CMD yum install -y $MISSING_PACKAGES
                 ;;
             alpine*)
                 echo "## Installing missing apk packages... ##"
-                execute sudo apk add $MISSING_PACKAGES
+                execute $SUDO_CMD apk add $MISSING_PACKAGES
                 ;;
             *)
                 (>&2 echo "Don't know how to install missing dependencies.")
@@ -141,13 +143,13 @@ fi
 echo "# Checking if it's possible to avoid linking to system uuid libs... #"
 case "$OS" in
     ubuntu*)
-        execute sudo apt remove -y uuid-dev
+        execute $SUDO_CMD apt remove -y uuid-dev
         ;;
     rhel*|amzn*)
-        execute sudo yum remove -y e2fsprogs-devel libuuid-devel
+        execute $SUDO_CMD yum remove -y e2fsprogs-devel libuuid-devel
         ;;
     alpine*)
-        execute sudo apk del util-linux-dev
+        execute $SUDO_CMD apk del util-linux-dev
         ;;
     *)
         (>&2 echo "Not guarding against linking to uuid libs on this system!")
