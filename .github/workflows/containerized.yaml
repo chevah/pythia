@@ -28,7 +28,7 @@ jobs:
     - uses: chevah/auto-cancel-redundant-job@v1
 
     - name: Install required packages
-      run: apk add bash gcc make m4 automake libtool texinfo patch unzip file musl-dev git openssl-dev zlib-dev libffi-dev ncurses-dev
+      run: apk add bash git gcc make m4 automake libtool texinfo patch unzip file musl-dev openssl-dev zlib-dev libffi-dev ncurses-dev sudo shadow
 
     - name: Prepare non-root user setup
       run: useradd -m -G wheel chevah
