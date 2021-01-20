@@ -28,37 +28,32 @@ jobs:
     - uses: chevah/auto-cancel-redundant-job@v1
 
     - name: Install required packages
-      run: apk add bash git gcc make m4 automake libtool texinfo patch unzip file musl-dev openssl-dev zlib-dev libffi-dev ncurses-dev shadow sudo curl
-
-    - name: Prepare non-root user setup
-      run: useradd -m -G wheel chevah
+      run: apk add bash git gcc make m4 automake libtool texinfo patch unzip file musl-dev openssl-dev zlib-dev libffi-dev ncurses-dev curl
 
     - name: Clone repo independently
       run: |
-        cd ~chevah
-        sudo -H -u chevah git clone https://github.com/chevah/pythia.git
+        git clone https://github.com/chevah/pythia.git
         cd pythia
-        sudo -H -u chevah git checkout ${GITHUB_HEAD_REF}
+        git checkout ${GITHUB_HEAD_REF}
 
     - name: Build Python
       run: |
-        cd ~chevah/pythia
-        sudo -H -u chevah bash ./pythia build
+        cd pythia
+        bash ./pythia build
 
     - name: Test Python
       run: |
-        cd ~chevah/pythia
-        sudo -H -u chevah bash ./pythia test
+        cd pythia
+        bash ./pythia test
 
     - name: Upload testing package
       run: |
-        cd ~chevah/pythia
-        sudo -H -u chevah mkdir -pv ~chevah/.ssh/
-        sudo -H -u chevah touch priv_key
+        mkdir -pv ~/.ssh/
+        touch priv_key
         chmod 600 priv_key
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
-        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~chevah/.ssh/known_hosts
-        sudo -H -u chevah bash ./publish_dist.sh
+        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
+        bash ./publish_dist.sh
         rm priv_key
 
     # If one of the above steps fails, fire up tmate for remote debugging.
