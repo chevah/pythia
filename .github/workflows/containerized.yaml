@@ -27,8 +27,11 @@ jobs:
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
 
+    # pkg_checks.sh would take of this, but under Docker sudo is not to be used.
     - name: Install required packages
-      run: apk add bash git gcc make m4 automake libtool texinfo patch unzip file musl-dev openssl-dev zlib-dev libffi-dev ncurses-dev curl
+      run: |
+        apk add bash git gcc make m4 automake libtool texinfo patch unzip file musl-dev openssl-dev zlib-dev libffi-dev ncurses-dev curl
+        apk del util-linux-dev
 
     - name: Clone repo independently
       run: |
