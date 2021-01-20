@@ -53,6 +53,7 @@ jobs:
     - name: Upload testing package
       run: |
         mkdir -pv ~/.ssh/
+        cd pythia
         touch priv_key
         chmod 600 priv_key
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
