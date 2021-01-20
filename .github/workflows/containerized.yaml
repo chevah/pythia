@@ -36,8 +36,8 @@ jobs:
     - name: Clone repo independently
       run: |
         cd ~chevah
-        sudo -H -u chevah git clone https://${{ secrets.PUBLIC_CI_CONTAINERS_DUMOL }}@github.com/chevah/server.git
-        cd server
+        sudo -H -u chevah git clone https://${{ secrets.PUBLIC_CI_CONTAINERS_DUMOL }}@github.com/chevah/pythia.git
+        cd pythia
         sudo -H -u chevah git checkout ${GITHUB_HEAD_REF}
 
     - name: Build Python
