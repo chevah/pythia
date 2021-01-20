@@ -27,6 +27,12 @@ jobs:
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
 
+    - name: Prepare setup
+      run: |
+        apk add git bash curl
+        curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
+        chmod +x /usr/local/bin/paxctl
+
     - name: Clone repo independently
       run: |
         apk add git bash curl
