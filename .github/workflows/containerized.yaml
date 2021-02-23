@@ -42,7 +42,7 @@ jobs:
       continue-on-error: true
       run: |
         rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
-        yum -y update
+        yum makecache
         yum -y install curl openssh-clients gcc make m4 patch unzip perl
         rpm -i --nodeps http://binary.chevah.com/third-party-stuff/centos5/endpoint/git{-core,}-2.5.0-1.ep.x86_64.rpm
 
