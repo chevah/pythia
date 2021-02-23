@@ -25,12 +25,14 @@ case $OS in
         ;;
     *)
         sftp_cmd="sftp"
+        sftp_opts="$sftp_opts -N"
         ;;
 esac
 
 ls -l priv_key
 ls -l ~/.ssh/
-$sftp_cmd -N $sftp_opts ${dest_user}@${dest_server}
+cat ~/.ssh/known_hosts
+$sftp_cmd $sftp_opts ${dest_user}@${dest_server}
 
 # Get $DIST_DIR.
 source pythia.conf
