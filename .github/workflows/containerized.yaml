@@ -62,7 +62,8 @@ jobs:
         rm priv_key
 
     - name: Prepare tmate debug
-      run: ln -s /bin/true /usr/bin/apt-get && sleep 3
+      if: failure() && env.CHEVAH_DEBUG == 'yes'
+      run: ln -s /bin/true /usr/bin/apt-get && sleep 3 && which apt-get
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure

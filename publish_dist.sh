@@ -28,11 +28,6 @@ case $OS in
         ;;
 esac
 
-ls -l priv_key
-ls -l ~/.ssh/
-ls -l /root/.ssh/
-cat ~/.ssh/known_hosts
-cat /root/.ssh/known_hosts
 $sftp_cmd $sftp_opts ${dest_user}@${dest_server}
 
 # Get $DIST_DIR.
