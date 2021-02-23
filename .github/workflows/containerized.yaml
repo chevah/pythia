@@ -49,20 +49,20 @@ jobs:
         cd pythia
         ./pythia test
 
+    # ~ is problematic under Docker.
     - name: Upload testing package
       run: |
-        mkdir -pv ~/.ssh/
+        mkdir -pv /root/.ssh/
         cd pythia
-        touch ~/priv_key
-        chmod 600 ~/priv_key
-        echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > ~/priv_key
-        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
+        touch priv_key
+        chmod 600 priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > /root/.ssh/known_hosts
         bash -x ./publish_dist.sh
         rm priv_key
 
     - name: Prepare tmate debug
-      run: |
-        ln -s /bin/true /bin/apt-get
+      run: ln -s /bin/true /usr/bin/apt-get && sleep 3
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
