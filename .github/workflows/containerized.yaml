@@ -30,7 +30,7 @@ jobs:
     steps:
 
     - name: Alpine setup
-      shell: bash {0}
+      shell: sh {0}
       run: |
         apk add git bash curl openssh-client
         curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
@@ -41,7 +41,7 @@ jobs:
       shell: bash {0}
       run: |
         rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
-        yum install -y curl openssh-clients
+        yum install -y curl openssh-clients gcc make m4 patch unzip perl
         rpm -i --nodeps http://binary.chevah.com/third-party-stuff/centos5/endpoint/git{-core,}-2.5.0-1.ep.x86_64.rpm
         exit 0
 
