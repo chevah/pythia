@@ -21,17 +21,17 @@ env:
 jobs:
   alpine-312:
     runs-on: ubuntu-latest
-    container:
-      image: alpine:3.12
+    container: ${{ matrix.container }}
+    strategy:
+      fail-fast: false
+      matrix:
+        container: [ alpine:3.12, astj/centos5-vault ]
     timeout-minutes: 60
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
 
     - name: Prepare setup
-      run: |
-        apk add git bash curl openssh-client
-        curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
-        chmod +x /usr/local/bin/paxctl
+      run: ./ci_docker_setup.sh
 
     - name: Clone repo independently
       run: |
@@ -49,7 +49,7 @@ jobs:
         cd pythia
         ./pythia test
 
-    # ~ is problematic under Docker.
+    # Using `~/` is problematic under Docker, use `/root/`.
     - name: Upload testing package
       run: |
         mkdir -pv /root/.ssh/
@@ -58,9 +58,10 @@ jobs:
         chmod 600 priv_key
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > /root/.ssh/known_hosts
-        bash -x ./publish_dist.sh
+        ./publish_dist.sh
         rm priv_key
 
+    # Still not working.
     - name: Prepare tmate debug
       if: failure() && env.CHEVAH_DEBUG == 'yes'
       run: ln -s /bin/true /usr/bin/apt-get && sleep 3 && which apt-get
