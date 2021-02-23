@@ -30,9 +30,7 @@ jobs:
     steps:
 
     - name: Show container job name
-      env:
-        CURRENT_CONTAINER: ${{ job.container }}
-      run: echo "Job container name is: $CURRENT_CONTAINER"
+      run: echo ${{ job.container }}
 
     - name: Alpine setup
       if: job.container == 'alpine:3.12'
