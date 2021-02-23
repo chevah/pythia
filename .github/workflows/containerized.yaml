@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [ alpine:3.12, astj/centos5-vault ]
+        container: [ alpine/3.12, astj/centos5-vault ]
     timeout-minutes: 60
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
