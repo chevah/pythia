@@ -120,8 +120,7 @@ jobs:
 
   macos:
     runs-on: macos-10.15
-    # XXX quick disable for the moment
-    timeout-minutes: 1
+    timeout-minutes: 60
     steps:
     - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2

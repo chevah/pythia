@@ -29,6 +29,7 @@ jobs:
     timeout-minutes: 60
     steps:
 
+    # To avoid duplicating the other steps, setup is done with no error checking.
     - name: Alpine setup
       shell: sh {0}
       run: |
@@ -37,6 +38,7 @@ jobs:
         chmod +x /usr/local/bin/paxctl
         exit 0
 
+    # To avoid duplicating the other steps, setup is done with no error checking.
     - name: CentOS 5 setup
       shell: bash {0}
       run: |
