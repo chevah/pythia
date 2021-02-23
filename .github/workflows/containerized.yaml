@@ -29,8 +29,19 @@ jobs:
     timeout-minutes: 60
     steps:
 
-    - name: Prepare setup
-      run: ./ci_docker_setup.sh
+    - name: Alpine setup
+      if: container == "alpine:3.12"
+      run: |
+        apk add git bash curl openssh-client
+        curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
+        chmod +x /usr/local/bin/paxctl
+
+    - name: CentOS 5 setup
+      if: container == "astj/centos5-vault"
+      run: |
+        rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
+        yum install -y curl openssh-clients
+        rpm -i --nodeps http://binary.chevah.com/third-party-stuff/centos5/endpoint/git{-core,}-2.5.0-1.ep.x86_64.rpm
 
     - name: Clone repo independently
       run: |
