@@ -27,6 +27,7 @@ jobs:
       matrix:
         container: [ "alpine:3.12", "astj/centos5-vault" ]
     timeout-minutes: 60
+    steps:
 
     - name: Prepare setup
       run: ./ci_docker_setup.sh
