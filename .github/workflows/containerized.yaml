@@ -31,22 +31,20 @@ jobs:
 
     # To avoid duplicating the other steps, setup is done with no error checking.
     - name: Alpine setup
-      shell: sh {0}
+      continue-on-error: true
       run: |
         apk add git bash curl openssh-client
         curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
-        exit 0
 
     # To avoid duplicating the other steps, setup is done with no error checking.
     - name: CentOS 5 setup
-      shell: bash {0}
+      continue-on-error: true
       run: |
         rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
         yum update
         yum install -y curl openssh-clients gcc make m4 patch unzip perl
         rpm -i --nodeps http://binary.chevah.com/third-party-stuff/centos5/endpoint/git{-core,}-2.5.0-1.ep.x86_64.rpm
-        exit 0
 
     - name: Clone repo independently
       run: |
