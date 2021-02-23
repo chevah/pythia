@@ -35,7 +35,7 @@ jobs:
 
     - name: Clone repo independently
       run: |
-        apk add git bash curl sudo # action-tmate requires sudo.
+        apk add git bash curl
         git clone https://github.com/chevah/pythia.git
         cd pythia
         git checkout ${GITHUB_HEAD_REF}
@@ -58,12 +58,13 @@ jobs:
         chmod 600 priv_key
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
-        sync
-        sleep 3
-        ./publish_dist.sh
+        bash -x ./publish_dist.sh
         rm priv_key
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
       if: failure() && env.CHEVAH_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v2
+      uses: mxschmitt/action-tmate@v3
+      with:
+        sudo: false
+        limit-access-to-actor: true
