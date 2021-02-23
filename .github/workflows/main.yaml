@@ -58,7 +58,7 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         choco install --yes --no-progress openssh
 
-    # Uploads using a (per-OS selected) sftp command, then shows final links.
+    # Upload using a (per-OS selected) sftp command, then show final links.
     - name: Upload testing package
       run: |
         bash ./publish_dist.sh
@@ -97,10 +97,10 @@ jobs:
       run: sudo apt-get install libncurses5-dev
 
     - name: Build Python
-      run: bash ./pythia build
+      run: ./pythia build
 
     - name: Test Python
-      run: bash ./pythia test
+      run: ./pythia test
 
     - name: Upload testing package
       run: |
@@ -109,7 +109,7 @@ jobs:
         chmod 600 priv_key
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
-        bash ./publish_dist.sh
+        ./publish_dist.sh
         rm priv_key
 
     # If one of the above steps fails, fire up tmate for remote debugging.
@@ -136,10 +136,10 @@ jobs:
         sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
 
     - name: Build Python
-      run: bash ./pythia build
+      run: ./pythia build
 
     - name: Test Python
-      run: bash ./pythia test
+      run: ./pythia test
 
     - name: Upload testing package
       run: |
@@ -148,7 +148,7 @@ jobs:
         chmod 600 priv_key
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
-        bash ./publish_dist.sh
+        ./publish_dist.sh
         rm priv_key
 
     # Fix back Homebrew, to make everything functional for tmate debugging.

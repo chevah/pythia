@@ -35,7 +35,7 @@ jobs:
 
     - name: Clone repo independently
       run: |
-        apk add git bash curl
+        apk add git bash curl sudo # action-tmate requires sudo.
         git clone https://github.com/chevah/pythia.git
         cd pythia
         git checkout ${GITHUB_HEAD_REF}
