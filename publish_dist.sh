@@ -28,7 +28,9 @@ case $OS in
         ;;
 esac
 
-$sftp_cmd $sftp_opts ${dest_user}@${dest_server}
+ls -l priv_key
+ls -l ~/.ssh/
+$sftp_cmd -N $sftp_opts ${dest_user}@${dest_server}
 
 # Get $DIST_DIR.
 source pythia.conf

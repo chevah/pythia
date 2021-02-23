@@ -35,7 +35,6 @@ jobs:
 
     - name: Clone repo independently
       run: |
-        apk add git bash curl
         git clone https://github.com/chevah/pythia.git
         cd pythia
         git checkout ${GITHUB_HEAD_REF}
@@ -60,6 +59,10 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         bash -x ./publish_dist.sh
         rm priv_key
+
+    - name: Prepare tmate debug
+      run: |
+        ln -s /bin/true /usr/local/bin/apt-get
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
