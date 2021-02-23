@@ -29,22 +29,21 @@ jobs:
     timeout-minutes: 60
     steps:
 
-    - name: Show container job id
-      run: echo ${{ job.container.id }}
-
     - name: Alpine setup
-      if: contains(job.container, 'alpine')
+      shell: bash {0}
       run: |
         apk add git bash curl openssh-client
         curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
+        exit 0
 
     - name: CentOS 5 setup
-      if: contains(job.container, 'centos')
+      shell: bash {0}
       run: |
         rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
         yum install -y curl openssh-clients
         rpm -i --nodeps http://binary.chevah.com/third-party-stuff/centos5/endpoint/git{-core,}-2.5.0-1.ep.x86_64.rpm
+        exit 0
 
     - name: Clone repo independently
       run: |
