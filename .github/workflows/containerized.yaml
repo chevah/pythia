@@ -17,9 +17,10 @@ on:
 env:
   CHEVAH_DEBUG: 'yes'
 
-
+# Using a job name that doesn't contain the OS name, to minimize the risk of
+# confusion with the OS names of the containers, which are the relevant ones.
 jobs:
-  ubuntu:
+  latest:
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:
