@@ -35,7 +35,7 @@ jobs:
     - name: Alpine setup
       continue-on-error: true
       run: |
-        apk add git bash curl openssh-client rust
+        apk add git bash curl openssh-client rust cargo
         curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
 
@@ -51,7 +51,7 @@ jobs:
         cd binary.chevah.com/third-party-stuff/centos5/endpoint/
         rpm -i local-perl-*.rpm
         rpm -i --nodeps git{-core,}-2.5.0-1.ep.x86_64.rpm
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+        curl -sSf https://sh.rustup.rs | sh
 
     - name: Clone repo independently
       run: |

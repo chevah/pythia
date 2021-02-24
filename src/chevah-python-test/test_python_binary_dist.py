@@ -116,6 +116,7 @@ def get_allowed_deps():
                 '/lib/x86_64-linux-gnu/libc.so.6',
                 '/lib/x86_64-linux-gnu/libcrypt.so.1',
                 '/lib/x86_64-linux-gnu/libdl.so.2',
+                '/lib/x86_64-linux-gnu/libgcc_s.so.1',
                 '/lib/x86_64-linux-gnu/libm.so.6',
                 '/lib/x86_64-linux-gnu/libpthread.so.0',
                 '/lib/x86_64-linux-gnu/librt.so.1',

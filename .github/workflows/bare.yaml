@@ -131,8 +131,10 @@ jobs:
 
     # Some Homebrew libs pollute the build.
     # Also make sure binaries depending on these libs are out of the way.
+    # But first of all, install what's missing.
     - name: Hack Homebrew
       run: |
+        brew install rust
         sudo mv -v /usr/local/bin/git{,.saved}
         sudo chmod -v a-r /usr/local/include/libintl.h
         sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
