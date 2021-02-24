@@ -4,7 +4,7 @@
 # For best support, use `-latest` for runners spinning up containers. More at
 # https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
 
-name: GitHub-CI-Containerized
+name: Docker
 
 on:
   push:
@@ -19,7 +19,7 @@ env:
 
 
 jobs:
-  lnx:
+  ubuntu:
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:

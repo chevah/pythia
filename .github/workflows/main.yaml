@@ -4,7 +4,7 @@
 # Don't use `-latest` for runners, pin specific OS versions instead. More at
 # https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
 
-name: GitHub-CI
+name: Bare
 
 on:
   push:
