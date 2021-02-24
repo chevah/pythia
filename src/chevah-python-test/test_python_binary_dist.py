@@ -146,8 +146,6 @@ def get_allowed_deps():
                 '/lib/libcrypto.so.1.1',
                 '/lib/libssl.so.1.1',
                 '/lib/libz.so.1',
-                '/usr/lib/libffi.so.7',
-                '/usr/lib/libncursesw.so.6',
                 ]
     elif platform_system == 'sunos':
         # This is the list of deps for Solaris 11 64bit builds.
