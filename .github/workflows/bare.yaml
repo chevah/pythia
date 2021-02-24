@@ -137,9 +137,6 @@ jobs:
         sudo chmod -v a-r /usr/local/include/libintl.h
         sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
 
-    - name: Get Rust
-      run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
     - name: Build pythia
       run: ./pythia build
 

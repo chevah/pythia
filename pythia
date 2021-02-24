@@ -133,6 +133,8 @@ build_dep() {
             fi
             # Still needed for building cryptography.
             export CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include"
+            # Build as portable as possible.
+            export CRYPTOGRAPHY_DONT_BUILD_RUST=1
         fi
     elif [ $dep_boolean = "no" ]; then
         (>&2 echo "    Skip building $dep_name")

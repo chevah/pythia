@@ -19,6 +19,8 @@ case $OS in
         # By default, the busybox ersatz binaries are used.
         export GET_CMD="wget -q -O"
         export SHA_CMD="sha512sum -csw"
+        # Building with Rust pulls in a dependency on libgcc.
+        export CRYPTOGRAPHY_DONT_BUILD_RUST=1
         ;;
     lnx)
         # Build as portable as possible, only glibc 2.x should be needed.

@@ -51,7 +51,6 @@ jobs:
         cd binary.chevah.com/third-party-stuff/centos5/endpoint/
         rpm -i local-perl-*.rpm
         rpm -i --nodeps git{-core,}-2.5.0-1.ep.x86_64.rpm
-        curl -sSf https://binary.chevah.com/third-party-stuff/centos5/rustup.sh | sh
 
     - name: Clone repo independently
       run: |
