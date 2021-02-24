@@ -33,7 +33,7 @@ chevahbs_compile() {
 
 
 chevahbs_install() {
-    execute make install
+    execute make --debug --keep-going install
 }
 
 
