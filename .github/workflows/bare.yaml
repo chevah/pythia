@@ -40,10 +40,10 @@ jobs:
         fetch-depth: 2
 
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
-    - name: Build Python
+    - name: Build pythia
       run: bash ./pythia build
 
-    - name: Test Python
+    - name: Test pythia
       run: bash ./pythia test
 
     # To use an RSA key with SFTPPlus, install upstream OpenSSH package,
@@ -97,10 +97,10 @@ jobs:
     - name: Install required packages
       run: sudo apt-get install libncurses5-dev
 
-    - name: Build Python
+    - name: Build pythia
       run: ./pythia build
 
-    - name: Test Python
+    - name: Test pythia
       run: ./pythia test
 
     - name: Upload testing package
@@ -131,18 +131,19 @@ jobs:
 
     # Some Homebrew libs pollute the build.
     # Also make sure binaries depending on these libs are out of the way.
-    # But first of all, install what's missing.
     - name: Hack Homebrew
       run: |
-        brew install rust
         sudo mv -v /usr/local/bin/git{,.saved}
         sudo chmod -v a-r /usr/local/include/libintl.h
         sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
 
-    - name: Build Python
+    - name: Get Rust
+      run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+    - name: Build pythia
       run: ./pythia build
 
-    - name: Test Python
+    - name: Test pythia
       run: ./pythia test
 
     - name: Upload testing package
