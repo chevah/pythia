@@ -29,7 +29,8 @@ jobs:
     timeout-minutes: 60
     steps:
 
-    # To avoid duplicating the other steps, setup is done with no error checking.
+    # To avoid duplicating the other steps, setup steps are allowed to fail.
+    # First 'run' command should only run successfully on the intended target.
     - name: Alpine setup
       continue-on-error: true
       run: |
@@ -37,14 +38,18 @@ jobs:
         curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
 
-    # To avoid duplicating the other steps, setup is done with no error checking.
+    # To avoid duplicating the other steps, setup steps are allowed to fail.
+    # First 'run' command should only run successfully on the intended target.
     - name: CentOS 5 setup
       continue-on-error: true
       run: |
         rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
         yum makecache
-        yum -y install curl openssh-clients gcc make m4 patch unzip perl
-        rpm -i --nodeps http://binary.chevah.com/third-party-stuff/centos5/endpoint/git{-core,}-2.5.0-1.ep.x86_64.rpm
+        yum -y install curl openssh-clients gcc make m4 patch unzip wget
+        wget --mirror --no-parent https://binary.chevah.com/third-party-stuff/centos5/endpoint/
+        cd binary.chevah.com/third-party-stuff/centos5/endpoint/
+        rpm -i local-perl-*.rpm
+        rpm -i --nodeps git{-core,}-2.5.0-1.ep.x86_64.rpm
 
     - name: Clone repo independently
       run: |
