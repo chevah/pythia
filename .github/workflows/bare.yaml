@@ -16,7 +16,8 @@ on:
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 # Version 3 of mxschmitt/action-tmate should also work on Windows.
 env:
-  CHEVAH_DEBUG: 'yes'
+  TMATE_DEBUG: 'yes'
+  NGROK_DEBUG: 'no'
 
 
 jobs:
@@ -65,10 +66,19 @@ jobs:
         bash ./publish_dist.sh
         rm priv_key
 
-    # Per https://github.com/nelsonjchen/reverse-rdp-windows-github-actions,
-    # but using the Ngrok token as password for the runnneradmin user.
+    # Command line debugging through Tmate. v3 works on Windows too.
+    - name: Tmate debug on failure
+      if: failure() && env.TMATE_DEBUG == 'yes'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
+    # To access the Windows desktop for advanced debugging, as per
+    # https://github.com/nelsonjchen/reverse-rdp-windows-github-actions,
+    # but using the ngrok token as password for the runnneradmin user.
+    # Basically you the ngrok token and the ngrok URL (from ngrok's dashboard).
     - name: Ngrok debugging on failure
-      if: failure() && env.CHEVAH_DEBUG == 'yes'
+      if: failure() && env.NGROK_DEBUG == 'yes'
       env:
         NGROK_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
       run: |
@@ -115,7 +125,7 @@ jobs:
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     - name: Tmate debug on failure
-      if: failure() && env.CHEVAH_DEBUG == 'yes'
+      if: failure() && env.TMATE_DEBUG == 'yes'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
@@ -155,14 +165,14 @@ jobs:
 
     # Fix back Homebrew, to make everything functional for tmate debugging.
     - name: Unhack Homebrew
-      if: failure() && env.CHEVAH_DEBUG == 'yes'
+      if: failure() && env.TMATE_DEBUG == 'yes'
       run: |
         sudo chmod -v a+r /usr/local/opt/gettext/lib/libintl*
         sudo chmod -v a+r /usr/local/include/libintl.h
         sudo mv -v /usr/local/bin/git{.saved,}
 
     - name: Tmate debug on failure
-      if: failure() && env.CHEVAH_DEBUG == 'yes'
+      if: failure() && env.TMATE_DEBUG == 'yes'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
