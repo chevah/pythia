@@ -46,7 +46,8 @@ jobs:
       run: |
         rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
         yum makecache
-        yum -y install curl openssh-clients gcc make m4 patch unzip wget
+        yum -y install curl openssh-clients gcc44 make m4 patch unzip wget
+        ln -s /usr/bin/gcc44 /usr/local/bin/gcc
         wget --mirror --no-parent https://binary.chevah.com/third-party-stuff/centos5/endpoint/
         cd binary.chevah.com/third-party-stuff/centos5/endpoint/
         rpm -i local-perl-*.rpm

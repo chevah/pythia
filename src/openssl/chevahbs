@@ -28,12 +28,13 @@ chevahbs_configure() {
 
 chevahbs_compile() {
     execute $MAKE
-    # XXX execute $MAKE test
+    # XXX Fails on Centos 5 under Docker.
+    $MAKE test
 }
 
 
 chevahbs_install() {
-    execute make --debug --keep-going install
+    execute $MAKE install
 }
 
 
