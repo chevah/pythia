@@ -27,9 +27,15 @@ chevahbs_configure() {
 
 
 chevahbs_compile() {
+    local kern_ver=$(uname -r)
     execute $MAKE
-    # XXX Fails on Centos 5 under Docker.
-    $MAKE test
+    # FIXME:32:
+    # OpenSSL 1.1.1 tests fail under Docker (at least with CentOS 5).
+    if [ -f /.dockerenv -a "${kern_ver%2.6.18-419.el5*}" = "" ]; then
+        $MAKE test
+    else
+        execute $MAKE test
+    fi
 }
 
 
