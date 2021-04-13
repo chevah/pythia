@@ -34,7 +34,16 @@ chevahbs_compile() {
 
 
 chevahbs_install() {
-    execute $MAKE install
+    case $OS in
+        lnx)
+            # Installing manually.
+            execute cp -v libcrypto.a libssl.a "$INSTALL_DIR"/lib/
+            execute cp -rv include/openssl/ "$INSTALL_DIR"/include/
+            ;;
+        *)
+            execute $MAKE install
+            ;;
+    esac
 }
 
 
