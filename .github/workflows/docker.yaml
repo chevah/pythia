@@ -59,12 +59,12 @@ jobs:
         cd pythia
         git checkout ${GITHUB_HEAD_REF}
 
-    - name: Build Python
+    - name: Build Pythia
       run: |
         cd pythia
         ./pythia build
 
-    - name: Test Python
+    - name: Test Pythia
       run: |
         cd pythia
         ./pythia test

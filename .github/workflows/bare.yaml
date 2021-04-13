@@ -41,10 +41,10 @@ jobs:
         fetch-depth: 2
 
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
-    - name: Build pythia
+    - name: Build Pythia
       run: bash ./pythia build
 
-    - name: Test pythia
+    - name: Test Pythia
       run: bash ./pythia test
 
     # To use an RSA key with SFTPPlus, install upstream OpenSSH package,
@@ -107,10 +107,10 @@ jobs:
     - name: Install required packages
       run: sudo apt-get install libncurses5-dev
 
-    - name: Build pythia
+    - name: Build Pythia
       run: ./pythia build
 
-    - name: Test pythia
+    - name: Test Pythia
       run: ./pythia test
 
     - name: Upload testing package
@@ -147,10 +147,10 @@ jobs:
         sudo chmod -v a-r /usr/local/include/libintl.h
         sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
 
-    - name: Build pythia
+    - name: Build Pythia
       run: ./pythia build
 
-    - name: Test pythia
+    - name: Test Pythia
       run: ./pythia test
 
     - name: Upload testing package
