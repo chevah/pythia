@@ -36,9 +36,10 @@ chevahbs_compile() {
 chevahbs_install() {
     case $OS in
         lnx)
-            # Installing manually.
+            # Installing manually to avoid messing with a lib64/ sub-dir.
             execute cp -v libcrypto.a libssl.a "$INSTALL_DIR"/lib/
             execute cp -rv include/openssl/ "$INSTALL_DIR"/include/
+            execute cp -v *.pc "$INSTALL_DIR"/pkgconfig/
             ;;
         *)
             execute $MAKE install

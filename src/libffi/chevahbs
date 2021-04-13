@@ -29,10 +29,19 @@ chevahbs_compile() {
 
 
 chevahbs_install() {
-    execute $MAKE install DESTDIR=$INSTALL_DIR
-    # Ugly hack for Python 3's configure issues.
-    execute $SUDO_CMD rm -f /include
-    execute $SUDO_CMD ln -s "${INSTALL_DIR}/include" /include
+    case $OS in
+        lnx)
+            # Installing manually to avoid messing with a lib64/ sub-dir.
+            execute cp -v x86*-pc-linux-gnu/.libs/libffi.a "$INSTALL_DIR"/lib/
+            execute cp -v x86*-pc-linux-gnu/libffi.la "$INSTALL_DIR"/lib/
+            execute cp -v x86*-pc-linux-gnu/include/*.h "$INSTALL_DIR"/include/
+            execute mkdir "$INSTALL_DIR"/pkgconfig/
+            execute cp -v x86*-pc-linux-gnu/libffi.pc "$INSTALL_DIR"/pkgconfig/
+            ;;
+        *)
+            execute $MAKE install DESTDIR=$INSTALL_DIR
+            ;;
+    esac
 }
 
 select_chevahbs_command $@
