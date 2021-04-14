@@ -28,22 +28,14 @@ chevahbs_configure() {
 
 chevahbs_compile() {
     execute $MAKE
-
-    # FIXME:32:
-    # OpenSSL 1.1.1 tests fail under Docker (at least with CentOS 5).
-    grep -q "5.11 (Final)" /etc/redhat-release 2>/dev/null
-    if [ $? -eq 0 -a -f /.dockerenv ]; then
-        $MAKE test
-    else
-        execute $MAKE test
-    fi
+    execute $MAKE test
 }
 
 
 chevahbs_install() {
     case $OS in
         lnx)
-            # Installing manually to avoid messing with a lib64/ sub-dir.
+            echo "Installing manually to avoid messing with a lib64/ sub-dir:"
             execute cp -v libcrypto.a libssl.a "$INSTALL_DIR"/lib/
             execute cp -rv include/openssl/ "$INSTALL_DIR"/include/
             execute cp -v *.pc "$INSTALL_DIR"/pkgconfig/
