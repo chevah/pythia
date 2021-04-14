@@ -50,6 +50,11 @@ chevahbs_configure() {
     fi
 
     case $OS in
+        alpine312)
+            # Ugly hack for Python 3's configure issues.
+            execute $SUDO_CMD rm -f /include
+            execute $SUDO_CMD ln -s "${INSTALL_DIR}/include" /include
+	    ;;
         fbsd*|sol11*)
             LDFLAGS="$LDFLAGS -lncurses"
             ;;
