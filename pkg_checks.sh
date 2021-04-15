@@ -16,9 +16,9 @@
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
 BASE_PKGS="gcc make m4 automake libtool patch unzip"
-DPKG_PKGS="$BASE_PKGS tar coreutils diffutils \
+DPKG_PKGS="$BASE_PKGS tar diffutils \
     git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
-RPM_PKGS="$BASE_PKGS tar coreutils diffutils \
+RPM_PKGS="$BASE_PKGS tar diffutils \
     git-core openssl-devel zlib-devel libffi-devel ncurses-devel"
 # Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
 APK_PKGS="$BASE_PKGS file lddtree \
