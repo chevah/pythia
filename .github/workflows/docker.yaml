@@ -36,8 +36,8 @@ jobs:
       continue-on-error: true
       run: |
         grep ^3\.12 /etc/alpine-release
-        apk add git bash openssh-client
-        wget -O /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
+        apk add git curl bash openssh-client
+        curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
 
     # To avoid duplicating the other steps, setup steps are allowed to fail.
@@ -50,7 +50,7 @@ jobs:
         sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/CentOS-*
         sed -i s@^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever/@baseurl=https://vault.centos.org/8.2.2004/@ /etc/yum.repos.d/*.repo
         yum makecache
-        yum -y install git openssh-clients
+        yum -y install git curl openssh-clients
 
     # To avoid duplicating the other steps, setup steps are allowed to fail.
     # First 'run' command should only run successfully on the intended target.

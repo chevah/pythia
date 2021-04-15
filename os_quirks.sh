@@ -20,7 +20,6 @@ case $OS in
         ;;
     alpine*)
         # By default, the busybox ersatz binaries are used.
-        export GET_CMD="wget -q -O"
         export SHA_CMD="sha512sum -csw"
         # libffi is not an essential Alpine package.
         export BUILD_LIBFFI="yes"

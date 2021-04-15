@@ -10,18 +10,18 @@
 #   * git (for patching Python's version, if actually building it)
 #   * automake, libtool, headers of a curses library (if building libedit)
 #   * perl 5.10.0 or newer, Test::More 0.96 or newer (if building OpenSSL)
-#   * curl/wget, sha512sum, tar, unzip (for downloading and unpacking)
+#   * curl, sha512sum, tar, unzip (for downloading and unpacking)
 #
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
-BASE_PKGS="gcc make m4 automake libtool patch unzip curl"
+BASE_PKGS="gcc make m4 automake libtool patch unzip"
 DPKG_PKGS="$BASE_PKGS tar coreutils diffutils \
     git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
 RPM_PKGS="$BASE_PKGS tar coreutils diffutils \
-    git-core diffutils openssl-devel zlib-devel libffi-devel ncurses-devel"
+    git-core openssl-devel zlib-devel libffi-devel ncurses-devel"
 # Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
-APK_PKGS="$BASE_PKGS patch file lddtree \
+APK_PKGS="$BASE_PKGS file lddtree \
     git musl-dev openssl-dev zlib-dev libffi-dev"
 # Windows is special, but package management is possible through Chocolatey.
 # Curl, sha512sum, and unzip are bundled with MINGW.
