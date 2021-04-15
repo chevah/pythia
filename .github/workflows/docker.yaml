@@ -26,24 +26,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [ 'alpine:3.12', 'astj/centos5-vault' ]
-    timeout-minutes: 60
+        container: [ 'alpine:3.12', 'centos:8.2.2004', 'astj/centos5-vault' ]
+    timeout-minutes: 30
     steps:
 
     # To avoid duplicating the other steps, setup steps are allowed to fail.
     # First 'run' command should only run successfully on the intended target.
-    - name: Alpine setup
+    - name: Alpine 3.12 setup
       continue-on-error: true
       run: |
-        apk add git bash curl openssh-client rust cargo
-        curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
+        grep ^3\.12 /etc/alpine-release
+        apk add git bash openssh-client
+        wget -O /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
 
     # To avoid duplicating the other steps, setup steps are allowed to fail.
     # First 'run' command should only run successfully on the intended target.
-    - name: CentOS 5 setup
+    # Stick to CentOS 8.2 as OpenSSL got updated in 8.3 from 1.1.1c to 1.1.1g.
+    - name: CentOS 8.2 setup
       continue-on-error: true
       run: |
+        grep "release 8.2.2004 (Core)" /etc/redhat-release
+        sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/CentOS-*
+        sed -i s@^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever/@baseurl=https://vault.centos.org/8.2.2004/@ /etc/yum.repos.d/*.repo
+        yum makecache
+        yum -y install git openssh-clients
+
+    # To avoid duplicating the other steps, setup steps are allowed to fail.
+    # First 'run' command should only run successfully on the intended target.
+    - name: CentOS 5.11 setup
+      continue-on-error: true
+      run: |
+        grep "release 5.11 (Final)" /etc/redhat-release
         rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
         yum makecache
         yum -y install curl openssh-clients gcc44 make m4 patch unzip wget
@@ -81,12 +95,8 @@ jobs:
         ./publish_dist.sh
         rm priv_key
 
-    # Still not working.
-    - name: Prepare tmate debug
-      if: failure() && env.CHEVAH_DEBUG == 'yes'
-      run: ln -s /bin/true /usr/bin/apt-get && sleep 3 && which apt-get
-
     # If one of the above steps fails, fire up tmate for remote debugging.
+    # Not working on Alpine (apt-get required) and CentOS 5 (glibc too old).
     - name: Tmate debug on failure
       if: failure() && env.CHEVAH_DEBUG == 'yes'
       uses: mxschmitt/action-tmate@v3

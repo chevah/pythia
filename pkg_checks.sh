@@ -15,12 +15,14 @@
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
-BASE_PKGS="gcc make m4 automake libtool texinfo patch curl tar coreutils unzip"
-DPKG_PKGS="$BASE_PKGS git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
-RPM_PKGS="$BASE_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
-# Alpine's ersatz wget/tar/sha51sum binaries from Busybox are good enough.
-APK_PKGS="gcc make m4 automake libtool texinfo patch unzip file musl-dev \
-    git openssl-dev zlib-dev libffi-dev ncurses-dev lddtree"
+BASE_PKGS="gcc make m4 automake libtool patch unzip curl"
+DPKG_PKGS="$BASE_PKGS tar coreutils diffutils \
+    git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
+RPM_PKGS="$BASE_PKGS tar coreutils diffutils \
+    git-core diffutils openssl-devel zlib-devel libffi-devel ncurses-devel"
+# Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
+APK_PKGS="$BASE_PKGS patch file lddtree \
+    git musl-dev openssl-dev zlib-dev libffi-dev"
 # Windows is special, but package management is possible through Chocolatey.
 # Curl, sha512sum, and unzip are bundled with MINGW.
 CHOCO_PKGS=""
