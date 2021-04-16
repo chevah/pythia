@@ -32,10 +32,13 @@ jobs:
 
     # To avoid duplicating the other steps, setup steps are allowed to fail.
     # First 'run' command should only run successfully on the intended target.
+    # OpenSSL gets updated by apk, but that is the Alpine way, so it's fine.
     - name: Alpine 3.12 setup
       continue-on-error: true
       run: |
         grep ^3\.12 /etc/alpine-release
+        apk update
+        apk upgrade
         apk add git curl bash openssh-client
         curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
@@ -49,7 +52,7 @@ jobs:
         grep "release 8.2.2004 (Core)" /etc/redhat-release
         sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
         sed -i s@^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever/@baseurl=https://vault.centos.org/8.2.2004/@ /etc/yum.repos.d/*.repo
-        yum makecache
+        yum -y upgrade
         yum -y install git curl openssh-clients
 
     # To avoid duplicating the other steps, setup steps are allowed to fail.
@@ -60,8 +63,10 @@ jobs:
         grep "release 5.11 (Final)" /etc/redhat-release
         sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
         sed -i s@^#baseurl=http://mirror.centos.org/centos/\$releasever/@baseurl=http://vault.centos.org/5.11/@ /etc/yum.repos.d/*.repo
+        yum -y upgrade
+        # Use http://binary.chevah.com/third-party-stuff/centos5/tuxad/
+        # when tuxad.de dissapears, it has the minimum required stuff.
         rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
-        yum makecache
         yum -y install curl openssh-clients gcc44 make m4 patch unzip wget
         ln -s /usr/bin/gcc44 /usr/local/bin/gcc
         wget --mirror --no-parent https://binary.chevah.com/third-party-stuff/centos5/endpoint/
