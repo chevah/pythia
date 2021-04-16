@@ -16,7 +16,7 @@ on:
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 # Version 3 of mxschmitt/action-tmate should also work on Windows.
 env:
-  TMATE_DEBUG: 'yes'
+  TMATE_DEBUG: 'no'
   NGROK_DEBUG: 'no'
 
 
@@ -76,7 +76,7 @@ jobs:
     # To access the Windows desktop for advanced debugging, as per
     # https://github.com/nelsonjchen/reverse-rdp-windows-github-actions,
     # but using the ngrok token as password for the runnneradmin user.
-    # Basically you the ngrok token and the ngrok URL (from ngrok's dashboard).
+    # Basically use the ngrok token and the ngrok URL (from ngrok's dashboard).
     - name: Ngrok debugging on failure
       if: failure() && env.NGROK_DEBUG == 'yes'
       env:

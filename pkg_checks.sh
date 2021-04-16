@@ -33,12 +33,10 @@ MISSING_PACKAGES=""
 PACKAGES="$CC make m4 git patch curl sha512sum tar unzip"
 CHECK_CMD="command -v"
 
-
 choco_shim() {
     local pkg=$1
     choco list --local-only --limit-output | grep -iq ^"${pkg}|"
 }
-
 
 # $CHECK_CMD should exit with 0 only when checked packages is installed.
 case "$OS" in

@@ -15,7 +15,7 @@ on:
 # Set to 'yes' to open a tunnel to GitHub's VMs through tmate on failures.
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 env:
-  CHEVAH_DEBUG: 'yes'
+  CHEVAH_DEBUG: 'no'
 
 # Using a job name that doesn't contain the OS name, to minimize the risk of
 # confusion with the OS names of the containers, which are the relevant ones.
@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [ 'alpine:3.12', 'centos:8.2', 'centos:5.11' ]
+        container: [ 'alpine:3.12', 'centos:8.2.2004', 'centos:5.11' ]
     timeout-minutes: 30
     steps:
 
