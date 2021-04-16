@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [ 'alpine:3.12', 'centos:8.2.2004', 'astj/centos5-vault' ]
+        container: [ 'alpine:3.12', 'centos:8.2', 'centos:5.11' ]
     timeout-minutes: 30
     steps:
 
@@ -47,7 +47,7 @@ jobs:
       continue-on-error: true
       run: |
         grep "release 8.2.2004 (Core)" /etc/redhat-release
-        sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/CentOS-*
+        sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
         sed -i s@^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever/@baseurl=https://vault.centos.org/8.2.2004/@ /etc/yum.repos.d/*.repo
         yum makecache
         yum -y install git curl openssh-clients
@@ -58,6 +58,8 @@ jobs:
       continue-on-error: true
       run: |
         grep "release 5.11 (Final)" /etc/redhat-release
+        sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
+        sed -i s@^#baseurl=http://mirror.centos.org/centos/\$releasever/@baseurl=http://vault.centos.org/5.11/@ /etc/yum.repos.d/*.repo
         rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
         yum makecache
         yum -y install curl openssh-clients gcc44 make m4 patch unzip wget
