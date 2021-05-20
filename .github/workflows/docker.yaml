@@ -13,7 +13,7 @@ on:
     branches: [ main ]
 
 concurrency:
-  group: ${{ github.head_ref }}
+  group: docker-${{ github.ref }}
   cancel-in-progress: true
 
 # Set to 'yes' to open a tunnel to GitHub's VMs through tmate on failures.
