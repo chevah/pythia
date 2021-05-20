@@ -49,6 +49,9 @@ export GET_CMD="curl --silent --output"
 export SHA_CMD="sha512sum --check --status --warn"
 export TAR_CMD="tar xfz"
 export ZIP_CMD="unzip -q"
+if [ x$(id -u) != "x0" ]; then
+    export SUDO_CMD="sudo"
+fi
 
 # OS quirks.
 source os_quirks.sh
@@ -122,11 +125,9 @@ build_dep() {
         if [ $dep_name = "openssl" ]; then
             if [ "$OS" = "lnx" ]; then
                 # On RHEL5/SLES11 x64, OpenSSL instals only to lib64/ sub-dir.
+                # More so, under Docker installing fails, so it's done manually.
                 # '-Wl,-rpath' voodoo is needed to build cryptography w/ pip.
-                export LDFLAGS="-L${INSTALL_DIR}/lib64/ \
-                    -Wl,-rpath,${INSTALL_DIR}/lib64/ ${LDFLAGS}"
-                export PKG_CONFIG_PATH="\
-                    ${INSTALL_DIR}/lib64/pkgconfig/:${PKG_CONFIG_PATH}"
+                export LDFLAGS="-Wl,-rpath,${INSTALL_DIR}/lib/ ${LDFLAGS}"
             fi
             # Still needed for building cryptography.
             export CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include"

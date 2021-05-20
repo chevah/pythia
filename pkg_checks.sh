@@ -10,17 +10,19 @@
 #   * git (for patching Python's version, if actually building it)
 #   * automake, libtool, headers of a curses library (if building libedit)
 #   * perl 5.10.0 or newer, Test::More 0.96 or newer (if building OpenSSL)
-#   * curl/wget, sha512sum, tar, unzip (for downloading and unpacking)
+#   * curl, sha512sum, tar, unzip (for downloading and unpacking)
 #
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
-BASE_PKGS="gcc make m4 automake libtool texinfo patch curl tar coreutils unzip"
-DPKG_PKGS="$BASE_PKGS git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
-RPM_PKGS="$BASE_PKGS git openssl-devel zlib-devel libffi-devel ncurses-devel"
-# Alpine's ersatz wget/tar/sha51sum binaries from Busybox are good enough.
-APK_PKGS="gcc make m4 automake libtool texinfo patch unzip file musl-dev \
-    git openssl-dev zlib-dev libffi-dev ncurses-dev"
+BASE_PKGS="gcc make m4 automake libtool patch unzip"
+DPKG_PKGS="$BASE_PKGS tar diffutils \
+    git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
+RPM_PKGS="$BASE_PKGS tar diffutils \
+    git-core openssl-devel zlib-devel libffi-devel ncurses-devel"
+# Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
+APK_PKGS="$BASE_PKGS file lddtree \
+    git openssl-dev zlib-dev libffi-dev musl-dev"
 # Windows is special, but package management is possible through Chocolatey.
 # Curl, sha512sum, and unzip are bundled with MINGW.
 CHOCO_PKGS=""
@@ -101,18 +103,18 @@ if [ -n "$MISSING_PACKAGES" ]; then
         case "$OS" in
             ubuntu*)
                 echo "## Installing missing dpkg packages... ##"
-                execute sudo apt install -y $MISSING_PACKAGES
+                execute $SUDO_CMD apt install -y $MISSING_PACKAGES
                 ;;
             rhel*|amzn*)
                 echo "## Installing missing rpm packages... ##"
-                execute sudo yum install -y $MISSING_PACKAGES
+                execute $SUDO_CMD yum install -y $MISSING_PACKAGES
                 ;;
             alpine*)
                 echo "## Installing missing apk packages... ##"
-                execute sudo apk add $MISSING_PACKAGES
+                execute $SUDO_CMD apk add $MISSING_PACKAGES
                 ;;
             *)
-                (>&2 echo "Don't know how to install missing dependencies.")
+                (>&2 echo "Don't know how to install those on the current OS.")
                 exit 149
                 ;;
         esac
@@ -141,13 +143,13 @@ fi
 echo "# Checking if it's possible to avoid linking to system uuid libs... #"
 case "$OS" in
     ubuntu*)
-        execute sudo apt remove -y uuid-dev
+        execute $SUDO_CMD apt remove -y uuid-dev
         ;;
     rhel*|amzn*)
-        execute sudo yum remove -y e2fsprogs-devel libuuid-devel
+        execute $SUDO_CMD yum remove -y e2fsprogs-devel libuuid-devel
         ;;
     alpine*)
-        execute sudo apk del util-linux-dev
+        execute $SUDO_CMD apk del util-linux-dev
         ;;
     *)
         (>&2 echo "Not guarding against linking to uuid libs on this system!")

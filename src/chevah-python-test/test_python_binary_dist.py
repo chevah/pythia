@@ -145,8 +145,6 @@ def get_allowed_deps():
                 '/lib/libcrypto.so.1.1',
                 '/lib/libssl.so.1.1',
                 '/lib/libz.so.1',
-                '/usr/lib/libffi.so.7',
-                '/usr/lib/libncursesw.so.6',
                 ]
     elif platform_system == 'sunos':
         # This is the list of deps for Solaris 11 64bit builds.
@@ -387,9 +385,14 @@ def main():
         from cryptography.hazmat.backends.openssl.backend import backend
         import cryptography
         openssl_version = backend.openssl_version_text()
-        if CHEVAH_OS in [ "win", "lnx", "macos" ]:
-            # Check OpenSSL version on OS'es with static OpenSSL libs.
-            expecting = u'OpenSSL 1.1.1h  22 Sep 2020'
+        if CHEVAH_OS in [ "win", "macos", "lnx", "rhel-8" ]:
+            if CHEVAH_OS == "rhel-8":
+                # On RHEL 8.3, OpenSSL got updated to 1.1.1g. To keep backward
+                # compatibility, link to version 1.1.1c from CentOS 8.2.2004.
+                expecting = u'OpenSSL 1.1.1c FIPS  28 May 2019'
+            else:
+                # Use latest OpenSSL version when building it from source.
+                expecting = u'OpenSSL 1.1.1k  25 Mar 2021'
             if openssl_version != expecting:
                 sys.stderr.write('Expecting %s, got %s.\n' % (
                     expecting, openssl_version))

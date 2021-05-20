@@ -2,6 +2,9 @@
 #
 # OS quirks for the Pythia build system.
 
+# Avoid Rust for now, it brings more trouble.
+export CRYPTOGRAPHY_DONT_BUILD_RUST=1
+
 case $OS in
     win)
         # On Windows, python executable is installed at a different path.
@@ -16,9 +19,12 @@ case $OS in
         export SHA_CMD="$SHA_CMD --ignore-missing"
         ;;
     alpine*)
-        # By default, the busybox ersatz binaries are used.
-        export GET_CMD="wget -q -O"
+        # The busybox ersatz binary is different.
         export SHA_CMD="sha512sum -csw"
+        # Do not depend on libffi and ncurses-libs Alpine packages.
+        # It's better to run on minimal Alpine containers.
+        export BUILD_LIBFFI="yes"
+        export BUILD_LIBEDIT="no"
         ;;
     lnx)
         # Build as portable as possible, only glibc 2.x should be needed.
