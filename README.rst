@@ -1,7 +1,7 @@
-Pythia - a Python Portable Package
+Pythia - a portable Python package
 ==================================
 
-Build system for a portable Python distribution. 
+Build system for a portable Python package.
 A derivative of https://github.com/chevah/python-package/.
 
 Building:
@@ -22,12 +22,15 @@ Supported platforms
 -------------------
 
 * Windows Server 2012 R2 and newer (x86 and x64)
-* Red Hat Linux Enterprise 7 and 8 (including derivatives such as CentOS)
+* macOS 10.13 and newer.
+* all glibc-based Linux distributions (glibc 2.5+ for x64, 2.23+ for arm64)
+
+Platforms on which the system OpenSSL is used:
+
+* Red Hat Linux Enterprise 8 and newer (including derivatives such as CentOS)
 * Amazon Linux 2
 * Ubuntu Server 18.04 and 20.04
-* all glibc-based Linux distributions (glibc 2.5+ for x64, 2.23+ for arm64)
 * Alpine Linux 3.12
-* macOS 10.13 and newer.
 
 Platforms that should work, but are not regularly tested:
 

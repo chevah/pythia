@@ -114,7 +114,7 @@ if [ -n "$MISSING_PACKAGES" ]; then
                 execute $SUDO_CMD apk add $MISSING_PACKAGES
                 ;;
             *)
-                (>&2 echo "Don't know how to install missing dependencies.")
+                (>&2 echo "Don't know how to install those on the current OS.")
                 exit 149
                 ;;
         esac
