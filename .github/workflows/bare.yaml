@@ -12,6 +12,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
 # Set to 'yes' to open a tunnel to GitHub's VMs through ngrok/tmate on failures.
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 # Version 3 of mxschmitt/action-tmate should also work on Windows.
@@ -29,12 +33,10 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [ windows-2019, windows-2016 ]
-
     timeout-minutes: 20
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Make sure there are no concurrent jobs
-    - uses: chevah/auto-cancel-redundant-job@v1
     # Checks-out the repository under $GITHUB_WORKSPACE, so the job can access it
     - uses: actions/checkout@v2
       with:
@@ -98,7 +100,6 @@ jobs:
         runs-on: [ ubuntu-20.04, ubuntu-18.04 ]
     timeout-minutes: 40
     steps:
-    - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
@@ -130,9 +131,9 @@ jobs:
 
   macos:
     runs-on: macos-10.15
+    needs: [ windows, linux ]
     timeout-minutes: 60
     steps:
-    - uses: chevah/auto-cancel-redundant-job@v1
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
