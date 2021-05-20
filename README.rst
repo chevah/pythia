@@ -70,8 +70,5 @@ right, then save the diff to the sources patched with the preceding patch.
 .. image:: https://github.com/chevah/pythia/workflows/GitHub-CI/badge.svg
   :target: https://github.com/chevah/pythia/actions
 
-.. image:: https://travis-ci.com/chevah/pythia.svg?branch=main
-  :target: https://travis-ci.com/github/chevah/pythia
-
 .. image:: https://img.shields.io/github/issues/chevah/pythia.svg
   :target: https://github.com/chevah/pythia/issues
