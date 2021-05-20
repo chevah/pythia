@@ -12,6 +12,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
 # Set to 'yes' to open a tunnel to GitHub's VMs through tmate on failures.
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 env:
