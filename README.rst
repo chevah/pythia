@@ -23,7 +23,7 @@ Supported platforms
 
 * Windows Server 2012 R2 and newer (x86 and x64)
 * macOS 10.13 and newer.
-* all glibc-based Linux distributions (glibc 2.5+ for x64, 2.23+ for arm64)
+* all glibc-based Linux distributions (glibc 2.5+)
 
 Platforms on which the system OpenSSL is used:
 
