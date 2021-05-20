@@ -15,7 +15,7 @@ on:
 # Set to 'yes' to open a tunnel to GitHub's VMs through tmate on failures.
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 env:
-  CHEVAH_DEBUG: 'no'
+  TMATE_DEBUG: 'no'
 
 # Using a job name that doesn't contain the OS name, to minimize the risk of
 # confusion with the OS names of the containers, which are the relevant ones.
@@ -49,10 +49,9 @@ jobs:
         yum -y upgrade
         yum -y install git curl openssh-clients
 
-    # CentOS 5 is used to build the generic Linux package.
+    # Final CentOS 5 version is used to build the generic Linux package.
     - name: CentOS 5.11 setup
       if: matrix.container == 'centos:5.11'
-      continue-on-error: true
       run: |
         sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
         sed -i s@^#baseurl=http://mirror.centos.org/centos/\$releasever/@baseurl=http://vault.centos.org/5.11/@ /etc/yum.repos.d/*.repo
@@ -96,9 +95,9 @@ jobs:
         ./publish_dist.sh ; rm priv_key
 
     # If one of the above steps fails, fire up tmate for remote debugging.
-    # Not working on Alpine (apt-get required) and CentOS 5 (glibc too old).
+    # Not working on Alpine (not supported) and CentOS 5 (glibc too old).
     - name: Tmate debug on failure
-      if: failure() && env.CHEVAH_DEBUG == 'yes'
+      if: failure() && env.TMATE_DEBUG == 'yes'
       uses: mxschmitt/action-tmate@v3
       with:
         sudo: false

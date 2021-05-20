@@ -22,7 +22,7 @@ RPM_PKGS="$BASE_PKGS tar diffutils \
     git-core openssl-devel zlib-devel libffi-devel ncurses-devel"
 # Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
 APK_PKGS="$BASE_PKGS file lddtree \
-    git musl-dev openssl-dev zlib-dev libffi-dev"
+    git openssl-dev zlib-dev libffi-dev musl-dev"
 # Windows is special, but package management is possible through Chocolatey.
 # Curl, sha512sum, and unzip are bundled with MINGW.
 CHOCO_PKGS=""

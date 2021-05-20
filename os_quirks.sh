@@ -19,11 +19,11 @@ case $OS in
         export SHA_CMD="$SHA_CMD --ignore-missing"
         ;;
     alpine*)
-        # By default, the busybox ersatz binaries are used.
+        # The busybox ersatz binary is different.
         export SHA_CMD="sha512sum -csw"
-        # libffi is not an essential Alpine package.
+        # Do not depend on libffi and ncurses-libs Alpine packages.
+        # It's better to run on minimal Alpine containers.
         export BUILD_LIBFFI="yes"
-        # Same for `ncurses-libs`.
         export BUILD_LIBEDIT="no"
         ;;
     lnx)
