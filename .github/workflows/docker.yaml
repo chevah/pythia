@@ -30,37 +30,30 @@ jobs:
     timeout-minutes: 30
     steps:
 
-    # To avoid duplicating the other steps, setup steps are allowed to fail.
-    # First 'run' command should only run successfully on the intended target.
     # OpenSSL gets updated by apk, but that is the Alpine way, so it's fine.
     - name: Alpine 3.12 setup
-      continue-on-error: true
+      if: matrix.container == 'alpine:3.12'
       run: |
-        grep ^3\.12 /etc/alpine-release
         apk update
         apk upgrade
         apk add git curl bash openssh-client
         curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
 
-    # To avoid duplicating the other steps, setup steps are allowed to fail.
-    # First 'run' command should only run successfully on the intended target.
     # Stick to CentOS 8.2 as OpenSSL got updated in 8.3 from 1.1.1c to 1.1.1g.
     - name: CentOS 8.2 setup
-      continue-on-error: true
+      if: matrix.container == 'centos:8.2.2004'
       run: |
-        grep "release 8.2.2004 (Core)" /etc/redhat-release
         sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
         sed -i s@^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever/@baseurl=https://vault.centos.org/8.2.2004/@ /etc/yum.repos.d/*.repo
         yum -y upgrade
         yum -y install git curl openssh-clients
 
-    # To avoid duplicating the other steps, setup steps are allowed to fail.
-    # First 'run' command should only run successfully on the intended target.
+    # CentOS 5 is used to build the generic Linux package.
     - name: CentOS 5.11 setup
+      if: matrix.container == 'centos:5.11'
       continue-on-error: true
       run: |
-        grep "release 5.11 (Final)" /etc/redhat-release
         sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
         sed -i s@^#baseurl=http://mirror.centos.org/centos/\$releasever/@baseurl=http://vault.centos.org/5.11/@ /etc/yum.repos.d/*.repo
         yum -y upgrade
