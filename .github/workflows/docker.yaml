@@ -91,6 +91,7 @@ jobs:
         ./pythia test
 
     # Using `~/` is problematic under Docker, use `/root/`.
+    # Remove key in same step to avoid leaving it on disk if publishing fails.
     - name: Upload testing package
       run: |
         mkdir -pv /root/.ssh/
@@ -99,8 +100,7 @@ jobs:
         chmod 600 priv_key
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > /root/.ssh/known_hosts
-        ./publish_dist.sh
-        rm priv_key
+        ./publish_dist.sh ; rm priv_key
 
     # If one of the above steps fails, fire up tmate for remote debugging.
     # Not working on Alpine (apt-get required) and CentOS 5 (glibc too old).
