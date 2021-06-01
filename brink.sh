@@ -464,6 +464,8 @@ copy_python() {
         # We have a Python, but we are not sure if is the right version.
         local version_file=${BUILD_FOLDER}/lib/PYTHIA_VERSION
 
+        # If we are upgrading the cache from Python 2,
+        # cat fails if this file is missing, so we create it blank.
         touch $version_file
         python_installed_version=`cat $version_file`
         if [ "$PYTHON_VERSION" != "$python_installed_version" ]; then
