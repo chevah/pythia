@@ -464,6 +464,7 @@ copy_python() {
         # We have a Python, but we are not sure if is the right version.
         local version_file=${BUILD_FOLDER}/lib/PYTHIA_VERSION
 
+        touch $version_file
         python_installed_version=`cat $version_file`
         if [ "$PYTHON_VERSION" != "$python_installed_version" ]; then
             # We have a different python installed.
