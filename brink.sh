@@ -112,6 +112,10 @@ execute_venv() {
 # Called to update the dependencies inside the newly created virtual
 # environment.
 update_venv() {
+    # After updating the python version, the existing pyc files might no
+    # longer be valid.
+    _clean_pyc
+
     set +e
     ${PYTHON_BIN} -c 'from paver.tasks import main; main()' deps
     exit_code=$?
@@ -134,11 +138,6 @@ clean_build() {
     delete_folder ${DIST_FOLDER}
     echo "Removing publish..."
     delete_folder 'publish'
-    echo "Cleaning pyc files ..."
-
-    # Faster than '-exec rm {} \;' and supported in most OS'es,
-    # details at https://www.in-ulm.de/~mascheck/various/find/#xargs
-    find ./ -name '*.pyc' -exec rm {} +
 
     # In some case pip hangs with a build folder in temp and
     # will not continue until it is manually removed.
@@ -149,6 +148,15 @@ clean_build() {
     else
         rm -rf /tmp/pip*
     fi
+}
+
+
+_clean_pyc() {
+    echo "Cleaning pyc files ..."
+    # Faster than '-exec rm {} \;' and supported in most OS'es,
+    # details at https://www.in-ulm.de/~mascheck/various/find/#xargs
+    find ./ -name '*.pyc' -exec rm {} +
+
 }
 
 
