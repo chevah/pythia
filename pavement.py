@@ -36,6 +36,7 @@ SETUP['buildbot']['web_url'] = 'https://buildbot.chevah.com:10433'
 
 RUN_PACKAGES = [
     'requests~=2.24',
+    'python-dateutil==2.8.1',
     ]
 
 
