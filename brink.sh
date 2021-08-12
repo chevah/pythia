@@ -455,7 +455,7 @@ copy_python() {
             cache_ver_file=${python_distributable}/lib/PYTHIA_VERSION
             cache_version='UNVERSIONED'
             if [ -f $cache_ver_file ]; then
-                cache_version=`cat $cache_ver_file`
+                cache_version=`cat $cache_ver_file | cut -d - -f 1`
             fi
             if [ "$PYTHON_VERSION" != "$cache_version" ]; then
                 # We have a different version in the cache.
@@ -486,10 +486,9 @@ copy_python() {
         # If we are upgrading the cache from Python 2,
         # cat fails if this file is missing, so we create it blank.
         touch $version_file
-        python_installed_version=`cat $version_file`
+        python_installed_version=`cat $version_file | cut -d - -f 1`
         if [ "$PYTHON_VERSION" != "$python_installed_version" ]; then
             # We have a different python installed.
-
             # Check if we have the to-be-updated version and fail if
             # it does not exists.
             set +o errexit
@@ -511,7 +510,6 @@ copy_python() {
             copy_python
         fi
     fi
-
 }
 
 
@@ -519,7 +517,6 @@ copy_python() {
 # Install dependencies after python was just installed.
 #
 install_dependencies(){
-
     if [ $WAS_PYTHON_JUST_INSTALLED -ne 1 ]; then
         return
     fi

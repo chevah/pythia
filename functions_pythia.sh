@@ -217,7 +217,7 @@ cleanup_install_dir() {
     execute popd
 
     # Output Pythia's own version to a dedicated file in the archive.
-    echo "${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}" \
+    echo "${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}-${OS}-${ARCH}" \
         > "${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHIA_VERSION"
 
     echo "::endgroup::"
