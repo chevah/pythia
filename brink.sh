@@ -156,7 +156,6 @@ _clean_pyc() {
     # Faster than '-exec rm {} \;' and supported in most OS'es,
     # details at https://www.in-ulm.de/~mascheck/various/find/#xargs
     find ./ -name '*.pyc' -exec rm {} +
-
 }
 
 
@@ -337,8 +336,20 @@ set_download_commands() {
     set +o errexit
     command -v curl > /dev/null
     if [ $? -eq 0 ]; then
-        DOWNLOAD_CMD="curl --remote-name --location"
-        ONLINETEST_CMD="curl --fail --silent --head --output /dev/null"
+        # Options not used because of no support in CentOS 5.11's curl:
+        #     --retry-connrefused (since curl 7.52.0)
+        #     --retry-all-errors (since curl 7.71.0)
+        # Retry 2 times, allocating 10s for the connection phase,
+        # at most 300s for an attempt, sleeping for 5s between retries.
+        CURL_RETRY_OPTS="\
+            --retry 2 \
+            --connect-timeout 10 \
+            --max-time 300 \
+            --retry-delay 5 \
+            "
+        DOWNLOAD_CMD="curl --remote-name --location $CURL_RETRY_OPTS"
+        ONLINETEST_CMD="curl --fail --silent --head $CURL_RETRY_OPTS \
+            --output /dev/null"
         set -o errexit
         return
     fi
