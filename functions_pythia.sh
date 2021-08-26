@@ -160,13 +160,12 @@ cleanup_install_dir() {
     execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
         echo "Cleaning up Python's caches and compiled files..."
         find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
-    execute popd
-    case $OS in
-        win)
-            echo "    Skip further cleaning of install dir"
-            ;;
-        *)
-            execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
+
+        case $OS in
+            win)
+                echo "    Skip further cleaning of install dir"
+                ;;
+            *)
                 execute rm -rf tmp
                 # Move all binaries to lib/config
                 execute mkdir -p lib/config
@@ -213,12 +212,12 @@ cleanup_install_dir() {
                 execute rm -rf "lib/$PYTHON_VERSION/test/"
                 # Remove (mostly OpenSSL) docs and manuals.
                 execute rm -rf share/
-            execute popd
-            ;;
-    esac
+                ;;
+        esac
+    execute popd
 
     # Output Pythia's own version to a dedicated file in the archive.
-    echo "${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}" \
+    echo "${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}-${OS}-${ARCH}" \
         > "${BUILD_DIR}/${PYTHON_BUILD_DIR}/lib/PYTHIA_VERSION"
 
     echo "::endgroup::"

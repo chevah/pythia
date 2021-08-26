@@ -41,7 +41,7 @@ jobs:
         apk update
         apk upgrade
         apk add git curl bash openssh-client
-        curl -o /usr/local/bin/paxctl https://binary.chevah.com/third-party-stuff/alpine/paxctl-3.12
+        curl -o /usr/local/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
 
     # Stick to CentOS 8.2 as OpenSSL got updated in 8.3 from 1.1.1c to 1.1.1g.
@@ -60,13 +60,13 @@ jobs:
         sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
         sed -i s@^#baseurl=http://mirror.centos.org/centos/\$releasever/@baseurl=http://vault.centos.org/5.11/@ /etc/yum.repos.d/*.repo
         yum -y upgrade
-        # Use http://binary.chevah.com/third-party-stuff/centos5/tuxad/
+        # Use http://bin.chevah.com:20443/third-party-stuff/centos5/tuxad/
         # when tuxad.de dissapears, it has the minimum required stuff.
         rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
         yum -y install curl openssh-clients gcc44 make m4 patch unzip wget
         ln -s /usr/bin/gcc44 /usr/local/bin/gcc
-        wget --mirror --no-parent https://binary.chevah.com/third-party-stuff/centos5/endpoint/
-        cd binary.chevah.com/third-party-stuff/centos5/endpoint/
+        wget --mirror --no-parent https://bin.chevah.com:20443/third-party-stuff/centos5/endpoint/
+        cd bin.chevah.com:20443/third-party-stuff/centos5/endpoint/
         rpm -i local-perl-*.rpm
         rpm -i --nodeps git{-core,}-2.5.0-1.ep.x86_64.rpm
 

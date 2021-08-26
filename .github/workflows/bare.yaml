@@ -9,8 +9,29 @@ name: Bare
 on:
   push:
     branches: [ main ]
+
   pull_request:
     branches: [ main ]
+
+  workflow_dispatch:
+    # These inputs are used for the `actions_try` command in pavement_commons.
+    # It pushes the local branch, and sends the staged but uncommitted diff
+    # to be executed for a GitHub Action.
+    # https://github.com/chevah/brink/blob/6477cd7d580a604dfda16420f1948e5b2019bcde/src/brink/pavement_commons.py#L826
+    inputs:
+      tests:
+        description: Run selected tests
+        default: ""
+        required: false
+      job:
+        description: Specific job to execute (windows | linux)
+        default: ""
+        required: false
+      diff:
+        description: Diff in base64
+        default: ""
+        required: False
+
 
 concurrency:
   group: bare-${{ github.ref }}
@@ -28,6 +49,7 @@ jobs:
   windows:
     # The type of runner that the job will run on
     runs-on: ${{ matrix.runs-on }}
+    if: github.event.inputs.job == '' || github.event.inputs.job == 'windows'
     strategy:
       # Workflow won't be cancelled at the first failed job.
       fail-fast: false
@@ -94,6 +116,7 @@ jobs:
 
   linux:
     runs-on: ${{ matrix.runs-on }}
+    if: github.event.inputs.job == '' || github.event.inputs.job == 'linux'
     strategy:
       fail-fast: false
       matrix:
@@ -132,6 +155,9 @@ jobs:
   macos:
     runs-on: macos-10.15
     needs: [ windows, linux ]
+    # For now, we don't support actions_try with macos due to the `needs`
+    # functionality.
+    if: github.event.inputs.job == ''
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@v2

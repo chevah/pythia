@@ -112,6 +112,10 @@ execute_venv() {
 # Called to update the dependencies inside the newly created virtual
 # environment.
 update_venv() {
+    # After updating the python version, the existing pyc files might no
+    # longer be valid.
+    _clean_pyc
+
     set +e
     ${PYTHON_BIN} -c 'from paver.tasks import main; main()' deps
     exit_code=$?
@@ -134,11 +138,6 @@ clean_build() {
     delete_folder ${DIST_FOLDER}
     echo "Removing publish..."
     delete_folder 'publish'
-    echo "Cleaning pyc files ..."
-
-    # Faster than '-exec rm {} \;' and supported in most OS'es,
-    # details at https://www.in-ulm.de/~mascheck/various/find/#xargs
-    find ./ -name '*.pyc' -exec rm {} +
 
     # In some case pip hangs with a build folder in temp and
     # will not continue until it is manually removed.
@@ -149,6 +148,14 @@ clean_build() {
     else
         rm -rf /tmp/pip*
     fi
+}
+
+
+_clean_pyc() {
+    echo "Cleaning pyc files ..."
+    # Faster than '-exec rm {} \;' and supported in most OS'es,
+    # details at https://www.in-ulm.de/~mascheck/various/find/#xargs
+    find ./ -name '*.pyc' -exec rm {} +
 }
 
 
@@ -300,15 +307,11 @@ pip_install() {
     echo "::group::pip install $1"
 
     set +e
-    # There is a bug in pip/setuptools when using custom build folders.
-    # See https://github.com/pypa/pip/issues/3564
-    rm -rf ${BUILD_FOLDER}/pip-build
     ${PYTHON_BIN} -m \
         pip install \
             --trusted-host pypi.chevah.com \
             --trusted-host deag.chevah.com \
             --index-url=$PIP_INDEX \
-            --build=${BUILD_FOLDER}/pip-build \
             $1
 
     exit_code=$?
@@ -329,8 +332,20 @@ set_download_commands() {
     set +o errexit
     command -v curl > /dev/null
     if [ $? -eq 0 ]; then
-        DOWNLOAD_CMD="curl --remote-name --location"
-        ONLINETEST_CMD="curl --fail --silent --head --output /dev/null"
+        # Options not used because of no support in CentOS 5.11's curl:
+        #     --retry-connrefused (since curl 7.52.0)
+        #     --retry-all-errors (since curl 7.71.0)
+        # Retry 2 times, allocating 10s for the connection phase,
+        # at most 300s for an attempt, sleeping for 5s between retries.
+        CURL_RETRY_OPTS="\
+            --retry 2 \
+            --connect-timeout 10 \
+            --max-time 300 \
+            --retry-delay 5 \
+            "
+        DOWNLOAD_CMD="curl --remote-name --location $CURL_RETRY_OPTS"
+        ONLINETEST_CMD="curl --fail --silent --head $CURL_RETRY_OPTS \
+            --output /dev/null"
         set -o errexit
         return
     fi
@@ -373,7 +388,7 @@ test_version_exists() {
     local remote_base_url=$1
     local target_file=python-${PYTHON_VERSION}-${OS}-${ARCH}.tar.gz
 
-    echo "Checking $remote_base_url/${OS}/${ARCH}/$target_file"
+    echo "Checking $remote_base_url/${PYTHON_VERSION}/$target_file"
     $ONLINETEST_CMD $remote_base_url/${PYTHON_VERSION}/$target_file
     return $?
 }
@@ -436,7 +451,7 @@ copy_python() {
             cache_ver_file=${python_distributable}/lib/PYTHIA_VERSION
             cache_version='UNVERSIONED'
             if [ -f $cache_ver_file ]; then
-                cache_version=`cat $cache_ver_file`
+                cache_version=`cat $cache_ver_file | cut -d - -f 1`
             fi
             if [ "$PYTHON_VERSION" != "$cache_version" ]; then
                 # We have a different version in the cache.
@@ -467,10 +482,9 @@ copy_python() {
         # If we are upgrading the cache from Python 2,
         # cat fails if this file is missing, so we create it blank.
         touch $version_file
-        python_installed_version=`cat $version_file`
+        python_installed_version=`cat $version_file | cut -d - -f 1`
         if [ "$PYTHON_VERSION" != "$python_installed_version" ]; then
             # We have a different python installed.
-
             # Check if we have the to-be-updated version and fail if
             # it does not exists.
             set +o errexit
@@ -492,7 +506,6 @@ copy_python() {
             copy_python
         fi
     fi
-
 }
 
 
@@ -500,7 +513,6 @@ copy_python() {
 # Install dependencies after python was just installed.
 #
 install_dependencies(){
-
     if [ $WAS_PYTHON_JUST_INSTALLED -ne 1 ]; then
         return
     fi
@@ -562,12 +574,14 @@ check_os_version() {
     done
 
     if [ "$flag_supported" = 'false' ]; then
-        (>&2 echo "Current version of ${name_fancy} is too old: ${version_raw}")
-        (>&2 echo "Oldest supported ${name_fancy} version is: ${version_good}")
+        (>&2 echo "Detected version of ${name_fancy} is: ${version_raw}.")
+        (>&2 echo "For versions older than ${name_fancy} ${version_good},")
         if [ "$OS" = "Linux" ]; then
             # For old and/or unsupported Linux distros there's a second chance!
+            (>&2 echo "the generic Linux runtime is used, if possible.")
             check_linux_glibc
         else
+            (>&2 echo "there is currently no support.")
             exit 13
         fi
     fi
@@ -587,7 +601,7 @@ check_linux_glibc() {
     local glibc_version_array
     local supported_glibc2_version
     # Output to a file to avoid "write error: Broken pipe" with grep/head.
-    local ldd_output_file="/tmp/.chevah_glibc_version"
+    local ldd_output_file=".chevah_glibc_version"
 
     # Supported minimum minor glibc 2.X versions for various arches.
     # For x64, we build on CentOS 5.11 (Final) with glibc 2.5.
@@ -600,10 +614,14 @@ check_linux_glibc() {
         "aarch64"|"arm64")
             supported_glibc2_version=23
             ;;
+        *)
+            (>&2 echo "$ARCH is an unsupported arch for generic Linux!")
+            exit 17
+            ;;
     esac
 
-    (>&2 echo -n "Couldn't detect a supported distribution. ")
-    (>&2 echo "Trying to treat it as generic Linux...")
+    echo "No specific runtime for the current distribution / version / arch."
+    echo "Minimum glibc version for this arch: 2.${supported_glibc2_version}."
 
     set +o errexit
 
@@ -622,6 +640,7 @@ check_linux_glibc() {
 
     # Tested with glibc 2.5/2.11.3/2.12/2.23/2.28-31 and eglibc 2.13/2.19.
     glibc_version=$(head -n 1 $ldd_output_file | rev | cut -d\  -f1 | rev)
+    rm $ldd_output_file
 
     if [[ $glibc_version =~ [^[:digit:]\.] ]]; then
         (>&2 echo "Glibc version should only have numbers and periods, but:")
@@ -636,13 +655,12 @@ check_linux_glibc() {
         exit 21
     fi
 
-    # We pass here because:
-    #   1. Building Python should work with an older glibc version.
-    #   2. Our generic "lnx" runtime might work with a slightly older glibc 2.
+    # Decrement supported_glibc2_version if building against an older glibc.
     if [ ${glibc_version_array[1]} -lt ${supported_glibc2_version} ]; then
-        (>&2 echo -n "Detected glibc version: ${glibc_version}. Versions older")
-        (>&2 echo " than 2.${supported_glibc2_version} were NOT tested!")
-
+        (>&2 echo "NOT good. Detected version is older: ${glibc_version}!")
+        exit 22
+    else
+        echo "All is good. Detected glibc version: ${glibc_version}."
     fi
 
     set -o errexit
