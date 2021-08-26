@@ -307,15 +307,11 @@ pip_install() {
     echo "::group::pip install $1"
 
     set +e
-    # There is a bug in pip/setuptools when using custom build folders.
-    # See https://github.com/pypa/pip/issues/3564
-    rm -rf ${BUILD_FOLDER}/pip-build
     ${PYTHON_BIN} -m \
         pip install \
             --trusted-host pypi.chevah.com \
             --trusted-host deag.chevah.com \
             --index-url=$PIP_INDEX \
-            --build=${BUILD_FOLDER}/pip-build \
             $1
 
     exit_code=$?
