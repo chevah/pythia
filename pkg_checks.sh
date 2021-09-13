@@ -22,7 +22,7 @@ RPM_PKGS="$BASE_PKGS tar diffutils \
     git-core openssl-devel zlib-devel libffi-devel ncurses-devel"
 # Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
 APK_PKGS="$BASE_PKGS file lddtree \
-    git openssl-dev zlib-dev libffi-dev musl-dev"
+    git openssl-dev zlib-dev libffi-dev musl-dev paxctl"
 # Windows is special, but package management is possible through Chocolatey.
 # Curl, sha512sum, and unzip are bundled with MINGW.
 CHOCO_PKGS=""
@@ -149,7 +149,8 @@ case "$OS" in
         execute $SUDO_CMD yum remove -y e2fsprogs-devel libuuid-devel
         ;;
     alpine*)
-        execute $SUDO_CMD apk del util-linux-dev
+        $CHECK_CMD util-linux-dev \
+            && execute $SUDO_CMD apk del util-linux-dev
         ;;
     *)
         (>&2 echo "Not guarding against linking to uuid libs on this system!")
