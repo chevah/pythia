@@ -30,19 +30,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [ 'alpine:3.12', 'centos:8.2.2004', 'centos:5.11' ]
+        container: [ 'alpine:3.14', 'centos:8.2.2004', 'centos:5.11' ]
     timeout-minutes: 30
     steps:
 
     # OpenSSL gets updated by apk, but that is the Alpine way, so it's fine.
-    - name: Alpine 3.12 setup
-      if: matrix.container == 'alpine:3.12'
+    - name: Alpine setup
+      if: startsWith(matrix.container, 'alpine')
       run: |
-        apk update
-        apk upgrade
-        apk add git curl bash openssh-client
-        curl -o /usr/local/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
-        chmod +x /usr/local/bin/paxctl
+        apk upgrade -U
+        apk add git curl bash openssh-client paxctl
 
     # Stick to CentOS 8.2 as OpenSSL got updated in 8.3 from 1.1.1c to 1.1.1g.
     - name: CentOS 8.2 setup
