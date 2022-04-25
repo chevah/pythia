@@ -390,9 +390,12 @@ def main():
                 # On RHEL 8.3, OpenSSL got updated to 1.1.1g. To keep backward
                 # compatibility, link to version 1.1.1c from CentOS 8.2.2004.
                 expecting = u'OpenSSL 1.1.1c FIPS  28 May 2019'
+            elif CHEVAH_OS == "win":
+                # Latest Python 3.8 Win packages are left behind.
+                expecting = u'OpenSSL 1.1.1k  25 Mar 2021'
             else:
                 # Use latest OpenSSL version when building it from source.
-                expecting = u'OpenSSL 1.1.1k  25 Mar 2021'
+                expecting = u'OpenSSL 1.1.1n  15 Mar 2022'
             if openssl_version != expecting:
                 sys.stderr.write('Expecting %s, got %s.\n' % (
                     expecting, openssl_version))
