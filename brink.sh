@@ -87,7 +87,7 @@ PYTHON_VERSION='not.defined.yet'
 PYTHON_PLATFORM='unknown-os-and-arch'
 PYTHON_NAME='python3.8'
 BINARY_DIST_URI='https://github.com/chevah/pythia/releases/download'
-PIP_INDEX='https://pypi.chevah.com'
+PIP_INDEX_URL='https://pypi.org/simple'
 BASE_REQUIREMENTS=''
 
 #
@@ -256,6 +256,7 @@ update_path_variables() {
     export CHEVAH_OS=${OS}
     export CHEVAH_ARCH=${ARCH}
     export CHEVAH_CACHE=${CACHE_FOLDER}
+    export PIP_INDEX_URL=${PIP_INDEX_URL}
 
 }
 
@@ -307,11 +308,15 @@ pip_install() {
     echo "::group::pip install $1"
 
     set +e
+    # There is a bug in pip/setuptools when using custom build folders.
+    # See https://github.com/pypa/pip/issues/3564
+    rm -rf ${BUILD_FOLDER}/pip-build
     ${PYTHON_BIN} -m \
         pip install \
-            --trusted-host pypi.chevah.com \
-            --trusted-host deag.chevah.com \
-            --index-url=$PIP_INDEX \
+            --trusted-host bin.chevah.com \
+            --trusted-host pypi-internal.chevah.com \
+            --index-url=$PIP_INDEX_URL \
+            --build=${BUILD_FOLDER}/pip-build \
             $1
 
     exit_code=$?
@@ -531,7 +536,7 @@ install_dependencies(){
 # If it's too old, exit with a nice informative message.
 # If it's supported, return through eval the version numbers to be used for
 # naming the package, for example: '8' for RHEL 8.2, '2004' for Ubuntu 20.04,
-# '312' for Alpine Linux 3.12, '114' for Solaris 11.4.
+# '314' for Alpine Linux 3.14, '114' for Solaris 11.4.
 #
 check_os_version() {
     # First parameter should be the human-readable name for the current OS.
@@ -796,11 +801,11 @@ detect_os() {
             ARCH="x64"
             case "$OS" in
                 win)
-                    # 32bit build on Windows 2016, 64bit otherwise.
+                    # 32bit build on Windows 2019, 64bit otherwise.
                     # Should work with a l10n pack too (tested with French).
                     win_ver=$(systeminfo.exe | head -n 3 | tail -n 1 \
                         | cut -d ":" -f 2)
-                    if [[ "$win_ver" =~ "Microsoft Windows Server 2016" ]]; then
+                    if [[ "$win_ver" =~ "Microsoft Windows Server 2019" ]]; then
                         ARCH="x86"
                     fi
                     ;;

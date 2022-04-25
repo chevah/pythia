@@ -54,7 +54,7 @@ jobs:
       # Workflow won't be cancelled at the first failed job.
       fail-fast: false
       matrix:
-        runs-on: [ windows-2019, windows-2016 ]
+        runs-on: [ windows-2022, windows-2019 ]
     timeout-minutes: 20
 
     # Steps represent a sequence of tasks that will be executed as part of the job
