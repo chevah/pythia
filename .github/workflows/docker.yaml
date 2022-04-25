@@ -30,7 +30,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [ 'alpine:3.14', 'centos:8.2.2004', 'centos:5.11' ]
+        # CentOS 5.11 setup was saved as an image pushed to Docker Hub. See the
+        # Overview section at https://hub.docker.com/r/proatria/centos for details.
+        container: [ 'alpine:3.14', 'centos:8.2.2004', 'proatria/centos:5.11-chevah1' ]
     timeout-minutes: 30
     steps:
 
@@ -49,23 +51,6 @@ jobs:
         sed -i s@^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever/@baseurl=https://vault.centos.org/8.2.2004/@ /etc/yum.repos.d/*.repo
         yum -y upgrade
         yum -y install git curl openssh-clients
-
-    # Final CentOS 5 version is used to build the generic Linux package.
-    - name: CentOS 5.11 setup
-      if: matrix.container == 'centos:5.11'
-      run: |
-        sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
-        sed -i s@^#baseurl=http://mirror.centos.org/centos/\$releasever/@baseurl=http://vault.centos.org/5.11/@ /etc/yum.repos.d/*.repo
-        yum -y upgrade
-        # Use http://bin.chevah.com:20443/third-party-stuff/centos5/tuxad/
-        # when tuxad.de dissapears, it has the minimum required stuff.
-        rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
-        yum -y install curl openssh-clients gcc44 make m4 patch unzip wget
-        ln -s /usr/bin/gcc44 /usr/local/bin/gcc
-        wget --mirror --no-parent https://bin.chevah.com:20443/third-party-stuff/centos5/endpoint/
-        cd bin.chevah.com:20443/third-party-stuff/centos5/endpoint/
-        rpm -i local-perl-*.rpm
-        rpm -i --nodeps git{-core,}-2.5.0-1.ep.x86_64.rpm
 
     - name: Clone repo independently
       run: |
