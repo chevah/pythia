@@ -144,6 +144,8 @@ build_dep() {
 # This builds Python itself.
 build_python() {
     if [ $OS = "win" ]; then
+        # Latest 3.8.x version with Windows packages.
+        export PYTHON_BUILD_VERSION="3.8.10"
         # Python "build" is a very special case under Windows.
         execute pushd src/Python-Windows
         execute ./chevahbs Python $PYTHON_BUILD_VERSION $INSTALL_DIR
