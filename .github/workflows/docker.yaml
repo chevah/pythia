@@ -55,7 +55,7 @@ jobs:
     # Our Chevah Centos 5 image, built for python-package.
     # FIXME: Update it to include unzip.
     - name: CentOS 5.11 setup
-      if: matrix.container == 'centos:5.11'
+      if: matrix.container == 'proatria/centos:5.11-chevah1'
       run: |
         wget https://vault.centos.org/5.11/os/x86_64/CentOS/unzip-5.52-3.el5.x86_64.rpm
         rpm -i unzip-5.52-3.el5.x86_64.rpm
