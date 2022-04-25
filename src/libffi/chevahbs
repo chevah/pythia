@@ -12,7 +12,7 @@ chevahbs_getsources() {
     local name=$1
     local ver=$2
     local ext="tar.gz"
-    local link=ftp://sourceware.org/pub/libffi/"$name"-"$ver"."$ext"
+    local link=https://github.com/libffi/libffi/releases/download/v"$ver"/"$name"-"$ver"."$ext"
 
     download_sources $name $ver $link $ext
 }
