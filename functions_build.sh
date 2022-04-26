@@ -212,6 +212,11 @@ cleanup_install_dir() {
                 execute rm -rf "lib/$PYTHON_VERSION/test/"
                 # Remove (mostly OpenSSL) docs and manuals.
                 execute rm -rf share/
+                # Move stray pkgconfig/* to lib/pkgconfig/.
+                if [ -d pkgconfig ]; then
+                    execute mv pkgconfig/* lib/pkgconfig/
+                    execute rmdir pkgconfig
+                fi
                 ;;
         esac
     execute popd

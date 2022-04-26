@@ -29,19 +29,7 @@ chevahbs_compile() {
 
 
 chevahbs_install() {
-    case $OS in
-        lnx)
-            # Installing manually to avoid messing with a lib64/ sub-dir.
-            execute cp -v *-linux-gnu/.libs/libffi.a "$INSTALL_DIR"/lib/
-            execute cp -v *-linux-gnu/libffi.la "$INSTALL_DIR"/lib/
-            execute cp -v *-linux-gnu/include/*.h "$INSTALL_DIR"/include/
-            execute mkdir "$INSTALL_DIR"/pkgconfig/
-            execute cp -v *-linux-gnu/libffi.pc "$INSTALL_DIR"/pkgconfig/
-            ;;
-        *)
-            execute $MAKE install DESTDIR=$INSTALL_DIR
-            ;;
-    esac
+    execute $MAKE install DESTDIR=$INSTALL_DIR
 }
 
 select_chevahbs_command $@
