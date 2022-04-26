@@ -69,12 +69,12 @@ jobs:
     - name: Build Pythia
       run: |
         cd pythia
-        ./pythia build
+        ./build.sh build
 
     - name: Test Pythia
       run: |
         cd pythia
-        ./pythia test
+        ./build.sh test
 
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.
