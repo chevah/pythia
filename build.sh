@@ -3,11 +3,11 @@
 # Pythia's script for building Python.
 
 # Set versions for the software to be built and other defaults.
-source pythia.conf
+source build.conf
 
 # Import shared and specific code.
 source ./functions.sh
-source ./functions_pythia.sh
+source ./functions_build.sh
 
 # Git revision to inject into Python's sys.version string through chevahbs
 # on non-Windows platforms. Also used for compat tests and archived in the dist.
@@ -21,13 +21,13 @@ export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
 # OS detection is slow on Windows, only execute it when the file is missing.
 if [ ! -r ./BUILD_ENV_VARS ]; then
-    execute ./brink.sh detect_os
+    execute ./pythia.sh detect_os
 fi
-# Import build env vars as set by brink.sh.
+# Import build env vars as set by pythia.sh.
 source ./BUILD_ENV_VARS
 
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
-# to force a 32bit build on a 64bit machine, e.g. by setting ARCH in brink.sh
+# to force a 32bit build on a 64bit machine, e.g. by setting ARCH in pythia.sh
 # as "x86" instead of "x64" for a certain platform.
 # $ARCH is also used when "building" Python on Windows and for testing.
 # $OS is used when patching/configuring/building/testing.
@@ -243,17 +243,17 @@ command_compat() {
     execute rm -rf compat/
     execute git clone https://github.com/chevah/compat.git --depth=1 -b master
     execute pushd compat
-    # Copy over current brink stuff, as some changes might require it.
-    execute cp ../../brink.{conf,sh} ./
+    # Copy over current pythia stuff, as some changes might require it.
+    execute cp ../../pythia.{conf,sh} ./
     # Patch compat to use the newly-built Python, then copy it to cache/.
-    echo -e "\nPYTHON_CONFIGURATION=default@${new_python_conf}" >> brink.conf
+    echo -e "\nPYTHON_CONFIGURATION=default@${new_python_conf}" >> pythia.conf
     execute mkdir cache
     execute cp -r ../"$PYTHON_BUILD_DIR" cache/
     # Make sure everything is done from scratch in the current dir.
     unset CHEVAH_CACHE CHEVAH_BUILD
     # Some tests might still fail due to causes not related to the new Python.
-    execute ./brink.sh deps
-    execute ./brink.sh test_ci
+    execute ./pythia.sh deps
+    execute ./pythia.sh test_ci
 
     execute popd
     echo "::endgroup::"

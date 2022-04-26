@@ -22,14 +22,14 @@
 # * CHEVAH_ARCH - CPU type of the current OS
 #
 # The build directory is used from CHEVAH_BUILD env,
-# then read from brink.conf as CHEVAH_BUILD_DIR,
+# then read from pythia.conf as CHEVAH_BUILD_DIR,
 # and will use a default value if not defined there.
 #
 # The cache directory is read the CHEVAH_CACHE env,
-# and then read from brink.conf as CHEVAH_CACHE_DIR,
+# and then read from pythia.conf as CHEVAH_CACHE_DIR,
 # and will use a default value if not defined.
 #
-# You can define your own `execute_venv` function in brink.conf with the
+# You can define your own `execute_venv` function in pythia.conf with the
 # command used to execute Python inside the newly virtual environment.
 #
 
@@ -81,7 +81,7 @@ LOCAL_PYTHON_BINARY_DIST=""
 OS='not-detected-yet'
 ARCH='not-detected-yet'
 
-# Initialize default values from brink.conf
+# Initialize default values from pythia.conf
 PYTHON_CONFIGURATION='NOT-YET-DEFINED'
 PYTHON_VERSION='not.defined.yet'
 PYTHON_PLATFORM='unknown-os-and-arch'
@@ -92,18 +92,18 @@ BASE_REQUIREMENTS=''
 
 #
 # Check that we have a pavement.py file in the current dir.
-# If not, we are out of the source's root dir and brink.sh won't work.
+# If not, we are out of the source's root dir and pythia.sh won't work.
 #
 check_source_folder() {
     if [ ! -e pavement.py ]; then
         (>&2 echo 'No "pavement.py" file found in current folder.')
-        (>&2 echo 'Make sure you are running "brink.sh" from a source folder.')
+        (>&2 echo 'Make sure you are running "pythia.sh" from a source folder.')
         exit 8
     fi
 }
 
 # Called to trigger the entry point in the virtual environment.
-# Can be overwritten in brink.conf
+# Can be overwritten in pythia.conf
 execute_venv() {
     ${PYTHON_BIN} $PYTHON3_CHECK -c 'from paver.tasks import main; main()' "$@"
 }
@@ -121,13 +121,13 @@ update_venv() {
     exit_code=$?
     set -e
     if [ $exit_code -ne 0 ]; then
-        (>&2 echo 'Failed to run the initial "./brink.sh deps" command.')
+        (>&2 echo 'Failed to run the initial "./pythia.sh deps" command.')
         exit 7
     fi
 }
 
 # Load repo specific configuration.
-source brink.conf
+source pythia.conf
 
 
 clean_build() {
@@ -851,7 +851,7 @@ check_source_folder
 copy_python
 install_dependencies
 
-# Update brink.conf dependencies when running deps.
+# Update pythia.conf dependencies when running deps.
 if [ "$COMMAND" == "deps" ] ; then
     install_base_deps
 fi
