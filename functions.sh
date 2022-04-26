@@ -4,9 +4,7 @@
 #
 
 # Check if debugging environment variable is set and initialize with 0 if not.
-if [ -z "$DEBUG" ] ; then
-    DEBUG=0
-fi
+DEBUG=${DEBUG-0}
 
 help_text_help=\
 "Show help for a command."

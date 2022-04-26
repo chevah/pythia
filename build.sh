@@ -2,6 +2,11 @@
 #
 # Pythia's script for building Python.
 
+# Script initialization.
+set -o nounset
+set -o errexit
+set -o pipefail
+
 # Set versions for the software to be built and other defaults.
 source build.conf
 
@@ -87,8 +92,8 @@ command_build() {
     # following locations, making sure they are picked up when building Python.
     # $CFLAGS/$CPPFLAGS is another way to ensure this, but it's not as portable.
     execute mkdir -p "$INSTALL_DIR"/{include,lib}
-    export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS}"
-    export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH}"
+    export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS:-}"
+    export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH:-}"
 
     build_dep $BUILD_LIBFFI   libffi           $LIBFFI_VERSION
     build_dep $BUILD_ZLIB     zlib             $ZLIB_VERSION
@@ -130,7 +135,7 @@ build_dep() {
                 export LDFLAGS="-Wl,-rpath,${INSTALL_DIR}/lib/ ${LDFLAGS}"
             fi
             # Still needed for building cryptography.
-            export CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include"
+            export CPPFLAGS="${CPPFLAGS:-} -I${INSTALL_DIR}/include"
         fi
     elif [ $dep_boolean = "no" ]; then
         (>&2 echo "    Skip building $dep_name")

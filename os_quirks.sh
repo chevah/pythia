@@ -40,7 +40,7 @@ case $OS in
     macos)
         export CC="clang"
         export CXX="clang++"
-        export CFLAGS="$CFLAGS -mmacosx-version-min=10.13"
+        export CFLAGS="${CFLAGS:-} -mmacosx-version-min=10.13"
         # setup.py skips building readline by default, as it sets this to
         # "10.4", and then tries to avoid the broken readline in OS X 10.4.
         export MACOSX_DEPLOYMENT_TARGET=10.13
@@ -76,14 +76,14 @@ case $OS in
         export MAKE="gmake"
         # Needed for the subprocess32 module.
         # More at https://github.com/google/python-subprocess32/issues/40.
-        export CFLAGS="$CFLAGS -DHAVE_DIRFD"
+        export CFLAGS="${CFLAGS:-} -DHAVE_DIRFD"
         # Arch-specific bits and paths.
         if [ "${ARCH%64}" = "$ARCH" ]; then
             # Some libs (e.g. GMP) need to be informed of a 32bit build.
             export ABI="32"
         else
             export CFLAGS="$CFLAGS -m64"
-            export LDFLAGS="$LDFLAGS -m64 -L/usr/lib/64 -R/usr/lib/64"
+            export LDFLAGS="${LDFLAGS:-} -m64 -L/usr/lib/64 -R/usr/lib/64"
         fi
         # System includes bzip2 libs by default.
         export BUILD_BZIP2="no"
@@ -101,10 +101,10 @@ if [ "${OS%sol*}" = "" ]; then
     export CFLAGS="$CFLAGS -Kpic"
 elif [ "${OS%fbsd*}" = "" -o "${OS%obsd*}" = "" ]; then
     # Use PIC (Position Independent Code) on FreeBSD and OpenBSD with Clang.
-    export CFLAGS="${CFLAGS} -fPIC"
+    export CFLAGS="${CFLAGS:-} -fPIC"
 elif [ "$CC" = "gcc" -a ${ARCH%%64} != "$ARCH" ]; then
     # Use PIC (Position Independent Code) with GCC on 64-bit arches.
-    export CFLAGS="${CFLAGS} -fPIC"
+    export CFLAGS="${CFLAGS:-} -fPIC"
 fi
 
 # Get number of useful CPUs, to enable parallel builds where applicable.
@@ -127,4 +127,4 @@ case "$OS" in
         CPUS=$(getconf _NPROCESSORS_ONLN)
         ;;
 esac
-export MAKE="$MAKE -j${CPUS}"
+export MAKE="${MAKE:-} -j${CPUS}"
