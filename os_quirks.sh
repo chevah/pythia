@@ -48,6 +48,7 @@ case $OS in
         export MACOSX_DEPLOYMENT_TARGET=10.13
         # System includes bzip2 libs by default.
         export BUILD_BZIP2="no"
+        export BUILD_XZ="yes"
         # 10.13 and newer come with LibreSSL instead of the old OpenSSL libs.
         # But 10.13 has version 2.2.7, while cryptography 2.9 requires 2.7.
         # Therefore, build OpenSSL for both stdlib and cryptography.
