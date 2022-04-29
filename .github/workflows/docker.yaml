@@ -41,7 +41,7 @@ jobs:
       if: startsWith(matrix.container, 'alpine')
       run: |
         apk upgrade -U
-        apk add git curl bash gcc make m4 automake libtool patch openssl-dev musl-dev lddtree shadow sudo openssh-client paxctl file unzip
+        apk add git curl bash gcc make m4 automake libtool patch zlib-dev openssl-dev musl-dev linux-headers lddtree shadow sudo openssh-client paxctl file unzip
         apk del util-linux-dev
 
     # Stick to CentOS 8.2 as OpenSSL got updated in 8.3 from 1.1.1c to 1.1.1g.
