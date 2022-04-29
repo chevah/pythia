@@ -41,7 +41,8 @@ jobs:
       if: startsWith(matrix.container, 'alpine')
       run: |
         apk upgrade -U
-        apk add git curl bash openssh-client paxctl
+        apk add git curl bash gcc make m4 automake libtool patch libffi-dev zlib-dev openssl-dev musl-dev lddtree shadow sudo openssh-client paxctl file unzip
+        apk del util-linux-dev
 
     # Stick to CentOS 8.2 as OpenSSL got updated in 8.3 from 1.1.1c to 1.1.1g.
     - name: CentOS 8.2 setup
@@ -50,7 +51,8 @@ jobs:
         sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
         sed -i s@^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever/@baseurl=https://vault.centos.org/8.2.2004/@ /etc/yum.repos.d/*.repo
         yum -y upgrade
-        yum -y install git curl openssh-clients
+        yum -y install git curl gcc make m4 automake libtool patch libffi-devel zlib-devel ncurses-devel openssl-devel openssh-clients unzip
+        yum remove -y e2fsprogs-devel libuuid-devel
 
     # Our Chevah Centos 5 image, built for python-package.
     # FIXME: Update it to include unzip.

@@ -127,8 +127,10 @@ jobs:
       with:
         fetch-depth: 2
 
-    - name: Install required packages
-      run: sudo apt-get install libncurses5-dev
+    - name: Prepare OS
+      run: |
+        sudo apt install libncurses5-dev
+        sudo apt purge uuid-dev
 
     - name: Build Pythia
       run: ./build.sh build
