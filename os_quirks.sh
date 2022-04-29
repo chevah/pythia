@@ -13,7 +13,6 @@ case $OS in
         # But not all are from pypi.org. Wheels copied from other places:
         #   * "setproctitle" from https://www.lfd.uci.edu/~gohlke/pythonlibs/
         export BUILD_BZIP2="no"
-        export BUILD_XZ="no"
         export BUILD_LIBEDIT="no"
         export BUILD_SQLITE="no"
         # On Windows, only one of the installers is downloaded.
@@ -31,6 +30,7 @@ case $OS in
         # Build as portable as possible, only glibc 2.x should be needed.
         export BUILD_LIBFFI="yes"
         export BUILD_ZLIB="yes"
+        export BUILD_XZ="yes"
         export BUILD_LIBEDIT="no"
         # Generic Linux might be an old distro with OpenSSL 0.9.8 libraries.
         # To avoid linking to local libs, build own OpenSSL libs.
