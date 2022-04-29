@@ -12,7 +12,7 @@ chevahbs_getsources() {
     local name=$1
     local ver=$2
     local ext="tar.gz"
-    local link=https://tukaani.org/xz/"$name"-"$ver"."$ext"
+    local link=https://downloads.sourceforge.net/project/lzmautils/"$name"-"$ver"."$ext"
 
     download_sources $name $ver $link $ext
 }
