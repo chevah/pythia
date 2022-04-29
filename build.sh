@@ -21,7 +21,7 @@ exit_on_error $? 250
 
 # Export the variables needed by the chevahbs scripts and the test phase.
 export PYTHON_BUILD_VERSION PYTHIA_VERSION
-export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
+export BUILD_ZLIB BUILD_BZIP2 BUILD_XZ BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
 
 # OS detection is slow on Windows, only execute it when the file is missing.
@@ -98,6 +98,7 @@ command_build() {
     build_dep $BUILD_LIBFFI   libffi           $LIBFFI_VERSION
     build_dep $BUILD_ZLIB     zlib             $ZLIB_VERSION
     build_dep $BUILD_BZIP2    bzip2            $BZIP2_VERSION
+    build_dep $BUILD_XZ       xz               $XZ_VERSION
     build_dep $BUILD_LIBEDIT  libedit          $LIBEDIT_VERSION
     build_dep $BUILD_SQLITE   sqlite-autoconf  $SQLITE_VERSION
     build_dep $BUILD_OPENSSL  openssl          $OPENSSL_VERSION

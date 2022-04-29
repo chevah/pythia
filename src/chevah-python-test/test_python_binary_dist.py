@@ -469,6 +469,19 @@ def main():
         exit_code = 149
 
     try:
+        import lzma
+        test_string = b"just a random string to quickly test lzma"
+        test_string_xzed = lzma.compress(test_string)
+        if lzma.decompress(test_string_xzed) == test_string:
+            print('"lzma" module is present.')
+        else:
+            sys.stderr.write('"lzma" is present, but broken.\n')
+            exit_code = 152
+    except:
+        sys.stderr.write('"lzma" is missing.\n')
+        exit_code = 151
+
+    try:
         import setproctitle
         current_process_title = setproctitle.getproctitle()
     except:
