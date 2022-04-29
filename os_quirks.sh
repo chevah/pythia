@@ -25,6 +25,7 @@ case $OS in
         # It's better to run on minimal Alpine containers.
         export BUILD_LIBFFI="yes"
         export BUILD_LIBEDIT="no"
+        export BUILD_XZ="yes"
         ;;
     lnx)
         # Build as portable as possible, only glibc 2.x should be needed.

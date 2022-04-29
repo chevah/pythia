@@ -19,12 +19,12 @@ set +o errexit
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
 BASE_PKGS="gcc make m4 automake libtool patch unzip"
 DEB_PKGS="$BASE_PKGS tar diffutils \
-    git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
+    git zlib1g-dev liblzma-dev libffi-dev libncurses5-dev libssl-dev"
 RPM_PKGS="$BASE_PKGS tar diffutils \
-    git-core openssl-devel zlib-devel libffi-devel ncurses-devel"
+    git-core libffi-devel zlib-devel xz-devel ncurses-devel openssl-devel"
 # Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
 APK_PKGS="$BASE_PKGS file lddtree \
-    git openssl-dev zlib-dev libffi-dev musl-dev paxctl"
+    git openssl-dev paxctl"
 # Windows is special, but package management is possible through Chocolatey.
 # Some tools are bundled with MINGW: curl, sha512sum, unzip.
 CHOCO_PKGS=""
