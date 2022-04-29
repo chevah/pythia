@@ -13,6 +13,9 @@
 #
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
+# This script has external checks with various exit codes that are checked here.
+set +o errexit
+
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
 BASE_PKGS="gcc make m4 automake libtool patch unzip"
 DEB_PKGS="$BASE_PKGS tar diffutils \
@@ -82,7 +85,6 @@ case "$OS" in
 esac
 
 # If $CHECK_CMD is still "command -v", it's only a check for needed commands.
-set +o errexit
 if [ -n "$PACKAGES" ]; then
     for package in $PACKAGES ; do
         echo "Checking if $package is available..."
@@ -93,7 +95,6 @@ if [ -n "$PACKAGES" ]; then
         fi
     done
 fi
-set -o errexit
 
 if [ -n "$MISSING_PACKAGES" ]; then
     (>&2 echo "Missing required dependencies: $MISSING_PACKAGES.")
@@ -122,7 +123,7 @@ fi
 echo "# Checking if it's possible to avoid linking to system uuid libs... #"
 case "$OS" in
     ubuntu*)
-        $CHECK_CMD uuid \
+        $CHECK_CMD uuid-dev \
             && echo "To not link to uuid libs, run: apt remove -y uuid-dev"
         ;;
     rhel*|amzn*)
