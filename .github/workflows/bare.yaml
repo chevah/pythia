@@ -173,6 +173,7 @@ jobs:
         sudo mv -v /usr/local/bin/git{,.saved}
         sudo chmod -v a-r /usr/local/include/libintl.h
         sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
+        sudo chmod -v a-r /usr/local/opt/xz/lib/liblzma*
 
     - name: Build Pythia
       run: ./build.sh build

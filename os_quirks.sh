@@ -48,7 +48,6 @@ case $OS in
         export MACOSX_DEPLOYMENT_TARGET=10.13
         # System includes bzip2 libs by default.
         export BUILD_BZIP2="no"
-        export BUILD_XZ="yes"
         # 10.13 and newer come with LibreSSL instead of the old OpenSSL libs.
         # But 10.13 has version 2.2.7, while cryptography 2.9 requires 2.7.
         # Therefore, build OpenSSL for both stdlib and cryptography.
@@ -62,7 +61,6 @@ case $OS in
         export BUILD_LIBFFI="yes"
         # System includes bzip2 libs by default.
         export BUILD_BZIP2="no"
-        export BUILD_XZ="yes"
         # Install package "p5-Digest-SHA" to get shasum binary.
         export SHA_CMD="shasum --algorithm 512 --check --status --warn"
         ;;
@@ -91,7 +89,6 @@ case $OS in
         fi
         # System includes bzip2 libs by default.
         export BUILD_BZIP2="no"
-        export BUILD_XZ="yes"
         # Solaris 11 is much more modern, but still has some quirks.
         # Multiple system libffi libs present, this is a problem in 11.4.
         export BUILD_LIBFFI="yes"
