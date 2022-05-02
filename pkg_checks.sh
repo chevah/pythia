@@ -115,6 +115,7 @@ command -v makeinfo >/dev/null
 if [ $? -ne 0 ]; then
     (>&2 echo "# Missing makeinfo, linking it to /bin/true in ~/bin... #")
     execute mkdir -p ~/bin
+    execute rm -f ~/bin/makeinfo
     execute ln -s /bin/true ~/bin/makeinfo
     export PATH="$PATH:~/bin/"
 fi

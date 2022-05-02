@@ -19,7 +19,7 @@ chevahbs_getsources() {
 
 
 chevahbs_configure() {
-    CONF_OPTS="--enable-static"
+    CONF_OPTS="--enable-static --disable-shared"
     execute ./configure --prefix="" $CONF_OPTS
 }
 

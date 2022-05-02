@@ -144,7 +144,6 @@ def get_allowed_deps():
             '/System/Library/Frameworks/IOKit.framework/Versions/A/IOKit',
             '/System/Library/Frameworks/Security.framework/Versions/A/Security',
             '/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration',
-            '/lib/liblzma.5.dylib',
             '/usr/lib/libbz2.1.0.dylib',
             '/usr/lib/libffi.dylib',
             '/usr/lib/libncurses.5.4.dylib',
