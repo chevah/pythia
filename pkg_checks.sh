@@ -13,9 +13,6 @@
 #
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
-# This script has external checks with various exit codes that are checked here.
-set +o errexit
-
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
 BASE_PKGS="gcc make m4 automake libtool patch unzip"
 DEB_PKGS="$BASE_PKGS tar diffutils \
@@ -84,6 +81,9 @@ case "$OS" in
         ;;
 esac
 
+# External checks with various exit codes are checked below.
+set +o errexit
+
 # If $CHECK_CMD is still "command -v", it's only a check for needed commands.
 if [ -n "$PACKAGES" ]; then
     for package in $PACKAGES ; do
@@ -107,6 +107,7 @@ fi
 
 # Windows "build" is special, following checks are for other platforms.
 if [ "$OS" = "win" ]; then
+    set -o errexit
     return
 fi
 
@@ -140,3 +141,6 @@ case "$OS" in
         (>&2 echo "Not guarding against linking to uuid libs on this system!")
         ;;
 esac
+
+# This script is sourced, execution does not end here.
+set -o errexit
