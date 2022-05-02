@@ -9,9 +9,10 @@ DEBUG=${DEBUG-0}
 help_text_help=\
 "Show help for a command."
 command_help() {
-    local command=$1
+    local command=${1:-}
     local help_command="help_$command"
     # Test for a valid help method, otherwise call general help.
+    set +o errexit
     type $help_command &> /dev/null
     if [ $? -eq 0 ]; then
         $help_command
@@ -23,6 +24,7 @@ command_help() {
             echo -e "    $command_name\t${!help_text}"
         done
     fi
+    set -o errexit
 }
 
 #
@@ -31,16 +33,17 @@ command_help() {
 # Select fuctions which are made public.
 #
 select_command() {
-    local command=$1
-    shift
+    local command=${1:-}
     case $command in
         "")
             command_help
             exit 99
             ;;
         *)
+            shift
             # Test for a valid command, otherwise call general help.
             call_command="command_$command"
+            set +o errexit
             type $call_command &> /dev/null
             if [ $? -eq 0 ]; then
                 $call_command $@
@@ -50,6 +53,7 @@ select_command() {
                 (>&2 echo "Unknown command: ${command}.")
                 exit 98
             fi
+            set -o errexit
         ;;
     esac
 }
