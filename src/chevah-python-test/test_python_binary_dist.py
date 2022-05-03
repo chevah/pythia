@@ -358,8 +358,8 @@ def main():
                 # compatibility, link to version 1.1.1c from CentOS 8.2.2004.
                 expecting = u'OpenSSL 1.1.1c FIPS  28 May 2019'
             elif CHEVAH_OS == "win":
-                # Latest Python 3.8 Win packages are left behind.
-                expecting = u'OpenSSL 1.1.1k  25 Mar 2021'
+                # Latest cryptography not requiring Rust has older wheels.
+                expecting = u'OpenSSL 1.1.1l  24 Aug 2021'
             else:
                 # Use latest OpenSSL version when building it from source.
                 expecting = u'OpenSSL 1.1.1n  15 Mar 2022'
