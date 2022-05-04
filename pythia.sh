@@ -313,8 +313,6 @@ pip_install() {
     rm -rf ${BUILD_FOLDER}/pip-build
     ${PYTHON_BIN} -m \
         pip install \
-            --trusted-host bin.chevah.com \
-            --trusted-host pypi-internal.chevah.com \
             --index-url=$PIP_INDEX_URL \
             --build=${BUILD_FOLDER}/pip-build \
             $1
