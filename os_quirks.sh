@@ -62,6 +62,7 @@ case $OS in
         export BUILD_LIBFFI="yes"
         # System includes bzip2 libs by default.
         export BUILD_BZIP2="no"
+        export BUILD_XZ="yes"
         # Install package "p5-Digest-SHA" to get shasum binary.
         export SHA_CMD="shasum --algorithm 512 --check --status --warn"
         ;;
@@ -70,6 +71,7 @@ case $OS in
         export CXX="clang++"
         # libffi not available in the base system, only as port/package.
         export BUILD_LIBFFI="yes"
+        export BUILD_XZ="yes"
         export SHA_CMD="sha512 -q -c"
         ;;
     sol*)
@@ -93,6 +95,7 @@ case $OS in
         # Solaris 11 is much more modern, but still has some quirks.
         # Multiple system libffi libs present, this is a problem in 11.4.
         export BUILD_LIBFFI="yes"
+        export BUILD_XZ="yes"
         # Native tar is not that compatible, but the GNU tar should be present.
         export TAR_CMD="gtar xfz"
         ;;
