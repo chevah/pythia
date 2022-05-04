@@ -31,6 +31,7 @@ esac
 $sftp_cmd $sftp_opts ${dest_user}@${dest_server}
 
 # Get $DIST_DIR.
+source pythia.conf
 source build.conf
 
 # As dist/ is rebuilt on every build, it should only have 1 sub-dir with 1 pkg.
