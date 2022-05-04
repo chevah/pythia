@@ -26,13 +26,10 @@ SETUP['folders']['source'] = u'src'
 SETUP['repository']['name'] = u'pythia'
 SETUP['test']['package'] = None
 
-SETUP['pypi']['index_url'] = 'http://pypi.chevah.com/simple'
+SETUP['pypi']['index_url'] = 'https://bin.chevah.com:20443/pypi/simple'
 
 SETUP['repository']['name'] = u'pythia'
 SETUP['repository']['github'] = 'https://github.com/chevah/pythia'
-SETUP['buildbot']['builders_filter'] = u'pythia'
-SETUP['buildbot']['server'] = 'buildbot.chevah.com'
-SETUP['buildbot']['web_url'] = 'https://buildbot.chevah.com:10433'
 
 RUN_PACKAGES = [
     'requests~=2.24',

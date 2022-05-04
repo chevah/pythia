@@ -177,6 +177,12 @@ command_install_python_modules() {
     # Install latest PIP, then instruct it to get exact versions of setuptools.
     # Otherwise, get-pip.py will always try to get latest versions.
     download_get_pip
+    # Get $PIP_INDEX_URL.
+    source pythia.conf
+    PIP_ARGS="\
+        --index-url=${PIP_INDEX_URL} \
+        --no-warn-script-location \
+        "
     echo "# Installing latest pip with preferred setuptools version... #"
     execute $PYTHON_BIN "$BUILD_DIR"/get-pip.py $PIP_ARGS \
         pip==$PIP_VERSION --no-setuptools setuptools==$SETUPTOOLS_VERSION
