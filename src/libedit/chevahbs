@@ -4,7 +4,7 @@
 
 # Import shared code.
 source ../../functions.sh
-source ../../functions_pythia.sh
+source ../../functions_build.sh
 
 
 chevahbs_getsources() {

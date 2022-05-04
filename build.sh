@@ -2,12 +2,20 @@
 #
 # Pythia's script for building Python.
 
-# Set versions for the software to be built and other defaults.
+# Script initialization.
+set -o nounset
+set -o errexit
+set -o pipefail
+
+# Get PIP_INDEX_URL for PIP_ARGS in build.conf.
 source pythia.conf
+
+# Set versions for the software to be built and other defaults.
+source build.conf
 
 # Import shared and specific code.
 source ./functions.sh
-source ./functions_pythia.sh
+source ./functions_build.sh
 
 # Git revision to inject into Python's sys.version string through chevahbs
 # on non-Windows platforms. Also used for compat tests and archived in the dist.
@@ -16,18 +24,18 @@ exit_on_error $? 250
 
 # Export the variables needed by the chevahbs scripts and the test phase.
 export PYTHON_BUILD_VERSION PYTHIA_VERSION
-export BUILD_ZLIB BUILD_BZIP2 BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
+export BUILD_ZLIB BUILD_BZIP2 BUILD_XZ BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
 
 # OS detection is slow on Windows, only execute it when the file is missing.
 if [ ! -r ./BUILD_ENV_VARS ]; then
-    execute ./brink.sh detect_os
+    execute ./pythia.sh detect_os
 fi
-# Import build env vars as set by brink.sh.
+# Import build env vars as set by pythia.sh.
 source ./BUILD_ENV_VARS
 
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
-# to force a 32bit build on a 64bit machine, e.g. by setting ARCH in brink.sh
+# to force a 32bit build on a 64bit machine, e.g. by setting ARCH in pythia.sh
 # as "x86" instead of "x64" for a certain platform.
 # $ARCH is also used when "building" Python on Windows and for testing.
 # $OS is used when patching/configuring/building/testing.
@@ -45,7 +53,7 @@ export CC="gcc"
 export MAKE="make"
 # $GET_CMD must save to custom filename, which must be appended before the link.
 # E.g., to use wget, GET_CMD should be "wget --quiet -O".
-export GET_CMD="curl --silent --output"
+export GET_CMD="curl --silent --location --output"
 export SHA_CMD="sha512sum --check --status --warn"
 export TAR_CMD="tar xfz"
 export ZIP_CMD="unzip -q"
@@ -87,12 +95,13 @@ command_build() {
     # following locations, making sure they are picked up when building Python.
     # $CFLAGS/$CPPFLAGS is another way to ensure this, but it's not as portable.
     execute mkdir -p "$INSTALL_DIR"/{include,lib}
-    export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS}"
-    export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH}"
+    export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS:-}"
+    export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH:-}"
 
     build_dep $BUILD_LIBFFI   libffi           $LIBFFI_VERSION
     build_dep $BUILD_ZLIB     zlib             $ZLIB_VERSION
     build_dep $BUILD_BZIP2    bzip2            $BZIP2_VERSION
+    build_dep $BUILD_XZ       xz               $XZ_VERSION
     build_dep $BUILD_LIBEDIT  libedit          $LIBEDIT_VERSION
     build_dep $BUILD_SQLITE   sqlite-autoconf  $SQLITE_VERSION
     build_dep $BUILD_OPENSSL  openssl          $OPENSSL_VERSION
@@ -130,7 +139,7 @@ build_dep() {
                 export LDFLAGS="-Wl,-rpath,${INSTALL_DIR}/lib/ ${LDFLAGS}"
             fi
             # Still needed for building cryptography.
-            export CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include"
+            export CPPFLAGS="${CPPFLAGS:-} -I${INSTALL_DIR}/include"
         fi
     elif [ $dep_boolean = "no" ]; then
         (>&2 echo "    Skip building $dep_name")
@@ -243,17 +252,17 @@ command_compat() {
     execute rm -rf compat/
     execute git clone https://github.com/chevah/compat.git --depth=1 -b master
     execute pushd compat
-    # Copy over current brink stuff, as some changes might require it.
-    execute cp ../../brink.{conf,sh} ./
+    # Copy over current pythia stuff, as some changes might require it.
+    execute cp ../../pythia.{conf,sh} ./
     # Patch compat to use the newly-built Python, then copy it to cache/.
-    echo -e "\nPYTHON_CONFIGURATION=default@${new_python_conf}" >> brink.conf
+    echo -e "\nPYTHON_CONFIGURATION=default@${new_python_conf}" >> pythia.conf
     execute mkdir cache
     execute cp -r ../"$PYTHON_BUILD_DIR" cache/
     # Make sure everything is done from scratch in the current dir.
     unset CHEVAH_CACHE CHEVAH_BUILD
     # Some tests might still fail due to causes not related to the new Python.
-    execute ./brink.sh deps
-    execute ./brink.sh test_ci
+    execute ./pythia.sh deps
+    execute ./pythia.sh test_ci
 
     execute popd
     echo "::endgroup::"

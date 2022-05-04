@@ -54,7 +54,7 @@ jobs:
       # Workflow won't be cancelled at the first failed job.
       fail-fast: false
       matrix:
-        runs-on: [ windows-2019, windows-2016 ]
+        runs-on: [ windows-2022, windows-2019 ]
     timeout-minutes: 20
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -66,10 +66,10 @@ jobs:
 
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
     - name: Build Pythia
-      run: bash ./pythia build
+      run: bash ./build.sh build
 
     - name: Test Pythia
-      run: bash ./pythia test
+      run: bash ./build.sh test
 
     # To use an RSA key with SFTPPlus, install upstream OpenSSH package,
     # which is more finicky in regards to file permissions.
@@ -127,14 +127,16 @@ jobs:
       with:
         fetch-depth: 2
 
-    - name: Install required packages
-      run: sudo apt-get install libncurses5-dev
+    - name: Prepare OS
+      run: |
+        sudo apt install libncurses5-dev
+        sudo apt purge uuid-dev
 
     - name: Build Pythia
-      run: ./pythia build
+      run: ./build.sh build
 
     - name: Test Pythia
-      run: ./pythia test
+      run: ./build.sh test
 
     - name: Upload testing package
       run: |
@@ -173,10 +175,10 @@ jobs:
         sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
 
     - name: Build Pythia
-      run: ./pythia build
+      run: ./build.sh build
 
     - name: Test Pythia
-      run: ./pythia test
+      run: ./build.sh test
 
     - name: Upload testing package
       run: |

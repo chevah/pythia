@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Pythia-specific functions.
+# Pythia-specific build functions.
 
 # Global variables.
 COMMAND=""
@@ -102,7 +102,7 @@ chevahbs_build() {
 build() {
     # This has the form: "libffi", "zlib", "bzip", "libedit", etc.
     # It's present in 'src/` and contains `chevahbs`, checksums, patches.
-    # Also used when downloading the gzipp'ed tarball and unpacking it.
+    # Also used when downloading the gzipped tarball and unpacking it.
     project_name="$1"
     # This has the form: "3.2.1", "1.2.11". etc.
     project_ver="$2"
@@ -212,6 +212,11 @@ cleanup_install_dir() {
                 execute rm -rf "lib/$PYTHON_VERSION/test/"
                 # Remove (mostly OpenSSL) docs and manuals.
                 execute rm -rf share/
+                # Move stray pkgconfig/* to lib/pkgconfig/.
+                if [ -d pkgconfig ]; then
+                    execute mv pkgconfig/* lib/pkgconfig/
+                    execute rmdir pkgconfig
+                fi
                 ;;
         esac
     execute popd

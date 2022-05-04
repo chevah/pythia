@@ -1,7 +1,7 @@
 diff -ur Python-3.8.6.orig/setup.py Python-3.8.6.disabled_modules/setup.py
 --- Python-3.8.6.orig/setup.py	2020-09-23 12:36:32.000000000 +0000
 +++ Python-3.8.6.disabled_modules/setup.py	2020-10-30 11:48:50.512622149 +0000
-@@ -24,8 +24,17 @@
+@@ -24,8 +24,16 @@
  TEST_EXTENSIONS = True
  
  # This global variable is used to hold the list of modules to be disabled.
@@ -13,7 +13,6 @@ diff -ur Python-3.8.6.orig/setup.py Python-3.8.6.disabled_modules/setup.py
 +    '_dbm',
 +    '_gdbm',
 +    '_locale',
-+    '_lzma',
 +    '_tkinter',
 +    'nis',
 +    'readline',

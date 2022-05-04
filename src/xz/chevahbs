@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Chevah Build Script for zlib.
+# Chevah Build Script for xz.
 
 # Import shared code.
 # The relative paths work in both src/blabla and build/blabla.
@@ -12,14 +12,14 @@ chevahbs_getsources() {
     local name=$1
     local ver=$2
     local ext="tar.gz"
-    local link=https://www.zlib.net/"$name"-"$ver"."$ext"
+    local link=https://downloads.sourceforge.net/project/lzmautils/"$name"-"$ver"."$ext"
 
     download_sources $name $ver $link $ext
 }
 
 
 chevahbs_configure() {
-    CONF_OPTS="--static"
+    CONF_OPTS="--enable-static --disable-shared"
     execute ./configure --prefix="" $CONF_OPTS
 }
 

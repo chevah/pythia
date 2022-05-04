@@ -30,7 +30,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: [ 'alpine:3.14', 'centos:8.2.2004', 'centos:5.11' ]
+        # CentOS 5.11 setup was saved as an image pushed to Docker Hub. See the
+        # Overview section at https://hub.docker.com/r/proatria/centos for details.
+        container: [ 'alpine:3.14', 'centos:8.2.2004', 'proatria/centos:5.11-chevah1' ]
     timeout-minutes: 30
     steps:
 
@@ -39,7 +41,8 @@ jobs:
       if: startsWith(matrix.container, 'alpine')
       run: |
         apk upgrade -U
-        apk add git curl bash openssh-client paxctl
+        apk add git curl bash gcc make m4 automake libtool patch zlib-dev openssl-dev musl-dev linux-headers lddtree shadow sudo openssh-client paxctl file unzip
+        apk del util-linux-dev
 
     # Stick to CentOS 8.2 as OpenSSL got updated in 8.3 from 1.1.1c to 1.1.1g.
     - name: CentOS 8.2 setup
@@ -48,24 +51,16 @@ jobs:
         sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
         sed -i s@^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever/@baseurl=https://vault.centos.org/8.2.2004/@ /etc/yum.repos.d/*.repo
         yum -y upgrade
-        yum -y install git curl openssh-clients
+        yum -y install git curl gcc make m4 automake libtool patch libffi-devel zlib-devel xz-devel ncurses-devel openssl-devel openssh-clients unzip
+        yum remove -y e2fsprogs-devel libuuid-devel
 
-    # Final CentOS 5 version is used to build the generic Linux package.
+    # Our Chevah Centos 5 image, built for python-package.
+    # FIXME: Update it to include unzip.
     - name: CentOS 5.11 setup
-      if: matrix.container == 'centos:5.11'
+      if: matrix.container == 'proatria/centos:5.11-chevah1'
       run: |
-        sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
-        sed -i s@^#baseurl=http://mirror.centos.org/centos/\$releasever/@baseurl=http://vault.centos.org/5.11/@ /etc/yum.repos.d/*.repo
-        yum -y upgrade
-        # Use http://bin.chevah.com:20443/third-party-stuff/centos5/tuxad/
-        # when tuxad.de dissapears, it has the minimum required stuff.
-        rpm -i http://www.tuxad.de/rpms/tuxad-release-5-1.noarch.rpm
-        yum -y install curl openssh-clients gcc44 make m4 patch unzip wget
-        ln -s /usr/bin/gcc44 /usr/local/bin/gcc
-        wget --mirror --no-parent https://bin.chevah.com:20443/third-party-stuff/centos5/endpoint/
-        cd bin.chevah.com:20443/third-party-stuff/centos5/endpoint/
-        rpm -i local-perl-*.rpm
-        rpm -i --nodeps git{-core,}-2.5.0-1.ep.x86_64.rpm
+        wget https://vault.centos.org/5.11/os/x86_64/CentOS/unzip-5.52-3.el5.x86_64.rpm
+        rpm -i unzip-5.52-3.el5.x86_64.rpm
 
     - name: Clone repo independently
       run: |
@@ -76,12 +71,12 @@ jobs:
     - name: Build Pythia
       run: |
         cd pythia
-        ./pythia build
+        ./build.sh build
 
     - name: Test Pythia
       run: |
         cd pythia
-        ./pythia test
+        ./build.sh test
 
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.

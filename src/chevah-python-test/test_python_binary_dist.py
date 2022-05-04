@@ -56,6 +56,7 @@ def get_allowed_deps():
                 '/lib64/libkeyutils.so.1',
                 '/lib64/libkrb5.so.3',
                 '/lib64/libkrb5support.so.0',
+                '/lib64/liblzma.so.5',
                 '/lib64/libm.so.6',
                 '/lib64/libnsl.so.1',
                 '/lib64/libpthread.so.0',
@@ -66,15 +67,6 @@ def get_allowed_deps():
                 '/lib64/libz.so.1',
                 ]
             rhel_version = CHEVAH_OS[4:]
-            if rhel_version.startswith("7"):
-                allowed_deps.extend([
-                    '/lib64/libcrypto.so.10',
-                    '/lib64/libffi.so.6',
-                    '/lib64/libncursesw.so.5',
-                    '/lib64/libpcre.so.1',
-                    '/lib64/libssl.so.10',
-                    '/lib64/libtinfo.so.5',
-                    ])
             if rhel_version.startswith("8"):
                 allowed_deps.extend([
                     '/lib64/libcrypto.so.1.1',
@@ -83,32 +75,6 @@ def get_allowed_deps():
                     '/lib64/libssl.so.1.1',
                     '/lib64/libtinfo.so.6',
                     ])
-        elif 'amzn' in CHEVAH_OS:
-            # Deps for Amazon Linux 2 (x86_64 only).
-            allowed_deps=[
-                '/lib64/libcom_err.so.2',
-                '/lib64/libcrypto.so.10',
-                '/lib64/libcrypt.so.1',
-                '/lib64/libc.so.6',
-                '/lib64/libdl.so.2',
-                '/lib64/libffi.so.6',
-                '/lib64/libgssapi_krb5.so.2',
-                '/lib64/libk5crypto.so.3',
-                '/lib64/libkeyutils.so.1',
-                '/lib64/libkrb5.so.3',
-                '/lib64/libkrb5support.so.0',
-                '/lib64/libm.so.6',
-                '/lib64/libncursesw.so.6',
-                '/lib64/libpcre.so.1',
-                '/lib64/libpthread.so.0',
-                '/lib64/libresolv.so.2',
-                '/lib64/librt.so.1',
-                '/lib64/libselinux.so.1',
-                '/lib64/libssl.so.10',
-                '/lib64/libtinfo.so.6',
-                '/lib64/libutil.so.1',
-                '/lib64/libz.so.1',
-                ]
         elif 'ubuntu' in CHEVAH_OS:
             ubuntu_version = CHEVAH_OS[6:]
             # Common deps for supported Ubuntu LTS with full paths (x86_64).
@@ -116,6 +82,7 @@ def get_allowed_deps():
                 '/lib/x86_64-linux-gnu/libc.so.6',
                 '/lib/x86_64-linux-gnu/libcrypt.so.1',
                 '/lib/x86_64-linux-gnu/libdl.so.2',
+                '/lib/x86_64-linux-gnu/liblzma.so.5',
                 '/lib/x86_64-linux-gnu/libm.so.6',
                 '/lib/x86_64-linux-gnu/libpthread.so.0',
                 '/lib/x86_64-linux-gnu/librt.so.1',
@@ -390,9 +357,12 @@ def main():
                 # On RHEL 8.3, OpenSSL got updated to 1.1.1g. To keep backward
                 # compatibility, link to version 1.1.1c from CentOS 8.2.2004.
                 expecting = u'OpenSSL 1.1.1c FIPS  28 May 2019'
+            elif CHEVAH_OS == "win":
+                # Latest cryptography not requiring Rust has older wheels.
+                expecting = u'OpenSSL 1.1.1l  24 Aug 2021'
             else:
                 # Use latest OpenSSL version when building it from source.
-                expecting = u'OpenSSL 1.1.1k  25 Mar 2021'
+                expecting = u'OpenSSL 1.1.1n  15 Mar 2022'
             if openssl_version != expecting:
                 sys.stderr.write('Expecting %s, got %s.\n' % (
                     expecting, openssl_version))
@@ -464,6 +434,19 @@ def main():
     except:
         sys.stderr.write('"bz2" is missing.\n')
         exit_code = 149
+
+    try:
+        import lzma
+        test_string = b"just a random string to quickly test lzma"
+        test_string_xzed = lzma.compress(test_string)
+        if lzma.decompress(test_string_xzed) == test_string:
+            print('"lzma" module is present.')
+        else:
+            sys.stderr.write('"lzma" is present, but broken.\n')
+            exit_code = 152
+    except:
+        sys.stderr.write('"lzma" is missing.\n')
+        exit_code = 151
 
     try:
         import setproctitle

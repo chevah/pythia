@@ -5,14 +5,14 @@
 # Import shared code.
 # The relative paths work in both src/blabla and build/blabla.
 source ../../functions.sh
-source ../../functions_pythia.sh
+source ../../functions_build.sh
 
 
 chevahbs_getsources() {
     local name=$1
     local ver=$2
     local ext="tar.gz"
-    local link=ftp://sourceware.org/pub/libffi/"$name"-"$ver"."$ext"
+    local link=https://github.com/libffi/libffi/releases/download/v"$ver"/"$name"-"$ver"."$ext"
 
     download_sources $name $ver $link $ext
 }
@@ -31,12 +31,12 @@ chevahbs_compile() {
 chevahbs_install() {
     case $OS in
         lnx)
-            # Installing manually to avoid messing with a lib64/ sub-dir.
+            # Install manually to avoid creating a lib64/ sub-dir on CentOS 5.
             execute cp -v *-linux-gnu/.libs/libffi.a "$INSTALL_DIR"/lib/
             execute cp -v *-linux-gnu/libffi.la "$INSTALL_DIR"/lib/
             execute cp -v *-linux-gnu/include/*.h "$INSTALL_DIR"/include/
-            execute mkdir "$INSTALL_DIR"/pkgconfig/
-            execute cp -v *-linux-gnu/libffi.pc "$INSTALL_DIR"/pkgconfig/
+            execute mkdir "$INSTALL_DIR"/lib/pkgconfig/
+            execute cp -v *-linux-gnu/libffi.pc "$INSTALL_DIR"/lib/pkgconfig/
             ;;
         *)
             execute $MAKE install DESTDIR=$INSTALL_DIR

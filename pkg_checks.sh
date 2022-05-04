@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
 # Check for the presence of required packages/commands.
-# If possible, install missing ones, typically through sudo.
 #
 # This build requires:
 #   * a C compiler, e.g. gcc
@@ -16,15 +15,15 @@
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
 BASE_PKGS="gcc make m4 automake libtool patch unzip"
-DPKG_PKGS="$BASE_PKGS tar diffutils \
-    git libssl-dev zlib1g-dev libffi-dev libncurses5-dev"
+DEB_PKGS="$BASE_PKGS tar diffutils \
+    git zlib1g-dev liblzma-dev libffi-dev libncurses5-dev libssl-dev"
 RPM_PKGS="$BASE_PKGS tar diffutils \
-    git-core openssl-devel zlib-devel libffi-devel ncurses-devel"
+    git-core libffi-devel zlib-devel xz-devel ncurses-devel openssl-devel"
 # Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
 APK_PKGS="$BASE_PKGS file lddtree \
-    git openssl-dev zlib-dev libffi-dev musl-dev paxctl"
+    git zlib-dev openssl-dev musl-dev linux-headers paxctl"
 # Windows is special, but package management is possible through Chocolatey.
-# Curl, sha512sum, and unzip are bundled with MINGW.
+# Some tools are bundled with MINGW: curl, sha512sum, unzip.
 CHOCO_PKGS=""
 CHOCO_PRESENT="unknown"
 
@@ -45,7 +44,7 @@ case "$OS" in
         CHECK_CMD="rpm --query"
         ;;
     ubuntu*)
-        PACKAGES="$DPKG_PKGS"
+        PACKAGES="$DEB_PKGS"
         CHECK_CMD="dpkg --status"
         ;;
     alpine*)
@@ -82,6 +81,9 @@ case "$OS" in
         ;;
 esac
 
+# External checks with various exit codes are checked below.
+set +o errexit
+
 # If $CHECK_CMD is still "command -v", it's only a check for needed commands.
 if [ -n "$PACKAGES" ]; then
     for package in $PACKAGES ; do
@@ -96,29 +98,7 @@ fi
 
 if [ -n "$MISSING_PACKAGES" ]; then
     (>&2 echo "Missing required dependencies: $MISSING_PACKAGES.")
-    if [ $CHOCO_PRESENT = "yes" ]; then
-        echo "## Installing missing Chocolatey packages... ##"
-        execute choco install --yes --no-progress $MISSING_PACKAGES
-    else
-        case "$OS" in
-            ubuntu*)
-                echo "## Installing missing dpkg packages... ##"
-                execute $SUDO_CMD apt install -y $MISSING_PACKAGES
-                ;;
-            rhel*|amzn*)
-                echo "## Installing missing rpm packages... ##"
-                execute $SUDO_CMD yum install -y $MISSING_PACKAGES
-                ;;
-            alpine*)
-                echo "## Installing missing apk packages... ##"
-                execute $SUDO_CMD apk add $MISSING_PACKAGES
-                ;;
-            *)
-                (>&2 echo "Don't know how to install those on the current OS.")
-                exit 149
-                ;;
-        esac
-    fi
+    exit 149
 fi
 
 if [ -n "$PACKAGES" ]; then
@@ -127,6 +107,7 @@ fi
 
 # Windows "build" is special, following checks are for other platforms.
 if [ "$OS" = "win" ]; then
+    set -o errexit
     return
 fi
 
@@ -135,6 +116,7 @@ command -v makeinfo >/dev/null
 if [ $? -ne 0 ]; then
     (>&2 echo "# Missing makeinfo, linking it to /bin/true in ~/bin... #")
     execute mkdir -p ~/bin
+    execute rm -f ~/bin/makeinfo
     execute ln -s /bin/true ~/bin/makeinfo
     export PATH="$PATH:~/bin/"
 fi
@@ -143,16 +125,22 @@ fi
 echo "# Checking if it's possible to avoid linking to system uuid libs... #"
 case "$OS" in
     ubuntu*)
-        execute $SUDO_CMD apt remove -y uuid-dev
+        $CHECK_CMD uuid-dev \
+            && echo "To not link to uuid libs, run: apt remove -y uuid-dev"
         ;;
     rhel*|amzn*)
-        execute $SUDO_CMD yum remove -y e2fsprogs-devel libuuid-devel
+        $CHECK_CMD libuuid-devel \
+            && echo -n "To not link to uuid libs, run: " \
+            && echo "yum remove -y e2fsprogs-devel libuuid-devel"
         ;;
     alpine*)
         $CHECK_CMD util-linux-dev \
-            && execute $SUDO_CMD apk del util-linux-dev
+            && echo "To not link to uuid libs, run: apk del util-linux-dev"
         ;;
     *)
         (>&2 echo "Not guarding against linking to uuid libs on this system!")
         ;;
 esac
+
+# This script is sourced, execution does not end here.
+set -o errexit

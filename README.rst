@@ -6,16 +6,16 @@ A derivative of https://github.com/chevah/python-package/.
 
 Building:
 
-* ``./pythia build``
+* ``./build.sh build``
 
 Testing:
 
-* ``./pythia test``
-* ``./pythia compat``
+* ``./build.sh test``
+* ``./build.sh compat``
 
-Use ``./pythia help`` to discover all available commands.
+Use ``./build.sh help`` to discover all available commands.
 
-Note that compat tests are currently only working with the ``python2.7`` branch.
+Note that compat tests are currently only working on the ``python2.7`` branch.
 
 
 Supported platforms
