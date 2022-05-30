@@ -199,7 +199,8 @@ cleanup_install_dir() {
                         execute strip lib/lib*.a
                         # On CentOS 5, libffi and OpenSSL install to lib64/.
                         if [ -d lib64 ]; then
-                            execute strip lib64/lib*.a
+                            echo "lib64/ found!"
+                            exit 88
                         fi
                         ;;
                 esac
