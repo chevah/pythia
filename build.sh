@@ -136,7 +136,7 @@ build_dep() {
                 # On RHEL5/SLES11 x64, OpenSSL installs only to lib64/ sub-dir.
                 # More so, under Docker it fails, so it's done manually to lib/.
                 # '-Wl,-rpath' voodoo is needed to build cryptography w/ pip.
-                export LDFLAGS="${LDFLAGS} -Wl,-rpath,${INSTALL_DIR}/lib/"
+                export LDFLAGS="-Wl,-rpath,${INSTALL_DIR}/lib/ ${LDFLAGS}"
             fi
             # Still needed for building cryptography.
             export CPPFLAGS="${CPPFLAGS:-} -I${INSTALL_DIR}/include"
