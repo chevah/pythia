@@ -156,11 +156,11 @@ jobs:
 
   macos:
     runs-on: macos-10.15
-    needs: [ windows, linux ]
+    # XXX needs: [ windows, linux ]
     # For now, we don't support actions_try with macos due to the `needs`
     # functionality.
     if: github.event.inputs.job == ''
-    timeout-minutes: 60
+    timeout-minutes: 120 #XXX Put 60 back
     steps:
     - uses: actions/checkout@v2
       with:
@@ -201,7 +201,7 @@ jobs:
       if: failure() && env.TMATE_DEBUG == 'yes'
       uses: mxschmitt/action-tmate@v3
       with:
-        limit-access-to-actor: true
+        limit-access-to-actor: false
         tmate-server-host: vreeland.chevah.com
         tmate-server-port: 44022
         tmate-server-rsa-fingerprint: SHA256:Hthk2T/M/Ivqfk1YYUn5ijC2Att3+UPzD7Rn72P5VWs
