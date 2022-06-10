@@ -201,8 +201,4 @@ jobs:
       if: failure() && env.TMATE_DEBUG == 'yes'
       uses: mxschmitt/action-tmate@v3
       with:
-        limit-access-to-actor: false
-        tmate-server-host: vreeland.chevah.com
-        tmate-server-port: 44022
-        tmate-server-rsa-fingerprint: SHA256:Hthk2T/M/Ivqfk1YYUn5ijC2Att3+UPzD7Rn72P5VWs
-        tmate-server-ed25519-fingerprint: SHA256:jfttvoypkHiQYUqUCwKeqd9d1fJj/ZiQlFOHVl6E9sI
+        limit-access-to-actor: true
