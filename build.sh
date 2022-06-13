@@ -2,10 +2,12 @@
 #
 # Pythia's script for building Python.
 
-# Script initialization.
-set -o nounset
-set -o errexit
-set -o pipefail
+
+# Bash checks
+set -o nounset    # always check if variables exist
+set -o errexit    # always exit on error
+set -o errtrace   # trap errors in functions as well
+set -o pipefail   # don't ignore exit codes when piping output
 
 # Get PIP_INDEX_URL for PIP_ARGS in build.conf.
 source pythia.conf
