@@ -634,10 +634,11 @@ check_linux_glibc() {
         exit 18
     fi
 
-    ldd --version > $ldd_output_file
+    ldd --version > $ldd_output_file 2> /dev/null
     egrep "GNU\ libc|GLIBC" $ldd_output_file > /dev/null
     if [ $? -ne 0 ]; then
         (>&2 echo "No glibc reported by ldd... Unsupported Linux libc?")
+        rm $ldd_output_file
         exit 19
     fi
 
