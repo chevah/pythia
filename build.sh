@@ -136,7 +136,8 @@ build_dep() {
         if [ $dep_name = "openssl" ]; then
             if [ "$OS" = "lnx" ]; then
                 # On RHEL5/SLES11 x64, OpenSSL installs only to lib64/ sub-dir.
-                # More so, under Docker it fails, so it's done manually to lib/.
+                # More so, under Docker its "make install" fails. To have all
+                # libs under lib/, the OpenSSL files are installed manually.
                 # '-Wl,-rpath' voodoo is needed to build cryptography w/ pip.
                 export LDFLAGS="-Wl,-rpath,${INSTALL_DIR}/lib/ ${LDFLAGS}"
             fi
