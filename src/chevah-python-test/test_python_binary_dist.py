@@ -362,7 +362,7 @@ def main():
                 expecting = u'OpenSSL 1.1.1l  24 Aug 2021'
             else:
                 # Use latest OpenSSL version when building it from source.
-                expecting = u'OpenSSL 1.1.1p  21 Jun 2022'
+                expecting = u'OpenSSL 1.1.1q  5 Jul 2022'
             if openssl_version != expecting:
                 sys.stderr.write('Expecting %s, got %s.\n' % (
                     expecting, openssl_version))
