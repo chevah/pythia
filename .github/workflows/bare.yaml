@@ -41,7 +41,7 @@ concurrency:
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 # Version 3 of mxschmitt/action-tmate should also work on Windows.
 env:
-  TMATE_DEBUG: 'no'
+  TMATE_DEBUG: 'yes'
   NGROK_DEBUG: 'no'
 
 
@@ -156,11 +156,11 @@ jobs:
 
   macos:
     runs-on: macos-10.15
-    needs: [ windows, linux ]
+    #needs: [ windows, linux ]
     # For now, we don't support actions_try with macos due to the `needs`
     # functionality.
     if: github.event.inputs.job == ''
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
     - uses: actions/checkout@v2
       with:
