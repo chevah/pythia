@@ -160,7 +160,7 @@ jobs:
     # For now, we don't support actions_try with macos due to the `needs`
     # functionality.
     if: github.event.inputs.job == ''
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
     - uses: actions/checkout@v2
       with:
