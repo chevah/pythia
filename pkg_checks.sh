@@ -20,7 +20,7 @@ DEB_PKGS="$BASE_PKGS tar diffutils \
 RPM_PKGS="$BASE_PKGS tar diffutils \
     git-core libffi-devel zlib-devel xz-devel ncurses-devel openssl-devel"
 # Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
-APK_PKGS="$BASE_PKGS file lddtree git musl-dev linux-headers paxctl"
+APK_PKGS="$BASE_PKGS file lddtree git musl-dev linux-headers"
 # Windows is special, but package management is possible through Chocolatey.
 # Some tools are bundled with MINGW: curl, sha512sum, unzip.
 CHOCO_PKGS=""
