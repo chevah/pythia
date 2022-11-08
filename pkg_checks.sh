@@ -19,8 +19,6 @@ DEB_PKGS="$BASE_PKGS tar diffutils \
     git zlib1g-dev liblzma-dev libffi-dev libncurses5-dev libssl-dev"
 RPM_PKGS="$BASE_PKGS tar diffutils \
     git-core libffi-devel zlib-devel xz-devel ncurses-devel openssl-devel"
-# Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
-APK_PKGS="$BASE_PKGS file lddtree git musl-dev linux-headers"
 # Windows is special, but package management is possible through Chocolatey.
 # Some tools are bundled with MINGW: curl, sha512sum, unzip.
 CHOCO_PKGS=""
@@ -45,11 +43,6 @@ case "$OS" in
     ubuntu*)
         PACKAGES="$DEB_PKGS"
         CHECK_CMD="dpkg --status"
-        ;;
-    lnx_musl)
-        # Packages for generic musl Linux are built on Alpine.
-        PACKAGES="$APK_PKGS"
-        CHECK_CMD="apk info -q -e"
         ;;
     win)
         # The windows build is special.
@@ -76,7 +69,7 @@ case "$OS" in
     obsd*)
         PACKAGES="$CC make m4 git patch libtool curl sha512 tar unzip"
         ;;
-    lnx)
+    lnx*)
         PACKAGES="$PACKAGES perl"
         ;;
 esac
@@ -132,10 +125,6 @@ case "$OS" in
         $CHECK_CMD libuuid-devel \
             && echo -n "To not link to uuid libs, run: " \
             && echo "yum remove -y e2fsprogs-devel libuuid-devel"
-        ;;
-    lnx_musl)
-        $CHECK_CMD util-linux-dev \
-            && echo "To not link to uuid libs, run: apk del util-linux-dev"
         ;;
     *)
         (>&2 echo "Not guarding against linking to uuid libs on this system!")

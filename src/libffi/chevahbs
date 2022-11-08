@@ -30,7 +30,7 @@ chevahbs_compile() {
 
 chevahbs_install() {
     case $OS in
-        lnx)
+        lnx*)
             echo "Installing manually to avoid messing with a lib64/ sub-dir:"
             execute cp -v *-linux-*/.libs/libffi.a "$INSTALL_DIR"/lib/
             execute cp -v *-linux-*/libffi.la "$INSTALL_DIR"/lib/

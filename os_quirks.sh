@@ -18,17 +18,16 @@ case $OS in
         # On Windows, only one of the installers is downloaded.
         export SHA_CMD="$SHA_CMD --ignore-missing"
         ;;
-    lnx_musl)
-        # The busybox ersatz binary on Alpine Linux is different.
-        export SHA_CMD="sha512sum -csw"
-        # Minimal deps to run on the smallest Alpine containers.
-        export BUILD_LIBFFI="yes"
-        export BUILD_ZLIB="yes"
-        export BUILD_XZ="yes"
-        export BUILD_LIBEDIT="no"
-        export BUILD_OPENSSL="yes"
-        ;;
-    lnx)
+    lnx*)
+        if [ -f /etc/alpine-release ]; then
+            # The busybox ersatz binary on Alpine Linux is different.
+            export SHA_CMD="sha512sum -csw"
+        elif [ -f /etc/centos-release ]; then
+            if [ $(rpm -E %{rhel}) -eq 5 ]; then
+                # There are issues with Let's Encrypt certs on CentOS 5.
+                export GET_CMD="curl --silent --insecure --location --output"
+            fi
+        fi
         # Build as portable as possible, only glibc 2.x should be needed.
         export BUILD_LIBFFI="yes"
         export BUILD_ZLIB="yes"
@@ -37,8 +36,6 @@ case $OS in
         # Generic Linux might be an old distro with OpenSSL 0.9.8 libraries.
         # To avoid linking to local libs, build own OpenSSL libs.
         export BUILD_OPENSSL="yes"
-        # Generic builds on CentOS 5 have issues with Let's Encrypt certs.
-        export GET_CMD="curl --silent --insecure --location --output"
         ;;
     macos)
         export CC="clang"
