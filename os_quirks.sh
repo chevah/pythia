@@ -23,8 +23,10 @@ case $OS in
         export SHA_CMD="sha512sum -csw"
         # Minimal deps to run on the smallest Alpine containers.
         export BUILD_LIBFFI="yes"
-        export BUILD_LIBEDIT="no"
+        export BUILD_ZLIB="yes"
         export BUILD_XZ="yes"
+        export BUILD_LIBEDIT="no"
+        export BUILD_OPENSSL="yes"
         ;;
     lnx)
         # Build as portable as possible, only glibc 2.x should be needed.
