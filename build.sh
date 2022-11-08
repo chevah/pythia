@@ -134,14 +134,15 @@ build_dep() {
         build $dep_name $dep_version
         # If there's something to be done post-build, here's the place.
         if [ $dep_name = "openssl" ]; then
-            if [ "$OS" = "lnx" ]; then
+            if [ "${OS%lnx*}" = "" ]; then
                 # On RHEL5/SLES11 x64, OpenSSL installs only to lib64/ sub-dir.
                 # More so, under Docker its "make install" fails. To have all
                 # libs under lib/, the OpenSSL files are installed manually.
-                # '-Wl,-rpath' voodoo is needed to build cryptography w/ pip.
+                # On all generic Linux builds, the '-Wl,-rpath' voodoo is
+                # needed to build cryptography with pip.
                 export LDFLAGS="-Wl,-rpath,${INSTALL_DIR}/lib/ ${LDFLAGS}"
             fi
-            # Still needed for building cryptography.
+            # Needed for building cryptography.
             export CPPFLAGS="${CPPFLAGS:-} -I${INSTALL_DIR}/include"
         fi
     elif [ $dep_boolean = "no" ]; then
