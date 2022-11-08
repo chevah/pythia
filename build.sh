@@ -234,7 +234,7 @@ command_test() {
     echo "::group::Security tests"
     echo "## Testing for outdated packages and security issues... ##"
     execute $python_binary -m pip list --outdated --format=columns
-    execute $python_binary -m pip install $PIP_ARGS safety
+    execute $python_binary -m pip install $PIP_ARGS safety=2.3.1
     execute $python_binary -m safety check --full-report
     echo "::endgroup::"
 
