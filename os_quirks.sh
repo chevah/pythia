@@ -18,11 +18,10 @@ case $OS in
         # On Windows, only one of the installers is downloaded.
         export SHA_CMD="$SHA_CMD --ignore-missing"
         ;;
-    alpine*)
-        # The busybox ersatz binary is different.
+    lnx_musl)
+        # The busybox ersatz binary on Alpine Linux is different.
         export SHA_CMD="sha512sum -csw"
-        # Do not depend on libffi and ncurses-libs Alpine packages.
-        # It's better to run on minimal Alpine containers.
+        # Minimal deps to run on the smallest Alpine containers.
         export BUILD_LIBFFI="yes"
         export BUILD_LIBEDIT="no"
         export BUILD_XZ="yes"

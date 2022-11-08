@@ -33,10 +33,11 @@
 # command used to execute Python inside the newly virtual environment.
 #
 
-# Script initialization.
-set -o nounset
-set -o errexit
-set -o pipefail
+# Bash checks
+set -o nounset    # always check if variables exist
+set -o errexit    # always exit on error
+set -o errtrace   # trap errors in functions as well
+set -o pipefail   # don't ignore exit codes when piping output
 
 # Initialize default value.
 COMMAND=${1-''}
@@ -533,8 +534,7 @@ install_dependencies(){
 # Check version of current OS to see if it is supported.
 # If it's too old, exit with a nice informative message.
 # If it's supported, return through eval the version numbers to be used for
-# naming the package, for example: '8' for RHEL 8.2, '2004' for Ubuntu 20.04,
-# '314' for Alpine Linux 3.14, '114' for Solaris 11.4.
+# naming the package, for example: '8' for RHEL 8.2, '2004' for Ubuntu 20.04.
 #
 check_os_version() {
     # First parameter should be the human-readable name for the current OS.
@@ -582,7 +582,7 @@ check_os_version() {
         if [ "$OS" = "Linux" ]; then
             # For old and/or unsupported Linux distros there's a second chance!
             (>&2 echo "the generic Linux runtime is used, if possible.")
-            check_linux_glibc
+            check_linux_libc
         else
             (>&2 echo "there is currently no support.")
             exit 13
@@ -595,16 +595,42 @@ check_os_version() {
 
 #
 # For old unsupported Linux distros (some with no /etc/os-release) and for other
-# unsupported Linux distros (eg. Arch), we check if the system is glibc-based.
+# unsupported Linux distros, we check if the system is based on glibc or musl.
 # If so, we use a generic code path that builds everything statically,
-# including OpenSSL, thus only requiring glibc 2.X, where X differs by arch.
+# including OpenSSL, thus only requiring glibc or musl.
 #
-check_linux_glibc() {
+check_linux_libc() {
+    local ldd_output_file=".chevah_libc_version"
+    set +o errexit
+
+    command -v ldd > /dev/null
+    if [ $? -ne 0 ]; then
+        (>&2 echo "No ldd binary found, can't check for glibc!")
+        exit 18
+    fi
+
+    ldd --version > $ldd_output_file 2>&1
+    egrep "GNU libc|GLIBC" $ldd_output_file > /dev/null
+    if [ $? -eq 0 ]; then
+        check_glibc_version
+    else
+        egrep ^"musl\ libc" $ldd_output_file > /dev/null
+        if [ $? -eq 0 ]; then
+            check_musl_version
+        else
+            (>&2 echo "Unknown libc reported by ldd... Unsupported Linux.")
+            rm $ldd_output_file
+            exit 19
+        fi
+    fi
+
+    set -o errexit
+}
+
+check_glibc_version(){
     local glibc_version
     local glibc_version_array
     local supported_glibc2_version
-    # Output to a file to avoid "write error: Broken pipe" with grep/head.
-    local ldd_output_file=".chevah_glibc_version"
 
     # Supported minimum minor glibc 2.X versions for various arches.
     # For x64, we build on CentOS 5.11 (Final) with glibc 2.5.
@@ -625,22 +651,6 @@ check_linux_glibc() {
 
     echo "No specific runtime for the current distribution / version / arch."
     echo "Minimum glibc version for this arch: 2.${supported_glibc2_version}."
-
-    set +o errexit
-
-    command -v ldd > /dev/null
-    if [ $? -ne 0 ]; then
-        (>&2 echo "No ldd binary found, can't check for glibc!")
-        exit 18
-    fi
-
-    ldd --version > $ldd_output_file 2> /dev/null
-    egrep "GNU\ libc|GLIBC" $ldd_output_file > /dev/null
-    if [ $? -ne 0 ]; then
-        (>&2 echo "No glibc reported by ldd... Unsupported Linux libc?")
-        rm $ldd_output_file
-        exit 19
-    fi
 
     # Tested with glibc 2.5/2.11.3/2.12/2.23/2.28-31 and eglibc 2.13/2.19.
     glibc_version=$(head -n 1 $ldd_output_file | rev | cut -d\  -f1 | rev)
@@ -667,25 +677,63 @@ check_linux_glibc() {
         echo "All is good. Detected glibc version: ${glibc_version}."
     fi
 
-    set -o errexit
-
-    # glibc 2 detected, we set $OS for a generic Linux build.
+    # Supported glibc version detected, set $OS for a generic glibc Linux build.
     OS="lnx"
 }
 
+check_musl_version(){
+    local musl_version
+    local musl_version_array
+    local supported_musl11_version=24
+
+    echo "No specific runtime for the current distribution / version / arch."
+    echo "Minimum musl version for this arch: 1.1.${supported_musl11_version}."
+
+    # Tested with musl 1.1.24/1.2.2.
+    musl_version=$(egrep ^Version $ldd_output_file | cut -d\  -f2)
+    rm $ldd_output_file
+
+    if [[ $musl_version =~ [^[:digit:]\.] ]]; then
+        (>&2 echo "Musl version should only have numbers and periods, but:")
+        (>&2 echo "    \$musl_version=$musl_version")
+        exit 25
+    fi
+
+    IFS=. read -a musl_version_array <<< "$musl_version"
+
+    if [ ${musl_version_array[0]} -lt 1 -o ${musl_version_array[1]} -lt 1 ];then
+        (>&2 echo "Only musl 1.1 or greater supported! Detected: $musl_version")
+        exit 26
+    fi
+
+    # Decrement supported_musl11_version if building against an older musl.
+    if [ ${musl_version_array[0]} -eq 1 -a ${musl_version_array[1]} -eq 1 \
+        -a ${musl_version_array[2]} -lt ${supported_musl11_version} ]; then
+        (>&2 echo "NOT good. Detected version is older: ${musl_version}!")
+        exit 27
+    else
+        echo "All is good. Detected musl version: ${musl_version}."
+    fi
+
+    # Supported musl version detected, set $OS for a generic musl Linux build.
+    OS="lnx_musl"
+}
+
 #
-# For glibc-based Linux distros, after checking if current version is
-# supported with check_os_version(), $OS might already be set to "lnx"
-# if current version is too old, through check_linux_glibc().
+# For Linux distros with a supported libc, after checking if current version is
+# supported with check_os_version(), $OS might be set to something like "lnx"
+# if current version is too old, through check_linux_libc() and its subroutines.
 #
 set_os_if_not_generic() {
     local distro_name="$1"
     local distro_version="$2"
 
-    if [ "$OS" != "lnx" ]; then
+    # Check if OS starts with "lnx", to match "lnx_musl" too, just in case.
+    if [ "${OS#lnx}" = "$OS" ]; then
         OS="${distro_name}${distro_version}"
     fi
 }
+
 
 #
 # Detect OS and ARCH for the current system.
@@ -704,7 +752,7 @@ detect_os() {
             if [ ! -f /etc/os-release ]; then
                 # No /etc/os-release file present, so we don't support this
                 # distro, but check for glibc, the generic build should work.
-                check_linux_glibc
+                check_linux_libc
             else
                 source /etc/os-release
                 linux_distro="$ID"
@@ -712,11 +760,16 @@ detect_os() {
                 # Some rolling-release distros (eg. Arch Linux) have
                 # no VERSION_ID here, so don't count on it unconditionally.
                 case "$linux_distro" in
-                    rhel|centos|ol)
+                    rhel|centos|almalinux|rocky|ol)
                         os_version_raw="$VERSION_ID"
                         check_os_version "Red Hat Enterprise Linux" 8 \
                             "$os_version_raw" os_version_chevah
-                        set_os_if_not_generic "rhel" $os_version_chevah
+                        if [ ${os_version_chevah} == "8" ]; then
+                            set_os_if_not_generic "rhel" $os_version_chevah
+                        else
+                            # OpenSSL 3.0.x not supported by cryptography 3.3.x.
+                            check_linux_libc
+                        fi
                         ;;
                     ubuntu|ubuntu-core)
                         os_version_raw="$VERSION_ID"
@@ -727,20 +780,17 @@ detect_os() {
                         # 04 or first two digits are uneven, use generic build.
                         if [ ${os_version_chevah%%04} == ${os_version_chevah} \
                             -o $(( ${os_version_chevah:0:2} % 2 )) -ne 0 ]; then
-                            check_linux_glibc
+                            check_linux_libc
+                        elif [ ${os_version_chevah} == "2204" ]; then
+                            # OpenSSL 3.0.x not supported by cryptography 3.3.x.
+                            check_linux_libc
                         fi
                         set_os_if_not_generic "ubuntu" $os_version_chevah
-                        ;;
-                    alpine)
-                        os_version_raw="$VERSION_ID"
-                        check_os_version "$distro_fancy_name" 3.12 \
-                            "$os_version_raw" os_version_chevah
-                        set_os_if_not_generic "alpine" $os_version_chevah
                         ;;
                     *)
                         # Supported distros with unsupported OpenSSL versions or
                         # distros not specifically supported: SLES, Debian, etc.
-                        check_linux_glibc
+                        check_linux_libc
                         ;;
                 esac
             fi

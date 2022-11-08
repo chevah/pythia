@@ -20,8 +20,7 @@ DEB_PKGS="$BASE_PKGS tar diffutils \
 RPM_PKGS="$BASE_PKGS tar diffutils \
     git-core libffi-devel zlib-devel xz-devel ncurses-devel openssl-devel"
 # Alpine's ersatz tar/sha51sum binaries from Busybox are good enough.
-APK_PKGS="$BASE_PKGS file lddtree \
-    git zlib-dev openssl-dev musl-dev linux-headers paxctl"
+APK_PKGS="$BASE_PKGS file lddtree git musl-dev linux-headers paxctl"
 # Windows is special, but package management is possible through Chocolatey.
 # Some tools are bundled with MINGW: curl, sha512sum, unzip.
 CHOCO_PKGS=""
@@ -47,7 +46,8 @@ case "$OS" in
         PACKAGES="$DEB_PKGS"
         CHECK_CMD="dpkg --status"
         ;;
-    alpine*)
+    lnx_musl)
+        # Packages for generic musl Linux are built on Alpine.
         PACKAGES="$APK_PKGS"
         CHECK_CMD="apk info -q -e"
         ;;
@@ -133,7 +133,7 @@ case "$OS" in
             && echo -n "To not link to uuid libs, run: " \
             && echo "yum remove -y e2fsprogs-devel libuuid-devel"
         ;;
-    alpine*)
+    lnx_musl)
         $CHECK_CMD util-linux-dev \
             && echo "To not link to uuid libs, run: apk del util-linux-dev"
         ;;
