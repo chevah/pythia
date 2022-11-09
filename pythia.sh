@@ -614,7 +614,7 @@ check_linux_libc() {
     if [ $? -eq 0 ]; then
         check_glibc_version
     else
-        egrep ^"musl\ libc" $ldd_output_file > /dev/null
+        egrep ^"musl libc" $ldd_output_file > /dev/null
         if [ $? -eq 0 ]; then
             check_musl_version
         else
