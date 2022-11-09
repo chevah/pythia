@@ -22,10 +22,10 @@ case $OS in
         if [ -f /etc/alpine-release ]; then
             # The busybox ersatz binary on Alpine Linux is different.
             export SHA_CMD="sha512sum -csw"
-        elif [ -f /etc/centos-release ]; then
-            echo "CentOS MATCHED!"
+        elif [ -f /etc/redhat-release ]; then
+            echo "Red Hat MATCHED!"
             echo "Content of release file:"
-            cat /etc/centos-release
+            cat /etc/redhat-release
             echo "Output of rpm command:"
             rpm -E %{rhel}
             if [ $(rpm -E %{rhel}) -eq 5 ]; then
@@ -37,7 +37,6 @@ case $OS in
             echo "Files in /etc ending with release:"
             ls -l /etc/*release
         fi
-        exit
         # Build as portable as possible, only glibc 2.x should be needed.
         export BUILD_LIBFFI="yes"
         export BUILD_ZLIB="yes"
