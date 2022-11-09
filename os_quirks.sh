@@ -23,6 +23,11 @@ case $OS in
             # The busybox ersatz binary on Alpine Linux is different.
             export SHA_CMD="sha512sum -csw"
         elif [ -f /etc/centos-release ]; then
+            echo "CentOS MATCHED!"
+            echo "Content of release file:"
+            cat /etc/centos-release
+            echo "Output of rpm command:"
+            rpm -E %{rhel}
             if [ $(rpm -E %{rhel}) -eq 5 ]; then
                 # There are issues with Let's Encrypt certs on CentOS 5.
                 export GET_CMD="curl --silent --insecure --location --output"
