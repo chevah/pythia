@@ -32,7 +32,12 @@ case $OS in
                 # There are issues with Let's Encrypt certs on CentOS 5.
                 export GET_CMD="curl --silent --insecure --location --output"
             fi
+        else
+            echo "CentOS NOT MATCHED!"
+            echo "Files in /etc ending with release:"
+            ls -l /etc/*release
         fi
+        exit
         # Build as portable as possible, only glibc 2.x should be needed.
         export BUILD_LIBFFI="yes"
         export BUILD_ZLIB="yes"
