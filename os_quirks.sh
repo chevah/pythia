@@ -28,13 +28,11 @@ case $OS in
                 export GET_CMD="curl --silent --insecure --location --output"
             fi
         fi
-        # Build as portable as possible, only glibc 2.x should be needed.
+        # Build as portable as possible, only libc should be needed.
         export BUILD_LIBFFI="yes"
         export BUILD_ZLIB="yes"
         export BUILD_XZ="yes"
         export BUILD_LIBEDIT="no"
-        # Generic Linux might be an old distro with OpenSSL 0.9.8 libraries.
-        # To avoid linking to local libs, build own OpenSSL libs.
         export BUILD_OPENSSL="yes"
         ;;
     macos)

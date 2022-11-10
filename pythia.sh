@@ -728,8 +728,8 @@ set_os_if_not_generic() {
     local distro_name="$1"
     local distro_version="$2"
 
-    # Check if OS starts with "lnx", to match "lnx_musl" too, just in case.
     if [ "${OS#lnx}" = "$OS" ]; then
+        # $OS doesn't start with lnx, not a generic Linux build.
         OS="${distro_name}${distro_version}"
     fi
 }

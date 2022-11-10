@@ -230,7 +230,7 @@ def get_actual_deps(script_helper):
                 if dep.startswith(openbsd_ignored_strings):
                     continue
             elif platform_system == 'linux':
-                #  On Alpine, lddtree is used, the output is different.
+                # On Alpine, lddtree is used, the output is different.
                 if 'musl' in CHEVAH_OS:
                     dep = line.split()[0]
                 else:
