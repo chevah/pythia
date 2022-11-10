@@ -26,7 +26,7 @@ SETUP['folders']['source'] = u'src'
 SETUP['repository']['name'] = u'pythia'
 SETUP['test']['package'] = None
 
-SETUP['pypi']['index_url'] = 'https://bin.chevah.com:20443/pypi/simple'
+SETUP['pypi']['index_url'] = os.environ['PIP_INDEX_URL']
 
 SETUP['repository']['name'] = u'pythia'
 SETUP['repository']['github'] = 'https://github.com/chevah/pythia'

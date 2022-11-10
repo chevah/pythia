@@ -24,8 +24,15 @@ def get_allowed_deps():
     """
     allowed_deps = []
     if platform_system == 'linux':
-        if 'lnx' in CHEVAH_OS:
+        if 'musl' in CHEVAH_OS:
             # Deps without paths for generic Linux builds.
+            # Only musl libs are allowed.
+            allowed_deps=[
+                'ld-musl-x86_64.so.1',
+                'libc.musl-x86_64.so.1',
+                ]
+        elif 'lnx' in CHEVAH_OS:
+            # Deps without paths for generic glibc Linux builds.
             # Only glibc 2.x libs are allowed.
             # Tested on SLES 11 with glibc 2.11.3 and CentOS 5 with glibc 2.5.
             allowed_deps=[
@@ -104,15 +111,6 @@ def get_allowed_deps():
                     '/lib/x86_64-linux-gnu/libssl.so.1.1',
                     '/lib/x86_64-linux-gnu/libtinfo.so.6',
                 ])
-        elif 'alpine' in CHEVAH_OS:
-            # Full deps with paths, but no minor versions, for Alpine 3.12+.
-            allowed_deps=[
-                '/lib/ld-musl-x86_64.so.1',
-                '/lib/libc.musl-x86_64.so.1',
-                '/lib/libcrypto.so.1.1',
-                '/lib/libssl.so.1.1',
-                '/lib/libz.so.1',
-                ]
     elif platform_system == 'sunos':
         # This is the list of deps for Solaris 11 64bit builds.
         allowed_deps = [
@@ -233,7 +231,7 @@ def get_actual_deps(script_helper):
                     continue
             elif platform_system == 'linux':
                 # On Alpine, lddtree is used, the output is different.
-                if 'alpine' in CHEVAH_OS:
+                if 'musl' in CHEVAH_OS:
                     dep = line.split()[0]
                 else:
                     if any(string in line for string in linux_ignored_strings):
@@ -336,7 +334,7 @@ def main():
         sys.stderr.write('"zlib" is missing.\n')
         exit_code = 131
     else:
-        print('zlib %s' % (zlib.__version__,))
+        print('zlib %s' % (zlib.ZLIB_VERSION,))
 
     try:
         from ssl import OPENSSL_VERSION
@@ -362,7 +360,7 @@ def main():
                 expecting = u'OpenSSL 1.1.1l  24 Aug 2021'
             else:
                 # Use latest OpenSSL version when building it from source.
-                expecting = u'OpenSSL 1.1.1n  15 Mar 2022'
+                expecting = u'OpenSSL 1.1.1s  1 Nov 2022'
             if openssl_version != expecting:
                 sys.stderr.write('Expecting %s, got %s.\n' % (
                     expecting, openssl_version))

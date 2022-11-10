@@ -2,10 +2,12 @@
 #
 # Pythia's script for building Python.
 
-# Script initialization.
-set -o nounset
-set -o errexit
-set -o pipefail
+
+# Bash checks
+set -o nounset    # always check if variables exist
+set -o errexit    # always exit on error
+set -o errtrace   # trap errors in functions as well
+set -o pipefail   # don't ignore exit codes when piping output
 
 # Get PIP_INDEX_URL for PIP_ARGS in build.conf.
 source pythia.conf
@@ -132,13 +134,14 @@ build_dep() {
         build $dep_name $dep_version
         # If there's something to be done post-build, here's the place.
         if [ $dep_name = "openssl" ]; then
-            if [ "$OS" = "lnx" ]; then
-                # On RHEL5/SLES11 x64, OpenSSL instals only to lib64/ sub-dir.
-                # More so, under Docker installing fails, so it's done manually.
-                # '-Wl,-rpath' voodoo is needed to build cryptography w/ pip.
+            if [ "${OS%lnx*}" = "" ]; then
+                # On x64 Linux, OpenSSL installs only to lib64/ sub-dir.
+                # More so, under Docker its "make install" fails. To have all
+                # libs under lib/, the OpenSSL files are installed manually.
+                # '-Wl,-rpath' voodoo is needed to build cryptography with pip.
                 export LDFLAGS="-Wl,-rpath,${INSTALL_DIR}/lib/ ${LDFLAGS}"
             fi
-            # Still needed for building cryptography.
+            # Needed for building cryptography.
             export CPPFLAGS="${CPPFLAGS:-} -I${INSTALL_DIR}/include"
         fi
     elif [ $dep_boolean = "no" ]; then
@@ -231,7 +234,7 @@ command_test() {
     echo "::group::Security tests"
     echo "## Testing for outdated packages and security issues... ##"
     execute $python_binary -m pip list --outdated --format=columns
-    execute $python_binary -m pip install $PIP_ARGS safety
+    execute $python_binary -m pip install $PIP_ARGS safety=="$SAFETY_VERSION"
     execute $python_binary -m safety check --full-report
     echo "::endgroup::"
 

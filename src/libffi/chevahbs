@@ -30,13 +30,13 @@ chevahbs_compile() {
 
 chevahbs_install() {
     case $OS in
-        lnx)
-            # Install manually to avoid creating a lib64/ sub-dir on CentOS 5.
-            execute cp -v *-linux-gnu/.libs/libffi.a "$INSTALL_DIR"/lib/
-            execute cp -v *-linux-gnu/libffi.la "$INSTALL_DIR"/lib/
-            execute cp -v *-linux-gnu/include/*.h "$INSTALL_DIR"/include/
+        lnx*)
+            echo "Installing manually to avoid messing with a lib64/ sub-dir:"
+            execute cp -v *-linux-*/.libs/libffi.a "$INSTALL_DIR"/lib/
+            execute cp -v *-linux-*/libffi.la "$INSTALL_DIR"/lib/
+            execute cp -v *-linux-*/include/*.h "$INSTALL_DIR"/include/
             execute mkdir "$INSTALL_DIR"/lib/pkgconfig/
-            execute cp -v *-linux-gnu/libffi.pc "$INSTALL_DIR"/lib/pkgconfig/
+            execute cp -v *-linux-*/libffi.pc "$INSTALL_DIR"/lib/pkgconfig/
             ;;
         *)
             execute $MAKE install DESTDIR=$INSTALL_DIR
