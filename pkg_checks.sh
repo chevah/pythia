@@ -69,7 +69,7 @@ case "$OS" in
     obsd*)
         PACKAGES="$CC make m4 git patch libtool curl sha512 tar unzip"
         ;;
-    lnx*)
+    linux*)
         PACKAGES="$PACKAGES perl"
         ;;
 esac

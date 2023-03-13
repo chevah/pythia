@@ -18,7 +18,7 @@ case $OS in
         # On Windows, only one of the installers is downloaded.
         export SHA_CMD="$SHA_CMD --ignore-missing"
         ;;
-    lnx*)
+    linux*)
         if [ -f /etc/alpine-release ]; then
             # The busybox ersatz binary on Alpine Linux is different.
             export SHA_CMD="sha512sum -csw"

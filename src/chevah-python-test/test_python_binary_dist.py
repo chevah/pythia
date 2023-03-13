@@ -31,7 +31,7 @@ def get_allowed_deps():
                 'ld-musl-x86_64.so.1',
                 'libc.musl-x86_64.so.1',
                 ]
-        elif 'lnx' in CHEVAH_OS:
+        elif 'linux' in CHEVAH_OS:
             # Deps without paths for generic glibc Linux builds.
             # Only glibc 2.x libs are allowed.
             # Tested on SLES 11 with glibc 2.11.3 and CentOS 5 with glibc 2.5.

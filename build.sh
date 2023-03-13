@@ -133,7 +133,7 @@ build_dep() {
         build $dep_name $dep_version
         # If there's something to be done post-build, here's the place.
         if [ $dep_name = "openssl" ]; then
-            if [ "${OS%lnx*}" = "" ]; then
+            if [ "${OS%linux*}" = "" ]; then
                 # On x64 Linux, OpenSSL installs only to lib64/ sub-dir.
                 # More so, under Docker its "make install" fails. To have all
                 # libs under lib/, the OpenSSL files are installed manually.

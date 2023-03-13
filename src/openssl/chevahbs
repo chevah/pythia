@@ -34,7 +34,7 @@ chevahbs_compile() {
 
 chevahbs_install() {
     case $OS in
-        lnx*)
+        linux*)
             echo "Installing manually to avoid messing with a lib64/ sub-dir:"
             execute cp -v libcrypto.a libssl.a "$INSTALL_DIR"/lib/
             execute cp -rv include/openssl/ "$INSTALL_DIR"/include/

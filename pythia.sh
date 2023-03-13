@@ -671,7 +671,7 @@ check_glibc_version(){
     fi
 
     # Supported glibc version detected, set $OS for a generic glibc Linux build.
-    OS="lnx"
+    OS="linux"
 }
 
 check_musl_version(){
@@ -709,7 +709,7 @@ check_musl_version(){
     fi
 
     # Supported musl version detected, set $OS for a generic musl Linux build.
-    OS="lnx_musl"
+    OS="linux_musl"
 }
 
 
