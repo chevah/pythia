@@ -32,7 +32,7 @@ jobs:
       matrix:
         # CentOS 5.11 setup was saved as an image pushed to Docker Hub. See the
         # Overview section at https://hub.docker.com/r/proatria/centos for details.
-        container: [ 'alpine:3.12', 'centos:8.2.2004', 'proatria/centos:5.11-chevah1' ]
+        container: [ 'alpine:3.12', 'proatria/centos:5.11-chevah1' ]
     timeout-minutes: 30
     steps:
 
@@ -45,16 +45,6 @@ jobs:
         apk del util-linux-dev
         curl --output /usr/local/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
-
-    # Stick to CentOS 8.2 as OpenSSL got updated in 8.3 from 1.1.1c to 1.1.1g.
-    - name: CentOS 8.2 setup
-      if: matrix.container == 'centos:8.2.2004'
-      run: |
-        sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
-        sed -i s@^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever/@baseurl=https://vault.centos.org/8.2.2004/@ /etc/yum.repos.d/*.repo
-        yum -y upgrade
-        yum -y install git curl gcc make m4 automake libtool patch libffi-devel zlib-devel xz-devel ncurses-devel openssl-devel openssh-clients unzip
-        yum remove -y e2fsprogs-devel libuuid-devel
 
     # Our Chevah Centos 5 image, built for python-package.
     # FIXME: Update it to include unzip.

@@ -26,12 +26,6 @@ Supported platforms
 * all glibc-based Linux distributions (glibc 2.5+)
 * Alpine Linux 3.12 and newer.
 
-Platforms on which the system OpenSSL is used:
-
-* Red Hat Linux Enterprise 8 and newer (including derivatives such as CentOS)
-* Ubuntu Server 18.04 and 20.04
-* Alpine Linux
-
 Platforms that should work, but are not regularly tested:
 
 * FreeBSD 12 and newer

@@ -28,7 +28,6 @@ exit_on_error $? 250
 export PYTHON_BUILD_VERSION PYTHIA_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_XZ BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
-
 # OS detection is slow on Windows, only execute it when the file is missing.
 if [ ! -r ./BUILD_ENV_VARS ]; then
     execute ./pythia.sh detect_os
