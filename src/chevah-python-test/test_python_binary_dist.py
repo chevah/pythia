@@ -350,21 +350,12 @@ def main():
         from cryptography.hazmat.backends.openssl.backend import backend
         import cryptography
         openssl_version = backend.openssl_version_text()
-        if CHEVAH_OS in [ "win", "macos", "lnx", "rhel-8" ]:
-            if CHEVAH_OS == "rhel-8":
-                # On RHEL 8.3, OpenSSL got updated to 1.1.1g. To keep backward
-                # compatibility, link to version 1.1.1c from CentOS 8.2.2004.
-                expecting = u'OpenSSL 1.1.1c FIPS  28 May 2019'
-            elif CHEVAH_OS == "win":
-                # Latest cryptography not requiring Rust has older wheels.
-                expecting = u'OpenSSL 1.1.1l  24 Aug 2021'
-            else:
-                # Use latest OpenSSL version when building it from source.
-                expecting = u'OpenSSL 1.1.1s  1 Nov 2022'
-            if openssl_version != expecting:
-                sys.stderr.write('Expecting %s, got %s.\n' % (
-                    expecting, openssl_version))
-                exit_code = 133
+        # OpenSSL version embedded with the cryptography wheels.
+        expecting = u'OpenSSL 3.0.8 7 Feb 2023.'
+        if openssl_version != expecting:
+            sys.stderr.write('Expecting %s, got %s.\n' % (
+                expecting, openssl_version))
+            exit_code = 133
     except Exception as error:
         sys.stderr.write('"cryptography" failure. %s\n' % (error,))
         exit_code = 134
