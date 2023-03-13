@@ -351,7 +351,7 @@ def main():
         import cryptography
         openssl_version = backend.openssl_version_text()
         # OpenSSL version embedded with the cryptography wheels.
-        expecting = u'OpenSSL 3.0.8 7 Feb 2023.'
+        expecting = u'OpenSSL 3.0.8 7 Feb 2023'
         if openssl_version != expecting:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting, openssl_version))
