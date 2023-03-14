@@ -28,7 +28,7 @@ chevahbs_configure() {
 
 chevahbs_compile() {
     execute $MAKE
-    #XXX execute $MAKE test
+    execute $MAKE test
 }
 
 

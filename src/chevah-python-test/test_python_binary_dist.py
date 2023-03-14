@@ -132,7 +132,8 @@ def get_allowed_deps():
             '/usr/lib/amd64/libc.so.1',
             ]
     elif platform_system == 'darwin':
-        # Deps for macOS 10.13, with full path.
+        # Deps for macOS 10.15, with full path.
+        # Latest bcrypt and cryptography depend on included Rust.
         allowed_deps = [
             '/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices',
             '/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon',
@@ -144,9 +145,13 @@ def get_allowed_deps():
             '/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration',
             '/usr/lib/libbz2.1.0.dylib',
             '/usr/lib/libffi.dylib',
+            '/usr/lib/libiconv.2.dylib',
             '/usr/lib/libncurses.5.4.dylib',
+            '/usr/lib/libresolv.9.dylib',
             '/usr/lib/libSystem.B.dylib',
             '/usr/lib/libz.1.dylib',
+            '@rpath/_rust.abi3.so',
+            '@rpath/_bcrypt.abi3.s',
             ]
     elif platform_system == 'freebsd':
         # Deps for FreeBSD 12, with full path.
