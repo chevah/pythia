@@ -208,6 +208,9 @@ command_install_python_modules() {
         execute "$PYTHON_BIN" -m pip install $PIP_ARGS $library
     done
 
+    # When done, uninstall wheel.
+    execute $PYTHON_BIN -m pip uninstall --yes wheel
+
     echo "::endgroup::"
 }
 
