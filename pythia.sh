@@ -782,6 +782,17 @@ detect_os() {
             ;;
         "amd64"|"x86_64")
             ARCH="x64"
+            case "$OS" in
+                win)
+                    # 32bit build on Windows 2019, 64bit otherwise.
+                    # Should work with a l10n pack too (tested with French).
+                    win_ver=$(systeminfo.exe | head -n 3 | tail -n 1 \
+                        | cut -d ":" -f 2)
+                    if [[ "$win_ver" =~ "Microsoft Windows Server 2019" ]]; then
+                        ARCH="x86"
+                    fi
+                    ;;
+            esac
             ;;
         "aarch64")
             ARCH="arm64"
