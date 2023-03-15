@@ -30,9 +30,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # CentOS 5.11 setup was saved as an image pushed to Docker Hub. See the
-        # Overview section at https://hub.docker.com/r/proatria/centos for details.
-        container: [ 'alpine:3.12', 'proatria/centos:5.11-chevah1' ]
+        # Alpine 3.12 has musl 1.1.24, Ubuntu 18.04 has glibc 2.27.
+        container: [ 'alpine:3.12', 'ubuntu:18.04' ]
     timeout-minutes: 30
     steps:
 
@@ -46,13 +45,12 @@ jobs:
         curl --output /usr/local/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
 
-    # Our Chevah Centos 5 image, built for python-package.
-    # FIXME: Update it to include unzip.
-    - name: CentOS 5.11 setup
-      if: matrix.container == 'proatria/centos:5.11-chevah1'
+    - name: Ubuntu setup
+      if: startsWith(matrix.container, 'ubuntu')
       run: |
-        wget https://vault.centos.org/5.11/os/x86_64/CentOS/unzip-5.52-3.el5.x86_64.rpm
-        rpm -i unzip-5.52-3.el5.x86_64.rpm
+        apt update
+        apt --yes dist-upgrade
+        apt --yes install wget curl gcc make m4 automake libtool patch sudo openssh-client unzip git libtest-simple-perl
 
     - name: Clone repo independently
       run: |

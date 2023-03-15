@@ -34,7 +34,7 @@ def get_allowed_deps():
         elif 'linux' in CHEVAH_OS:
             # Deps without paths for generic glibc Linux builds.
             # Only glibc 2.x libs are allowed.
-            # Tested on SLES 11 with glibc 2.11.3 and CentOS 5 with glibc 2.5.
+            # Tested on Ubuntu 16.04/18.04 with glibc 2.23/2.26.
             allowed_deps=[
                 'libc.so.6',
                 'libcrypt.so.1',
@@ -43,13 +43,8 @@ def get_allowed_deps():
                 'libpthread.so.0',
                 'librt.so.1',
                 'libutil.so.1',
+                'libgcc_s.so.1',
                 ]
-            if 'arm64' in CHEVAH_ARCH:
-                # Additional deps without paths for arm64 generic Linux builds.
-                # From Ubuntu 16.04 w/ glibc 2.23 (on Pine A64+ and X-Gene 3).
-                allowed_deps.extend([
-                    'libgcc_s.so.1',
-                    ])
         elif 'rhel' in CHEVAH_OS:
             # Common deps for supported RHEL with full paths (x86_64 only).
             allowed_deps = [

@@ -336,7 +336,7 @@ set_download_commands() {
     set +o errexit
     command -v curl > /dev/null
     if [ $? -eq 0 ]; then
-        # Options not used because of no support in CentOS 5.11's curl:
+        # Options not used because of no support in older curl versions:
         #     --retry-connrefused (since curl 7.52.0)
         #     --retry-all-errors (since curl 7.71.0)
         # Retry 2 times, allocating 10s for the connection phase,
@@ -626,12 +626,12 @@ check_glibc_version(){
     local supported_glibc2_version
 
     # Supported minimum minor glibc 2.X versions for various arches.
-    # For x64, we build on CentOS 5.11 (Final) with glibc 2.5.
+    # For x64, we build on Ubuntu 18.04 with glibc 2.27.
     # For arm64, we build on Ubuntu 16.04 with glibc 2.23.
     # Beware we haven't normalized arch names yet.
     case "$ARCH" in
         "amd64"|"x86_64"|"x64")
-            supported_glibc2_version=5
+            supported_glibc2_version=27
             ;;
         "aarch64"|"arm64")
             supported_glibc2_version=23
@@ -645,7 +645,7 @@ check_glibc_version(){
     echo "No specific runtime for the current distribution / version / arch."
     echo "Minimum glibc version for this arch: 2.${supported_glibc2_version}."
 
-    # Tested with glibc 2.5/2.11.3/2.12/2.23/2.28-31 and eglibc 2.13/2.19.
+    # Tested with glibc 2.5/2.11.3/2.12/2.23/2.28-35 and eglibc 2.13/2.19.
     glibc_version=$(head -n 1 $ldd_output_file | rev | cut -d\  -f1 | rev)
     rm $ldd_output_file
 
