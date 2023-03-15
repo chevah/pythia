@@ -218,6 +218,8 @@ cleanup_install_dir() {
                 execute popd
                 # Remove the big test/ sub-dir.
                 execute rm -rf "lib/$PYTHON_VERSION/test/"
+                # Remove OpenSSL files if present.
+                execute rm -rf ssl/
                 # Remove (mostly OpenSSL) docs and manuals.
                 execute rm -rf share/
                 # Move stray pkgconfig/* to lib/pkgconfig/.
