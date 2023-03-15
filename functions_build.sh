@@ -221,8 +221,17 @@ cleanup_install_dir() {
                     execute mv pkgconfig/* lib/pkgconfig/
                     execute rmdir pkgconfig
                 fi
+                # Move include/ to lib/include/.
+                execute mv include/ lib/
                 ;;
         esac
+        # Test that only bin/ and lib/ sub-dirs are left.
+        for element in $(ls -1); do
+            if [ "$element" != "bin" -a "$element" != "lib" ]; then
+                echo "Unwanted element in root dir: $element"
+                exit 97
+            fi
+        done
     execute popd
 
     # Output Pythia's own version to a dedicated file in the archive.
