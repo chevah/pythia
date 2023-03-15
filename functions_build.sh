@@ -161,10 +161,13 @@ cleanup_install_dir() {
         echo "Cleaning up Python's caches and compiled files..."
         find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 
+        # Move include/ to lib/include/.
+        echo "Moving the include/ sub-dir out of the way..."
+        execute mv include/ lib/
+
         case $OS in
             win)
-                # Remove empty include/ sub-dir.
-                execute rmdir include/
+                echo "    Skip further cleaning of install dir"
                 ;;
             *)
                 execute rm -rf tmp
@@ -222,8 +225,6 @@ cleanup_install_dir() {
                     execute mv pkgconfig/* lib/pkgconfig/
                     execute rmdir pkgconfig
                 fi
-                # Move include/ to lib/include/.
-                execute mv include/ lib/
                 ;;
         esac
         # Test that only bin/ and lib/ sub-dirs are left.
@@ -263,6 +264,18 @@ make_dist(){
         echo "#### Creating ${target_tar}.gz from $target_dir. ####"
         execute tar -cf "$target_tar" "$target_dir"
         execute gzip "$target_tar"
+    execute popd
+}
+
+
+#
+# Move lib/include/ back to include/ in Python's build dir,
+# otherwise building modules for testing the package is going to fail.
+#
+bring_back_includes(){
+    execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
+        echo "Bringing back the include/ sub-dir, it's needed for testing..."
+        execute mv lib/include/ ./
     execute popd
 }
 
