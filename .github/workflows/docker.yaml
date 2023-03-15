@@ -32,7 +32,7 @@ jobs:
       matrix:
         # CentOS 5.11 setup was saved as an image pushed to Docker Hub. See the
         # Overview section at https://hub.docker.com/r/proatria/centos for details.
-        container: [ 'alpine:3.12', 'centos:6.10' ]
+        container: [ 'alpine:3.12', 'proatria/centos:5.11-chevah1' ]
     timeout-minutes: 30
     steps:
 
@@ -46,13 +46,13 @@ jobs:
         curl --output /usr/local/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
 
-    - name: CentOS 6.10 setup
-      if: matrix.container == 'centos:6.10'
+    # Our Chevah Centos 5 image, built for python-package.
+    # FIXME: Update it to include unzip.
+    - name: CentOS 5.11 setup
+      if: matrix.container == 'proatria/centos:5.11-chevah1'
       run: |
-        sed -i s/^mirrorlist=/#mirrorlist=/ /etc/yum.repos.d/*.repo
-        sed -i s@^#baseurl=http://mirror.centos.org/centos/\$releasever/@baseurl=http://vault.centos.org/6.10/@ /etc/yum.repos.d/*.repo
-        yum -y upgrade
-        yum -y install wget curl gcc make m4 automake libtool patch sudo which openssh-clients unzip git perl-Test-Simple
+        wget https://vault.centos.org/5.11/os/x86_64/CentOS/unzip-5.52-3.el5.x86_64.rpm
+        rpm -i unzip-5.52-3.el5.x86_64.rpm
 
     - name: Clone repo independently
       run: |
