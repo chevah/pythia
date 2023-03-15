@@ -169,7 +169,7 @@ download_get_pip() {
     echo "## Downloading get-pip.py... ##"
     if [ ! -e "$BUILD_DIR"/get-pip.py ]; then
         execute $GET_CMD \
-            "$BUILD_DIR"/get-pip.py https://bootstrap.pypa.io/get-pip.py
+            "$BUILD_DIR"/get-pip.py "$BOOTSTRAP_GET_PIP"
     fi
 }
 
