@@ -163,7 +163,8 @@ cleanup_install_dir() {
 
         case $OS in
             win)
-                echo "    Skip further cleaning of install dir"
+                # Remove empty include/ sub-dir.
+                execute rmdir include/
                 ;;
             *)
                 execute rm -rf tmp
