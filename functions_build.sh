@@ -274,9 +274,9 @@ make_dist(){
 # Move lib/include/ back to include/ in Python's build dir,
 # otherwise building modules for testing the package is going to fail.
 #
-bring_back_includes(){
+bring_back_include(){
     execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
-        echo "Bringing back the include/ sub-dir, it's needed for testing..."
+        echo "Moving back the include/ sub-dir for building testing modules..."
         execute mv lib/include/ ./
     execute popd
 }

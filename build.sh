@@ -112,7 +112,7 @@ command_build() {
     # Python modules installed with pip. Built locally if not on Windows.
     command_install_python_modules
 
-    # Cleanups for the dir to be package, also moves include/ from the root dir.
+    # Cleanups the dir to be packaged, also moves include/ from the root dir.
     cleanup_install_dir
 
     # Build the new package.
@@ -122,7 +122,7 @@ command_build() {
     build_publish_dist_sftp_batch
 
     # Put include/ back where it belongs, for building testing modules.
-    bring_back_includes
+    bring_back_include
 }
 
 
