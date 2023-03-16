@@ -388,15 +388,6 @@ def main():
         exit_code = 140
 
     try:
-        import subprocess32 as subprocess
-        dir_output = subprocess.check_output('ls')
-    except:
-        sys.stderr.write('"subprocess32" is missing or broken.\n')
-        exit_code = 145
-    else:
-        print('"subprocess32" module is present.')
-
-    try:
         import bcrypt
         password = b"super secret password"
         # Hash the password with a randomly-generated salt.
