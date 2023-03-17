@@ -14,7 +14,7 @@ chevahbs_getsources() {
     local name=$1
     local ver=$2
     local ext="tar.gz"
-    local link=https://sqlite.org/2022/"$name"-"$ver"."$ext"
+    local link=https://sqlite.org/2023/"$name"-"$ver"."$ext"
 
     download_sources $name $ver $link $ext
 }
