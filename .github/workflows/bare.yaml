@@ -9,9 +9,7 @@ name: Bare
 on:
   push:
     branches: [ main ]
-
   pull_request:
-    branches: [ main ]
 
 concurrency:
   group: bare-${{ github.ref }}
