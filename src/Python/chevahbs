@@ -69,7 +69,7 @@ chevahbs_configure() {
     execute cp Modules/getbuildinfo.c Modules/getbuildinfo.c.orig
     # Don't use 'sed -i' here, it's not supported on macOS 10.13.
     execute sed -e \
-        s/gitid\ =\ \"default\"/gitid\ =\ \"$PYTHIA_VERSION\"/g \
+        s/gitid\ =\ \"main\"/gitid\ =\ \"$PYTHIA_VERSION\"/g \
         Modules/getbuildinfo.c.orig > Modules/getbuildinfo.c
     execute ./configure --prefix="" $CONFIG_ARGS
 }
