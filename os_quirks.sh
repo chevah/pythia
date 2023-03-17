@@ -13,7 +13,6 @@ case $OS in
         # But not all are from pypi.org. Wheels copied from other places:
         #   * "setproctitle" from https://www.lfd.uci.edu/~gohlke/pythonlibs/
         export BUILD_BZIP2="no"
-        export BUILD_LIBEDIT="no"
         export BUILD_SQLITE="no"
         # On Windows, only one of the installers is downloaded.
         export SHA_CMD="$SHA_CMD --ignore-missing"
@@ -32,7 +31,6 @@ case $OS in
         export BUILD_LIBFFI="yes"
         export BUILD_ZLIB="yes"
         export BUILD_XZ="yes"
-        export BUILD_LIBEDIT="no"
         export BUILD_OPENSSL="yes"
         ;;
     macos)
