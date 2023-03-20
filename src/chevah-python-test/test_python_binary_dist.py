@@ -31,10 +31,10 @@ def get_allowed_deps():
                 'ld-musl-x86_64.so.1',
                 'libc.musl-x86_64.so.1',
                 ]
-        elif 'lnx' in CHEVAH_OS:
+        elif 'linux' in CHEVAH_OS:
             # Deps without paths for generic glibc Linux builds.
             # Only glibc 2.x libs are allowed.
-            # Tested on SLES 11 with glibc 2.11.3 and CentOS 5 with glibc 2.5.
+            # Tested on Ubuntu 16.04/18.04 with glibc 2.23/2.26.
             allowed_deps=[
                 'libc.so.6',
                 'libcrypt.so.1',
@@ -43,13 +43,8 @@ def get_allowed_deps():
                 'libpthread.so.0',
                 'librt.so.1',
                 'libutil.so.1',
+                'libgcc_s.so.1',
                 ]
-            if 'arm64' in CHEVAH_ARCH:
-                # Additional deps without paths for arm64 generic Linux builds.
-                # From Ubuntu 16.04 w/ glibc 2.23 (on Pine A64+ and X-Gene 3).
-                allowed_deps.extend([
-                    'libgcc_s.so.1',
-                    ])
         elif 'rhel' in CHEVAH_OS:
             # Common deps for supported RHEL with full paths (x86_64 only).
             allowed_deps = [
@@ -132,7 +127,8 @@ def get_allowed_deps():
             '/usr/lib/amd64/libc.so.1',
             ]
     elif platform_system == 'darwin':
-        # Deps for macOS 10.13, with full path.
+        # Deps for macOS 10.15, with full path.
+        # Latest bcrypt and cryptography depend on included Rust.
         allowed_deps = [
             '/System/Library/Frameworks/ApplicationServices.framework/Versions/A/ApplicationServices',
             '/System/Library/Frameworks/Carbon.framework/Versions/A/Carbon',
@@ -144,9 +140,13 @@ def get_allowed_deps():
             '/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration',
             '/usr/lib/libbz2.1.0.dylib',
             '/usr/lib/libffi.dylib',
+            '/usr/lib/libiconv.2.dylib',
             '/usr/lib/libncurses.5.4.dylib',
+            '/usr/lib/libresolv.9.dylib',
             '/usr/lib/libSystem.B.dylib',
             '/usr/lib/libz.1.dylib',
+            '@rpath/_rust.abi3.so',
+            '@rpath/_bcrypt.abi3.s',
             ]
     elif platform_system == 'freebsd':
         # Deps for FreeBSD 12, with full path.
@@ -350,21 +350,12 @@ def main():
         from cryptography.hazmat.backends.openssl.backend import backend
         import cryptography
         openssl_version = backend.openssl_version_text()
-        if CHEVAH_OS in [ "win", "macos", "lnx", "rhel-8" ]:
-            if CHEVAH_OS == "rhel-8":
-                # On RHEL 8.3, OpenSSL got updated to 1.1.1g. To keep backward
-                # compatibility, link to version 1.1.1c from CentOS 8.2.2004.
-                expecting = u'OpenSSL 1.1.1c FIPS  28 May 2019'
-            elif CHEVAH_OS == "win":
-                # Latest cryptography not requiring Rust has older wheels.
-                expecting = u'OpenSSL 1.1.1l  24 Aug 2021'
-            else:
-                # Use latest OpenSSL version when building it from source.
-                expecting = u'OpenSSL 1.1.1s  1 Nov 2022'
-            if openssl_version != expecting:
-                sys.stderr.write('Expecting %s, got %s.\n' % (
-                    expecting, openssl_version))
-                exit_code = 133
+        # OpenSSL version embedded with the cryptography wheels.
+        expecting = u'OpenSSL 3.0.8 7 Feb 2023'
+        if openssl_version != expecting:
+            sys.stderr.write('Expecting %s, got %s.\n' % (
+                expecting, openssl_version))
+            exit_code = 133
     except Exception as error:
         sys.stderr.write('"cryptography" failure. %s\n' % (error,))
         exit_code = 134
@@ -395,15 +386,6 @@ def main():
     except:
         sys.stderr.write('"multiprocessing" is missing or broken.\n')
         exit_code = 140
-
-    try:
-        import subprocess32 as subprocess
-        dir_output = subprocess.check_output('ls')
-    except:
-        sys.stderr.write('"subprocess32" is missing or broken.\n')
-        exit_code = 145
-    else:
-        print('"subprocess32" module is present.')
 
     try:
         import bcrypt

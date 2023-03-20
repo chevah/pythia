@@ -22,21 +22,16 @@ Supported platforms
 -------------------
 
 * Windows Server 2012 R2 and newer (x86 and x64)
-* macOS 10.13 and newer
-* all glibc-based Linux distributions (glibc 2.5+)
+* macOS 10.13 and newer (Intel Macs only)
+* all glibc-based Linux distributions (glibc 2.17+)
 * Alpine Linux 3.12 and newer.
-
-Platforms on which the system OpenSSL is used:
-
-* Red Hat Linux Enterprise 8 and newer (including derivatives such as CentOS)
-* Ubuntu Server 18.04 and 20.04
-* Alpine Linux
 
 Platforms that should work, but are not regularly tested:
 
+* all musl-based Linux distributions (musl 1.1.24+)
 * FreeBSD 12 and newer
 * OpenBSD 6.7 and newer
-* Solaris 11.4.
+* Solaris 11.4 (x86 only).
 
 Where not noted, supported architecture is x64 (also known as X86-64 or AMD64).
 

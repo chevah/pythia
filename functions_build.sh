@@ -161,6 +161,10 @@ cleanup_install_dir() {
         echo "Cleaning up Python's caches and compiled files..."
         find lib/ | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 
+        # Move include/ to lib/include/.
+        echo "Moving the include/ sub-dir out of the way..."
+        execute mv include/ lib/
+
         case $OS in
             win)
                 echo "    Skip further cleaning of install dir"
@@ -214,6 +218,8 @@ cleanup_install_dir() {
                 execute popd
                 # Remove the big test/ sub-dir.
                 execute rm -rf "lib/$PYTHON_VERSION/test/"
+                # Remove OpenSSL files if present.
+                execute rm -rf ssl/
                 # Remove (mostly OpenSSL) docs and manuals.
                 execute rm -rf share/
                 # Move stray pkgconfig/* to lib/pkgconfig/.
@@ -223,6 +229,13 @@ cleanup_install_dir() {
                 fi
                 ;;
         esac
+        # Test that only bin/ and lib/ sub-dirs are left.
+        for element in $(ls -1); do
+            if [ "$element" != "bin" -a "$element" != "lib" ]; then
+                echo "Unwanted element in root dir: $element"
+                exit 97
+            fi
+        done
     execute popd
 
     # Output Pythia's own version to a dedicated file in the archive.
@@ -253,6 +266,18 @@ make_dist(){
         echo "#### Creating ${target_tar}.gz from $target_dir. ####"
         execute tar -cf "$target_tar" "$target_dir"
         execute gzip "$target_tar"
+    execute popd
+}
+
+
+#
+# Move lib/include/ back to include/ in Python's build dir,
+# otherwise building modules for testing the package is going to fail.
+#
+bring_back_include(){
+    execute pushd ${BUILD_DIR}/${PYTHON_BUILD_DIR}
+        echo "Moving back the include/ sub-dir for building testing modules..."
+        execute mv lib/include/ ./
     execute popd
 }
 

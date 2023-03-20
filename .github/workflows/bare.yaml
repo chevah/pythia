@@ -1,5 +1,7 @@
 #
-# GitHub actions for building and testing.
+# GitHub actions for building and testing on bare hardware.
+# Typically, Windows and macOS builds are done this way.
+# Look for the Linux builds in the "docker" workflow.
 #
 # Don't use `-latest` for runners, pin specific OS versions instead. More at
 # https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
@@ -12,26 +14,6 @@ on:
 
   pull_request:
     branches: [ main ]
-
-  workflow_dispatch:
-    # These inputs are used for the `actions_try` command in pavement_commons.
-    # It pushes the local branch, and sends the staged but uncommitted diff
-    # to be executed for a GitHub Action.
-    # https://github.com/chevah/brink/blob/6477cd7d580a604dfda16420f1948e5b2019bcde/src/brink/pavement_commons.py#L826
-    inputs:
-      tests:
-        description: Run selected tests
-        default: ""
-        required: false
-      job:
-        description: Specific job to execute (windows | linux)
-        default: ""
-        required: false
-      diff:
-        description: Diff in base64
-        default: ""
-        required: False
-
 
 concurrency:
   group: bare-${{ github.ref }}
@@ -55,7 +37,7 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [ windows-2022, windows-2019 ]
-    timeout-minutes: 20
+    timeout-minutes: 15
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -114,53 +96,9 @@ jobs:
         ngrok.exe tcp 3389
 
 
-  linux:
-    runs-on: ${{ matrix.runs-on }}
-    if: github.event.inputs.job == '' || github.event.inputs.job == 'linux'
-    strategy:
-      fail-fast: false
-      matrix:
-        runs-on: [ ubuntu-20.04, ubuntu-18.04 ]
-    timeout-minutes: 40
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 2
-
-    - name: Prepare OS
-      run: |
-        sudo apt install libncurses5-dev
-        sudo apt purge uuid-dev
-
-    - name: Build Pythia
-      run: ./build.sh build
-
-    - name: Test Pythia
-      run: ./build.sh test
-
-    - name: Upload testing package
-      run: |
-        mkdir -pv ~/.ssh/
-        touch priv_key
-        chmod 600 priv_key
-        echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
-        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
-        ./publish_dist.sh ; rm priv_key
-
-    # If one of the above steps fails, fire up tmate for remote debugging.
-    - name: Tmate debug on failure
-      if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
-
   macos:
     runs-on: macos-10.15
-    needs: [ windows, linux ]
-    # For now, we don't support actions_try with macos due to the `needs`
-    # functionality.
-    if: github.event.inputs.job == ''
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
       with:

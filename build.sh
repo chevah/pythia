@@ -28,7 +28,6 @@ exit_on_error $? 250
 export PYTHON_BUILD_VERSION PYTHIA_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_XZ BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
-
 # OS detection is slow on Windows, only execute it when the file is missing.
 if [ ! -r ./BUILD_ENV_VARS ]; then
     execute ./pythia.sh detect_os
@@ -113,6 +112,7 @@ command_build() {
     # Python modules installed with pip. Built locally if not on Windows.
     command_install_python_modules
 
+    # Cleanups the dir to be packaged, also moves include/ from the root dir.
     cleanup_install_dir
 
     # Build the new package.
@@ -120,6 +120,9 @@ command_build() {
 
     # Generate a SFTP batch for uploading the package.
     build_publish_dist_sftp_batch
+
+    # Put include/ back where it belongs, for building testing modules.
+    bring_back_include
 }
 
 
@@ -134,7 +137,7 @@ build_dep() {
         build $dep_name $dep_version
         # If there's something to be done post-build, here's the place.
         if [ $dep_name = "openssl" ]; then
-            if [ "${OS%lnx*}" = "" ]; then
+            if [ "${OS%linux*}" = "" ]; then
                 # On x64 Linux, OpenSSL installs only to lib64/ sub-dir.
                 # More so, under Docker its "make install" fails. To have all
                 # libs under lib/, the OpenSSL files are installed manually.
@@ -170,7 +173,7 @@ download_get_pip() {
     echo "## Downloading get-pip.py... ##"
     if [ ! -e "$BUILD_DIR"/get-pip.py ]; then
         execute $GET_CMD \
-            "$BUILD_DIR"/get-pip.py https://bootstrap.pypa.io/get-pip.py
+            "$BUILD_DIR"/get-pip.py "$BOOTSTRAP_GET_PIP"
     fi
 }
 
@@ -208,6 +211,9 @@ command_install_python_modules() {
     for library in $PIP_LIBRARIES ; do
         execute "$PYTHON_BIN" -m pip install $PIP_ARGS $library
     done
+
+    # When done, uninstall wheel.
+    execute $PYTHON_BIN -m pip uninstall --yes wheel
 
     echo "::endgroup::"
 }
