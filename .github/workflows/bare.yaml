@@ -1,5 +1,7 @@
 #
-# GitHub actions for building and testing.
+# GitHub actions for building and testing on bare hardware.
+# Typically, Windows and macOS builds are done this way.
+# Look for the Linux builds in the "docker" workflow.
 #
 # Don't use `-latest` for runners, pin specific OS versions instead. More at
 # https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
