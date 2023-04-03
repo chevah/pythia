@@ -388,6 +388,13 @@ def main():
         exit_code = 140
 
     try:
+        import cffi
+        ffibuilder = cffi.FFI()
+    except:
+        sys.stderr.write('"cffi" is missing or broken.\n')
+        exit_code = 141
+
+    try:
         import bcrypt
         password = b"super secret password"
         # Hash the password with a randomly-generated salt.
