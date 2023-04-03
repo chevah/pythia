@@ -393,7 +393,7 @@ def main():
     except:
         sys.stderr.write('"cffi" is missing or broken.\n')
         exit_code = 141
-    else
+    else:
         print ('cffi %s' % (cffi.__version__,))
 
     try:
