@@ -393,6 +393,31 @@ def main():
     except:
         sys.stderr.write('"cffi" is missing or broken.\n')
         exit_code = 141
+    else
+        print ('cffi %s' % (cffi.__version__,))
+
+    try:
+        import nacl.utils
+        from nacl.public import PrivateKey, Box
+        skbob = PrivateKey.generate()
+        pkbob = skbob.public_key
+        skalice = PrivateKey.generate()
+        pkalice = skalice.public_key
+        bob_box = Box(skbob, pkalice)
+        message = b"Some secret message"
+        encrypted = bob_box.encrypt(message)
+        nonce = nacl.utils.random(Box.NONCE_SIZE)
+        encrypted = bob_box.encrypt(message, nonce)
+        alice_box = Box(skalice, pkbob)
+        plaintext = alice_box.decrypt(encrypted)
+        if plaintext.decode('utf-8') == message.decode('utf-8'):
+            print('PyNaCl %s' % (nacl.__version__,))
+        else:
+            sys.stderr.write('"PyNaCl" is present, but broken.\n')
+            exit_code = 144
+    except:
+        sys.stderr.write('"PyNaCl" is missing.\n')
+        exit_code = 143
 
     try:
         import bcrypt
