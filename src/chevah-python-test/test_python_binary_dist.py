@@ -496,6 +496,24 @@ def main():
     else:
         print('"uuid" module is present.')
 
+    try:
+        from charset_normalizer import from_path
+        tmp_results = from_path('../README.rst')
+    except:
+        sys.stderr.write('"charset-normalizer" is missing or broken.\n')
+        exit_code = 164
+    else:
+        print('"charset-normalizer" module is present.')
+
+    try:
+        from markupsafe import escape
+        tmp_text = escape('<script>alert(document.cookie);</script>')
+    except:
+        sys.stderr.write('"markupsafe" is missing or broken.\n')
+        exit_code = 165
+    else:
+        print('"markupsafe" module is present.')
+
     if os.name == 'nt':
         # Windows specific modules.
         try:
@@ -503,9 +521,16 @@ def main():
             windll
         except:
             sys.stderr.write('"ctypes - windll" is missing.\n')
-            exit_code = 152
+            exit_code = 171
         else:
             print('ctypes %s' % (ctypes.__version__,))
+
+        try:
+            import win32service
+            win32service.EnumWindowStations()
+        except:
+            sys.stderr.write('"pywin32" missing or broken.\n')
+            exit_code = 172
 
     else:
         # Linux / Unix stuff.

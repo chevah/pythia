@@ -14,6 +14,9 @@ case $OS in
         #   * "setproctitle" from https://www.lfd.uci.edu/~gohlke/pythonlibs/
         export BUILD_BZIP2="no"
         export BUILD_SQLITE="no"
+        PIP_LIBRARIES="$PIP_LIBRARIES \
+            pywin32==${PYWIN32_VERSION} \
+            "
         # On Windows, only one of the installers is downloaded.
         export SHA_CMD="$SHA_CMD --ignore-missing"
         ;;
