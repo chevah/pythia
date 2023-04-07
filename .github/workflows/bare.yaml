@@ -21,7 +21,7 @@ concurrency:
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
 # Version 3 of mxschmitt/action-tmate should also work on Windows.
 env:
-  TMATE_DEBUG: 'no'
+  TMATE_DEBUG: 'yes'
   NGROK_DEBUG: 'no'
 
 
@@ -35,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [ windows-2022, windows-2019 ]
-    timeout-minutes: 15
+    timeout-minutes: 60
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
