@@ -33,4 +33,4 @@ execute unzip -q "$ARCHIVE" -d "${INSTALL_DIR}"
 
 echo "## Adding site-packages to python*._pth file... ##"
 echo "site.main()" >> ${INSTALL_DIR}/python310._pth
-echo "lib\\site-packages" >> ${INSTALL_DIR}/python10._pth
+echo "lib\\site-packages" >> ${INSTALL_DIR}/python310._pth
