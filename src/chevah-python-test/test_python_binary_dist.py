@@ -526,10 +526,10 @@ def main():
             print('ctypes %s' % (ctypes.__version__,))
 
         try:
-            import win32service
-            win32service.EnumWindowStations()
-        except:
-            sys.stderr.write('"pywin32" missing or broken.\n')
+            import win32security
+            win32security.win32api.GetCurrentThread()
+        except Exception as error:
+            sys.stderr.write('"pywin32" missing or broken.\n {}'.format(error))
             exit_code = 172
 
     else:
