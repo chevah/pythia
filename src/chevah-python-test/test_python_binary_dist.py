@@ -4,11 +4,6 @@ import os
 import sys
 import platform
 import subprocess
-import site
-
-# FIXME
-# I have no idea why site.main is not enabled at this point.
-site.main()
 
 script_helper = './get_binaries_deps.sh'
 platform_system = platform.system().lower()
@@ -532,7 +527,7 @@ def main():
 
         try:
             import win32security
-            win32security.win32api.GetCurrentThread()
+            win32security.GetCurrentThread()
         except Exception as error:
             sys.stderr.write('"pywin32" missing or broken.\n {}'.format(error))
             exit_code = 172
