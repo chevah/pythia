@@ -4,6 +4,11 @@ import os
 import sys
 import platform
 import subprocess
+import site
+
+# FIXME
+# I have no idea why site.main is not enabled at this point.
+site.main()
 
 script_helper = './get_binaries_deps.sh'
 platform_system = platform.system().lower()
