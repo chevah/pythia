@@ -106,7 +106,7 @@ check_source_folder() {
 # Called to trigger the entry point in the virtual environment.
 # Can be overwritten in pythia.conf
 execute_venv() {
-    ${PYTHON_BIN} $PYTHON3_CHECK -c 'from paver.tasks import main; main()' "$@"
+    ${PYTHON_BIN} -c 'from paver.tasks import main; main()' "$@"
 }
 
 
@@ -838,15 +838,6 @@ install_dependencies
 if [ "$COMMAND" == "deps" ] ; then
     install_base_deps
 fi
-
-case $COMMAND in
-    test_ci|test_py3)
-        PYTHON3_CHECK='-3'
-        ;;
-    *)
-        PYTHON3_CHECK=''
-        ;;
-esac
 
 set +e
 execute_venv "$@"
