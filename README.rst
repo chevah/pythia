@@ -25,12 +25,12 @@ Supported platforms
 * macOS 10.13 and newer (Intel Macs only)
 * Red Hat Enterprise Linux 8 and newer (including clones)
 * Ubuntu 18.04 LTS and newer
-* Amazon Linux 2022 and newer
+* Amazon Linux 2 and newer
 * Alpine Linux 3.12 and newer.
 
 Platforms that should work, but are not regularly tested:
 
-* all glibc-based Linux distributions (glibc 2.27+)
+* all glibc-based Linux distributions (glibc 2.26+)
 * all musl-based Linux distributions (musl 1.1.24+)
 * FreeBSD 12 and newer
 * OpenBSD 6.7 and newer

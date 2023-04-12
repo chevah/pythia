@@ -626,12 +626,12 @@ check_glibc_version(){
     local supported_glibc2_version
 
     # Supported minimum minor glibc 2.X versions for various arches.
-    # For x64, we build on Ubuntu 18.04 with glibc 2.27.
-    # For arm64, we build on Ubuntu 16.04 with glibc 2.23.
+    # For x64, we build on Amazon 2 with glibc 2.26.
+    # For arm64, we used to build on Ubuntu 16.04 with glibc 2.23.
     # Beware we haven't normalized arch names yet.
     case "$ARCH" in
         "amd64"|"x86_64"|"x64")
-            supported_glibc2_version=27
+            supported_glibc2_version=26
             ;;
         "aarch64"|"arm64")
             supported_glibc2_version=23
