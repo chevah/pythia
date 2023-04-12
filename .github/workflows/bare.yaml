@@ -2,9 +2,6 @@
 # GitHub actions for building and testing on bare hardware.
 # Typically, Windows and macOS builds are done this way.
 # Look for the Linux builds in the "docker" workflow.
-#
-# Don't use `-latest` for runners, pin specific OS versions instead. More at
-# https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
 
 name: Bare
 
@@ -28,7 +25,7 @@ env:
 jobs:
   windows:
     # The type of runner that the job will run on
-    runs-on: windows-2022
+    runs-on: windows-latest
     timeout-minutes: 15
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -89,7 +86,7 @@ jobs:
 
 
   macos:
-    runs-on: macos-10.15
+    runs-on: macos-latest
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
