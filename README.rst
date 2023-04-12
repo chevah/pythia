@@ -23,11 +23,14 @@ Supported platforms
 
 * Windows Server 2012 R2 and newer (x86 and x64)
 * macOS 10.13 and newer (Intel Macs only)
-* all glibc-based Linux distributions (glibc 2.17+)
+* Red Hat Enterprise Linux 8 and newer (including clones)
+* Ubuntu 18.04 LTS and newer
+* Amazon Linux 2022 and newer
 * Alpine Linux 3.12 and newer.
 
 Platforms that should work, but are not regularly tested:
 
+* all glibc-based Linux distributions (glibc 2.27+)
 * all musl-based Linux distributions (musl 1.1.24+)
 * FreeBSD 12 and newer
 * OpenBSD 6.7 and newer
