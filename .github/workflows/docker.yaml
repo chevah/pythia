@@ -47,7 +47,7 @@ jobs:
     - name: Amazon setup
       if: startsWith(matrix.container, 'amazonlinux')
       run: |
-        yum -Y upgrade
+        yum -y upgrade
         yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple
 
     - name: Ubuntu setup
