@@ -66,7 +66,7 @@ download_sources(){
             echo "## Unpacking archive ${archive_filename}... ##"
             execute $ZIP_CMD "$archive_filename" -d ../../build/
             ;;
-        exe|amd64*|win32*)
+        exe|amd64*)
             # No need to use ../../build/"$project_name"-"$project_ver"/ here.
             echo "    Nothing to unpack in build/ for ${archive_filename}."
             ;;

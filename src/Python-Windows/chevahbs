@@ -18,13 +18,10 @@ INSTALL_DIR=$3/lib
 
 # Construct the relevant download link for the Windows version.
 EXT="amd64.zip"
-if [ "$ARCH" = "x86" ]; then
-    EXT="win32.zip"
-fi
 ARCHIVE="python-${VER}.${EXT}"
 LINK="https://www.python.org/ftp/python/${VER}/python-${VER}-embed-${EXT}"
 
-# Download without unpacking (amd64.zip/win32.zip EXTs are treated specially).
+# Download without unpacking (amd64.zip extension is treated specially).
 download_sources $NAME $VER $LINK $EXT
 
 # Installation consists of unpacking the ZIP'ed embeddable distribution.
