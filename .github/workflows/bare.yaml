@@ -28,13 +28,7 @@ env:
 jobs:
   windows:
     # The type of runner that the job will run on
-    runs-on: ${{ matrix.runs-on }}
-    if: github.event.inputs.job == '' || github.event.inputs.job == 'windows'
-    strategy:
-      # Workflow won't be cancelled at the first failed job.
-      fail-fast: false
-      matrix:
-        runs-on: [ 'windows-2022' ]
+    runs-on: windows-2022
     timeout-minutes: 15
 
     # Steps represent a sequence of tasks that will be executed as part of the job
