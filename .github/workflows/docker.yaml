@@ -49,6 +49,7 @@ jobs:
       run: |
         yum -y upgrade
         yum -y install git-core gcc10 make m4 patch tar unzip perl perl-Test-Simple
+        ln -s /usr/bin/gcc10-cc /usr/local/bin/gcc
 
     - name: Ubuntu setup
       if: startsWith(matrix.container, 'ubuntu')
