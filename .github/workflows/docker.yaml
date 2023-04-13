@@ -48,7 +48,7 @@ jobs:
       if: startsWith(matrix.container, 'amazonlinux')
       run: |
         yum -y upgrade
-        yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple
+        yum -y install git-core gcc10 make m4 patch tar unzip perl perl-Test-Simple
 
     - name: Ubuntu setup
       if: startsWith(matrix.container, 'ubuntu')
