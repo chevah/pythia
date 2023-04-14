@@ -129,3 +129,47 @@ jobs:
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
+
+  linux:
+    # ARM64 is currently our virtualized Ubuntu 16.04 image.
+    runs-on: ARM64
+    timeout-minutes: 120
+    steps:
+    # On 16.04, git is too old for actions/checkout, so clone manually.
+    # This fails when opening a new PR, but works starting with second commit.
+    - name: Clone sources independently
+      run: |
+        git init $CHEVAH_REPO
+        cd $CHEVAH_REPO
+        # Cleanup the repo.
+        git rev-parse --symbolic-full-name --verify --quiet HEAD || true
+        git rev-parse --symbolic-full-name --branches || true
+        git remote remove origin || true
+        # Update repo token.
+        git remote add origin https://github.com/chevah/$CHEVAH_REPO
+        git fetch --no-tags --prune origin
+        # Prepare the code.
+        git clean -f
+        git reset --hard ${{ github.event.after }}
+        git log -1 --format='%H'
+
+    - name: Build Pythia
+      run: ./build.sh build
+
+    - name: Test Pythia
+      run: ./build.sh test
+
+    - name: Upload testing package
+      run: |
+        mkdir -pv ~/.ssh/
+        touch priv_key
+        chmod 600 priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
+        ./publish_dist.sh ; rm priv_key
+
+    - name: Tmate debug on failure
+      if: failure() && env.TMATE_DEBUG == 'yes'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
