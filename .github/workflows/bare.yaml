@@ -130,7 +130,7 @@ jobs:
       with:
         limit-access-to-actor: true
 
-  linux:
+  arm64:
     # ARM64 is currently our virtualized Ubuntu 16.04 image.
     runs-on: ARM64
     timeout-minutes: 120
@@ -139,14 +139,14 @@ jobs:
     # This fails when opening a new PR, but works starting with second commit.
     - name: Clone sources independently
       run: |
-        git init $CHEVAH_REPO
-        cd $CHEVAH_REPO
+        git init pythia
+        cd pythia
         # Cleanup the repo.
         git rev-parse --symbolic-full-name --verify --quiet HEAD || true
         git rev-parse --symbolic-full-name --branches || true
         git remote remove origin || true
         # Update repo token.
-        git remote add origin https://github.com/chevah/$CHEVAH_REPO
+        git remote add origin https://github.com/chevah/pythia
         git fetch --no-tags --prune origin
         # Prepare the code.
         git clean -f
@@ -154,13 +154,14 @@ jobs:
         git log -1 --format='%H'
 
     - name: Build Pythia
-      run: ./build.sh build
+      run: cd pythia && ./build.sh build
 
     - name: Test Pythia
-      run: ./build.sh test
+      run: cd pythia && ./build.sh test
 
     - name: Upload testing package
       run: |
+        cd pythia
         mkdir -pv ~/.ssh/
         touch priv_key
         chmod 600 priv_key
