@@ -132,7 +132,7 @@ jobs:
 
 
   macos-m1:
-    runs-on: laja
+    runs-on: m1
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
@@ -153,9 +153,3 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         ./publish_dist.sh ; rm priv_key
-
-    - name: Tmate debug on failure
-      if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
