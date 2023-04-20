@@ -63,7 +63,7 @@ jobs:
     # Command line debugging through Tmate. v3 works on Windows too.
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v3
+      uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true
 
@@ -126,7 +126,7 @@ jobs:
 
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v3
+      uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true
 

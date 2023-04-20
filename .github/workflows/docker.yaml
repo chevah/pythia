@@ -89,7 +89,7 @@ jobs:
     # Not working on Alpine (not supported) and CentOS 5 (glibc too old).
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v3
+      uses: chevah/action-tmate@v3
       with:
         sudo: false
         limit-access-to-actor: true
