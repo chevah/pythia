@@ -21,8 +21,8 @@ Note that compat tests are currently only working on the ``python2.7`` branch.
 Supported platforms
 -------------------
 
-* Windows Server 2012 R2 and newer (x86 and x64)
-* macOS 10.13 and newer (Intel Macs only)
+* Windows Server 2012 R2 and newer
+* macOS 10.13 and newer (both Intel and Apple Silicon)
 * Red Hat Enterprise Linux 8 and newer (including clones)
 * Ubuntu 18.04 LTS and newer
 * Amazon Linux 2 and newer
