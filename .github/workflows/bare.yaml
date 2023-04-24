@@ -2,18 +2,13 @@
 # GitHub actions for building and testing on bare hardware.
 # Typically, Windows and macOS builds are done this way.
 # Look for the Linux builds in the "docker" workflow.
-#
-# Don't use `-latest` for runners, pin specific OS versions instead. More at
-# https://help.github.com/en/actions/reference/virtual-environments-for-github-hosted-runners.
 
 name: Bare
 
 on:
   push:
     branches: [ main ]
-
   pull_request:
-    branches: [ main ]
 
 concurrency:
   group: bare-${{ github.ref }}
@@ -30,13 +25,7 @@ env:
 jobs:
   windows:
     # The type of runner that the job will run on
-    runs-on: ${{ matrix.runs-on }}
-    if: github.event.inputs.job == '' || github.event.inputs.job == 'windows'
-    strategy:
-      # Workflow won't be cancelled at the first failed job.
-      fail-fast: false
-      matrix:
-        runs-on: [ windows-2022, windows-2019 ]
+    runs-on: windows-latest
     timeout-minutes: 15
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -74,7 +63,7 @@ jobs:
     # Command line debugging through Tmate. v3 works on Windows too.
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v3
+      uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true
 
@@ -97,7 +86,7 @@ jobs:
 
 
   macos:
-    runs-on: macos-10.15
+    runs-on: macos-latest
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@v2
@@ -137,6 +126,30 @@ jobs:
 
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v3
+      uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true
+
+
+  macos-m1:
+    runs-on: m1
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Build Pythia
+      run: ./build.sh build
+
+    - name: Test Pythia
+      run: ./build.sh test
+
+    - name: Upload testing package
+      run: |
+        mkdir -pv ~/.ssh/
+        touch priv_key
+        chmod 600 priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
+        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
+        ./publish_dist.sh ; rm priv_key

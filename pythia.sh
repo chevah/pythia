@@ -86,7 +86,7 @@ ARCH='not-detected-yet'
 PYTHON_CONFIGURATION='NOT-YET-DEFINED'
 PYTHON_VERSION='not.defined.yet'
 PYTHON_PLATFORM='unknown-os-and-arch'
-PYTHON_NAME='python3.8'
+PYTHON_NAME='python3.10'
 BINARY_DIST_URI='https://github.com/chevah/pythia/releases/download'
 PIP_INDEX_URL='https://pypi.org/simple'
 BASE_REQUIREMENTS=''
@@ -106,7 +106,7 @@ check_source_folder() {
 # Called to trigger the entry point in the virtual environment.
 # Can be overwritten in pythia.conf
 execute_venv() {
-    ${PYTHON_BIN} $PYTHON3_CHECK -c 'from paver.tasks import main; main()' "$@"
+    ${PYTHON_BIN} -c 'from paver.tasks import main; main()' "$@"
 }
 
 
@@ -626,12 +626,12 @@ check_glibc_version(){
     local supported_glibc2_version
 
     # Supported minimum minor glibc 2.X versions for various arches.
-    # For x64, we build on Ubuntu 18.04 with glibc 2.27.
-    # For arm64, we build on Ubuntu 16.04 with glibc 2.23.
+    # For x64, we build on Amazon 2 with glibc 2.26.
+    # For arm64, we used to build on Ubuntu 16.04 with glibc 2.23.
     # Beware we haven't normalized arch names yet.
     case "$ARCH" in
         "amd64"|"x86_64"|"x64")
-            supported_glibc2_version=27
+            supported_glibc2_version=26
             ;;
         "aarch64"|"arm64")
             supported_glibc2_version=23
@@ -782,17 +782,6 @@ detect_os() {
             ;;
         "amd64"|"x86_64")
             ARCH="x64"
-            case "$OS" in
-                win)
-                    # 32bit build on Windows 2019, 64bit otherwise.
-                    # Should work with a l10n pack too (tested with French).
-                    win_ver=$(systeminfo.exe | head -n 3 | tail -n 1 \
-                        | cut -d ":" -f 2)
-                    if [[ "$win_ver" =~ "Microsoft Windows Server 2019" ]]; then
-                        ARCH="x86"
-                    fi
-                    ;;
-            esac
             ;;
         "aarch64")
             ARCH="arm64"
@@ -838,15 +827,6 @@ install_dependencies
 if [ "$COMMAND" == "deps" ] ; then
     install_base_deps
 fi
-
-case $COMMAND in
-    test_ci|test_py3)
-        PYTHON3_CHECK='-3'
-        ;;
-    *)
-        PYTHON3_CHECK=''
-        ;;
-esac
 
 set +e
 execute_venv "$@"

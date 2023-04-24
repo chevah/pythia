@@ -10,7 +10,6 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 concurrency:
   group: docker-${{ github.ref }}
@@ -24,14 +23,14 @@ env:
 # Using a job name that doesn't contain the OS name, to minimize the risk of
 # confusion with the OS names of the containers, which are the relevant ones.
 jobs:
-  latest:
+  linux:
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:
       fail-fast: false
       matrix:
-        # Alpine 3.12 has musl 1.1.24, Ubuntu 18.04 has glibc 2.27.
-        container: [ 'alpine:3.12', 'ubuntu:18.04' ]
+        # Alpine 3.12 has musl 1.1.24, Amazon 2 has glibc 2.26.
+        container: [ 'alpine:3.12', 'amazonlinux:2' ]
     timeout-minutes: 30
     steps:
 
@@ -44,6 +43,12 @@ jobs:
         apk del util-linux-dev
         curl --output /usr/local/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
+
+    - name: Amazon setup
+      if: startsWith(matrix.container, 'amazonlinux')
+      run: |
+        yum -y upgrade
+        yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple
 
     - name: Ubuntu setup
       if: startsWith(matrix.container, 'ubuntu')
@@ -84,7 +89,7 @@ jobs:
     # Not working on Alpine (not supported) and CentOS 5 (glibc too old).
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: mxschmitt/action-tmate@v3
+      uses: chevah/action-tmate@v3
       with:
         sudo: false
         limit-access-to-actor: true

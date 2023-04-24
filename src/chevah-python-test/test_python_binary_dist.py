@@ -34,7 +34,7 @@ def get_allowed_deps():
         elif 'linux' in CHEVAH_OS:
             # Deps without paths for generic glibc Linux builds.
             # Only glibc 2.x libs are allowed.
-            # Tested on Ubuntu 16.04/18.04 with glibc 2.23/2.26.
+            # Tested on Amazon 2 & Ubuntu 16.04/18.04 with glibc 2.26/2.23/2.27.
             allowed_deps=[
                 'libc.so.6',
                 'libcrypt.so.1',
@@ -351,7 +351,7 @@ def main():
         import cryptography
         openssl_version = backend.openssl_version_text()
         # OpenSSL version embedded with the cryptography wheels.
-        expecting = u'OpenSSL 3.0.8 7 Feb 2023'
+        expecting = u'OpenSSL 3.1.0 14 Mar 2023'
         if openssl_version != expecting:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting, openssl_version))
@@ -386,6 +386,38 @@ def main():
     except:
         sys.stderr.write('"multiprocessing" is missing or broken.\n')
         exit_code = 140
+
+    try:
+        import cffi
+        ffibuilder = cffi.FFI()
+    except:
+        sys.stderr.write('"cffi" is missing or broken.\n')
+        exit_code = 141
+    else:
+        print ('cffi %s' % (cffi.__version__,))
+
+    try:
+        import nacl.utils
+        from nacl.public import PrivateKey, Box
+        skbob = PrivateKey.generate()
+        pkbob = skbob.public_key
+        skalice = PrivateKey.generate()
+        pkalice = skalice.public_key
+        bob_box = Box(skbob, pkalice)
+        message = b"Some secret message"
+        encrypted = bob_box.encrypt(message)
+        nonce = nacl.utils.random(Box.NONCE_SIZE)
+        encrypted = bob_box.encrypt(message, nonce)
+        alice_box = Box(skalice, pkbob)
+        plaintext = alice_box.decrypt(encrypted)
+        if plaintext.decode('utf-8') == message.decode('utf-8'):
+            print('PyNaCl %s' % (nacl.__version__,))
+        else:
+            sys.stderr.write('"PyNaCl" is present, but broken.\n')
+            exit_code = 144
+    except:
+        sys.stderr.write('"PyNaCl" is missing.\n')
+        exit_code = 143
 
     try:
         import bcrypt
@@ -464,6 +496,24 @@ def main():
     else:
         print('"uuid" module is present.')
 
+    try:
+        from charset_normalizer import from_path
+        tmp_results = from_path('../README.rst')
+    except:
+        sys.stderr.write('"charset-normalizer" is missing or broken.\n')
+        exit_code = 164
+    else:
+        print('"charset-normalizer" module is present.')
+
+    try:
+        from markupsafe import escape
+        tmp_text = escape('<script>alert(document.cookie);</script>')
+    except:
+        sys.stderr.write('"markupsafe" is missing or broken.\n')
+        exit_code = 165
+    else:
+        print('"markupsafe" module is present.')
+
     if os.name == 'nt':
         # Windows specific modules.
         try:
@@ -471,9 +521,16 @@ def main():
             windll
         except:
             sys.stderr.write('"ctypes - windll" is missing.\n')
-            exit_code = 152
+            exit_code = 171
         else:
             print('ctypes %s' % (ctypes.__version__,))
+
+        try:
+            import win32api
+            win32api.GetCurrentThread()
+        except Exception as error:
+            sys.stderr.write('"pywin32" missing or broken.\n {}'.format(error))
+            exit_code = 172
 
     else:
         # Linux / Unix stuff.
