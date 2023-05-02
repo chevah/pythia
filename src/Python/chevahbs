@@ -23,7 +23,7 @@ chevahbs_getsources() {
 chevahbs_patch() {
     # Our own patch to avoid compiling certain modules.
     echo "# Applying disabled_modules.patch... #"
-    execute patch -p 1 < disabled_modules.patch
+    execute patch < disabled_modules.patch
 
     if [ "$BUILD_LIBEDIT" = "yes" ]; then
         # Adapted from https://bugs.python.org/issue13501.
