@@ -71,7 +71,7 @@ chevahbs_configure() {
     execute sed -e \
         s/gitid\ =\ \"main\"/gitid\ =\ \"$PYTHIA_VERSION\"/g \
         Modules/getbuildinfo.c.orig > Modules/getbuildinfo.c
-    execute ./configure --prefix=/tmp $CONFIG_ARGS
+    execute ./configure --prefix="$INSTALL_DIR" $CONFIG_ARGS
 }
 
 
@@ -94,7 +94,7 @@ chevahbs_install() {
             ;;
     esac
 
-    execute $MAKE install DESTDIR=$INSTALL_DIR
+    execute $MAKE install
 }
 
 
