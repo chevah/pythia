@@ -71,7 +71,7 @@ chevahbs_configure() {
     execute sed -e \
         s/gitid\ =\ \"main\"/gitid\ =\ \"$PYTHIA_VERSION\"/g \
         Modules/getbuildinfo.c.orig > Modules/getbuildinfo.c
-    execute ./configure --prefix=/ $CONFIG_ARGS
+    execute ./configure --prefix=/tmp $CONFIG_ARGS
 }
 
 
