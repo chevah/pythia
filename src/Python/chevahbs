@@ -61,9 +61,11 @@ chevahbs_configure() {
     esac
 
     echo "# Patching the git rev id into Python's version string... #"
-    execute sed -i \
+    execute cp Modules/getbuildinfo.c Modules/getbuildinfo.c.orig
+    # Don't use 'sed -i' here, it's not supported on macOS yet (tested on 13.3).
+    execute sed -e \
         s/gitid\ =\ \"main\"/gitid\ =\ \"$PYTHIA_VERSION\"/g \
-        Modules/getbuildinfo.c
+        Modules/getbuildinfo.c.orig > Modules/getbuildinfo.c
     execute ./configure --prefix="$INSTALL_DIR" $CONFIG_ARGS
 }
 
