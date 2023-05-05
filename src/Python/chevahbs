@@ -50,11 +50,6 @@ chevahbs_configure() {
     fi
 
     case $OS in
-        alpine312|alpine314)
-            # Ugly hack for Python 3's configure issues.
-            execute $SUDO_CMD rm -f /include
-            execute $SUDO_CMD ln -s "${INSTALL_DIR}/include" /include
-            ;;
         fbsd*|sol11*)
             LDFLAGS="$LDFLAGS -lncurses"
             ;;
@@ -66,11 +61,9 @@ chevahbs_configure() {
     esac
 
     echo "# Patching the git rev id into Python's version string... #"
-    execute cp Modules/getbuildinfo.c Modules/getbuildinfo.c.orig
-    # Don't use 'sed -i' here, it's not supported on macOS 10.13.
-    execute sed -e \
+    execute sed -i \
         s/gitid\ =\ \"main\"/gitid\ =\ \"$PYTHIA_VERSION\"/g \
-        Modules/getbuildinfo.c.orig > Modules/getbuildinfo.c
+        Modules/getbuildinfo.c
     execute ./configure --prefix="$INSTALL_DIR" $CONFIG_ARGS
 }
 
