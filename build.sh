@@ -94,10 +94,11 @@ command_build() {
 
     # Build stuff statically on most platforms, install headers and libs in the
     # following locations, making sure they are picked up when building Python.
-    # $CFLAGS/$CPPFLAGS is another way to ensure this, but it's not as portable.
     execute mkdir -p "$INSTALL_DIR"/{include,lib}
     export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS:-}"
     export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH:-}"
+    # On certain OS'es, some modules require this (zlib, bz2, lzma, sqlite3).
+    export CPPFLAGS="${CPPFLAGS:-} -I${INSTALL_DIR}/include"
 
     build_dep $BUILD_LIBFFI   libffi           $LIBFFI_VERSION
     build_dep $BUILD_ZLIB     zlib             $ZLIB_VERSION
@@ -135,11 +136,6 @@ build_dep() {
     if [ $dep_boolean = "yes" ]; then
         # This is where building happens.
         build $dep_name $dep_version
-        # If there's something to be done post-build, here's the place.
-        if [ "$dep_name" = "sqlite-autoconf" ]; then
-            # Needed for building Python's sqlite3 module.
-            export LIBSQLITE3_CFLAGS="-I${INSTALL_DIR}/include"
-        fi
     elif [ $dep_boolean = "no" ]; then
         (>&2 echo "    Skip building $dep_name")
     else
