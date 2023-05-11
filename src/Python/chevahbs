@@ -52,6 +52,7 @@ chevahbs_configure() {
     case $OS in
         linux)
             # Needed for building Python 3.11's sqlite3 module on Linux.
+            # Note that this is not needed on Alpine.
             LDFLAGS="$LDFLAGS -lm"
             ;;
         fbsd*|sol11*)

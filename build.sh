@@ -136,6 +136,7 @@ build_dep() {
     if [ $dep_boolean = "yes" ]; then
         # This is where building happens.
         build $dep_name $dep_version
+        # If there's something to be done post-build, here's the place.
     elif [ $dep_boolean = "no" ]; then
         (>&2 echo "    Skip building $dep_name")
     else
