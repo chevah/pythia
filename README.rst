@@ -31,7 +31,10 @@ Supported platforms
 Platforms that should work, but are not regularly tested:
 
 * all glibc-based Linux distributions (glibc 2.26+)
-* all musl-based Linux distributions (musl 1.1.24+)
+* all musl-based Linux distributions (musl 1.1.24+).
+
+Platforms built in the past, but not any more:
+
 * FreeBSD 12 and newer
 * OpenBSD 6.7 and newer
 * Solaris 11.4 (x86 only).
