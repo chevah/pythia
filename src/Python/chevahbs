@@ -23,7 +23,7 @@ chevahbs_getsources() {
 chevahbs_patch() {
     # Our own patch to avoid compiling certain modules.
     echo "# Applying disabled_modules.patch... #"
-    execute patch -p 1 < disabled_modules.patch
+    execute patch < disabled_modules.patch
 
     if [ "$BUILD_LIBEDIT" = "yes" ]; then
         # Adapted from https://bugs.python.org/issue13501.
@@ -50,10 +50,10 @@ chevahbs_configure() {
     fi
 
     case $OS in
-        alpine312|alpine314)
-            # Ugly hack for Python 3's configure issues.
-            execute $SUDO_CMD rm -f /include
-            execute $SUDO_CMD ln -s "${INSTALL_DIR}/include" /include
+        linux)
+            # Needed for building Python 3.11's sqlite3 module on Linux.
+            # Note that this is not needed on Alpine.
+            LDFLAGS="$LDFLAGS -lm"
             ;;
         fbsd*|sol11*)
             LDFLAGS="$LDFLAGS -lncurses"
@@ -67,11 +67,11 @@ chevahbs_configure() {
 
     echo "# Patching the git rev id into Python's version string... #"
     execute cp Modules/getbuildinfo.c Modules/getbuildinfo.c.orig
-    # Don't use 'sed -i' here, it's not supported on macOS 10.13.
+    # Don't use 'sed -i' here, it's not supported on macOS yet (tested on 13.3).
     execute sed -e \
         s/gitid\ =\ \"main\"/gitid\ =\ \"$PYTHIA_VERSION\"/g \
         Modules/getbuildinfo.c.orig > Modules/getbuildinfo.c
-    execute ./configure --prefix="" $CONFIG_ARGS
+    execute ./configure --prefix="$INSTALL_DIR" $CONFIG_ARGS
 }
 
 
@@ -94,7 +94,7 @@ chevahbs_install() {
             ;;
     esac
 
-    execute $MAKE install DESTDIR=$INSTALL_DIR
+    execute $MAKE install
 }
 
 

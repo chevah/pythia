@@ -17,6 +17,7 @@ concurrency:
 
 # Set to 'yes' to open a tunnel to GitHub's VMs through tmate on failures.
 # Also increase timeout-minutes for the relevant OS when debugging remotely.
+# Not all platforms are supported by tmate (currently no support for Amazon 2).
 env:
   TMATE_DEBUG: 'no'
 

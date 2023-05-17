@@ -86,7 +86,7 @@ ARCH='not-detected-yet'
 PYTHON_CONFIGURATION='NOT-YET-DEFINED'
 PYTHON_VERSION='not.defined.yet'
 PYTHON_PLATFORM='unknown-os-and-arch'
-PYTHON_NAME='python3.10'
+PYTHON_NAME='python3.11'
 BINARY_DIST_URI='https://github.com/chevah/pythia/releases/download'
 PIP_INDEX_URL='https://pypi.org/simple'
 BASE_REQUIREMENTS=''
@@ -124,6 +124,15 @@ update_venv() {
     if [ $exit_code -ne 0 ]; then
         (>&2 echo 'Failed to run the initial "./pythia.sh deps" command.')
         exit 7
+    fi
+
+    set +e
+    ${PYTHON_BIN} -c 'from paver.tasks import main; main()' build
+    exit_code=$?
+    set -e
+    if [ $exit_code -ne 0 ]; then
+        (>&2 echo 'Failed to run the initial "./pythia.sh build" command.')
+        exit 8
     fi
 }
 
@@ -315,7 +324,6 @@ pip_install() {
     ${PYTHON_BIN} -m \
         pip install \
             --index-url=$PIP_INDEX_URL \
-            --build=${BUILD_FOLDER}/pip-build \
             $1
 
     exit_code=$?
@@ -521,12 +529,15 @@ install_dependencies(){
         return
     fi
 
+    update_venv
+
+    # Deps command was just requested.
+    # End the process here so that we will not re-run it as part of the
+    # general command handling.
     if [ "$COMMAND" == "deps" ] ; then
-        # Will be installed soon.
-        return
+        exit 0
     fi
 
-    update_venv
 }
 
 

@@ -94,10 +94,11 @@ command_build() {
 
     # Build stuff statically on most platforms, install headers and libs in the
     # following locations, making sure they are picked up when building Python.
-    # $CFLAGS/$CPPFLAGS is another way to ensure this, but it's not as portable.
     execute mkdir -p "$INSTALL_DIR"/{include,lib}
     export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS:-}"
     export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH:-}"
+    # On certain OS'es, some modules require this (zlib, bz2, lzma, sqlite3).
+    export CPPFLAGS="${CPPFLAGS:-} -I${INSTALL_DIR}/include"
 
     build_dep $BUILD_LIBFFI   libffi           $LIBFFI_VERSION
     build_dep $BUILD_ZLIB     zlib             $ZLIB_VERSION
@@ -136,17 +137,6 @@ build_dep() {
         # This is where building happens.
         build $dep_name $dep_version
         # If there's something to be done post-build, here's the place.
-        if [ $dep_name = "openssl" ]; then
-            if [ "${OS%linux*}" = "" ]; then
-                # On x64 Linux, OpenSSL installs only to lib64/ sub-dir.
-                # More so, under Docker its "make install" fails. To have all
-                # libs under lib/, the OpenSSL files are installed manually.
-                # '-Wl,-rpath' voodoo is needed to build cryptography with pip.
-                export LDFLAGS="-Wl,-rpath,${INSTALL_DIR}/lib/ ${LDFLAGS}"
-            fi
-            # Needed for building cryptography.
-            export CPPFLAGS="${CPPFLAGS:-} -I${INSTALL_DIR}/include"
-        fi
     elif [ $dep_boolean = "no" ]; then
         (>&2 echo "    Skip building $dep_name")
     else

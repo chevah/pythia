@@ -31,7 +31,10 @@ Supported platforms
 Platforms that should work, but are not regularly tested:
 
 * all glibc-based Linux distributions (glibc 2.26+)
-* all musl-based Linux distributions (musl 1.1.24+)
+* all musl-based Linux distributions (musl 1.1.24+).
+
+Platforms built in the past, but not any more:
+
 * FreeBSD 12 and newer
 * OpenBSD 6.7 and newer
 * Solaris 11.4 (x86 only).
@@ -51,12 +54,12 @@ These patches are applied at build time when added as:
 
 * ``src/$PROJECT/*.patch``
 
-An example for creating a patch for pristine Python 3.9.0 sources::
+An example for creating a patch for pristine Python 3.11.3 sources::
 
-    # Make a copy of the sources to be patched:
-    cp -r Python-3.9.0 Python-3.9.0.disabled_modules
-    # Modify the sources as needed, then create the diff:
-    diff -ur Python-3.9.0/ Python-3.9.0.disabled_modules/
+    # Make a copy of the file to be patched from Python sources:
+    cp setup.py setup.py.orig
+    # Modify it as needed, then check the diff:
+    diff -ru setup.py.orig setup.py
     # Save the diff into a file such as:
     src/Python/disabled_modules.patch
 

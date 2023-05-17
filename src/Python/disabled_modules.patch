@@ -1,8 +1,7 @@
-diff -ur Python-3.10.10/setup.py Python-3.10.10-disabled-modules/setup.py
---- Python-3.10.10/setup.py	2023-02-07 14:05:45.000000000 +0200
-+++ Python-3.10.10-disabled-modules/setup.py	2023-03-17 12:41:45.252791918 +0200
-@@ -58,7 +58,16 @@
- TEST_EXTENSIONS = (sysconfig.get_config_var('TEST_MODULES') == 'yes')
+--- setup.py.orig	2023-04-05 01:22:17.000000000 +0300
++++ setup.py	2023-05-02 13:21:57.151724870 +0300
+@@ -56,7 +56,16 @@
+ 
  
  # This global variable is used to hold the list of modules to be disabled.
 -DISABLED_MODULE_LIST = []
