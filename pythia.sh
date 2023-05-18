@@ -151,7 +151,7 @@ clean_build() {
     # In some case pip hangs with a build folder in temp and
     # will not continue until it is manually removed.
     # On the OSX build server tmp is in $TMPDIR
-    if [ ! -z "${TMPDIR-}" ]; then
+    if [ -n "${TMPDIR-}" ]; then
         # check if TMPDIR is set before trying to clean it.
         rm -rf "$TMPDIR"/pip*
     else
@@ -235,22 +235,22 @@ update_path_variables() {
     CACHE_FOLDER="$CHEVAH_CACHE"
     set -o nounset
 
-    if [ "$BUILD_FOLDER" = "" ] ; then
+    if [ -z "$BUILD_FOLDER" ] ; then
         # Use value from configuration file.
         BUILD_FOLDER="$CHEVAH_BUILD_DIR"
     fi
 
-    if [ "$BUILD_FOLDER" = "" ] ; then
+    if [ -z "$BUILD_FOLDER" ] ; then
         # Use default value if not yet defined.
         BUILD_FOLDER="build-$OS-$ARCH"
     fi
 
-    if [ "$CACHE_FOLDER" = "" ] ; then
+    if [ -z "$CACHE_FOLDER" ] ; then
         # Use default if not yet defined.
         CACHE_FOLDER="$CHEVAH_CACHE_DIR"
     fi
 
-    if [ "$CACHE_FOLDER" = "" ] ; then
+    if [ -z "$CACHE_FOLDER" ] ; then
         # Use default if not yet defined.
         CACHE_FOLDER="cache"
     fi
@@ -292,7 +292,7 @@ resolve_python_version() {
         if [ "$candidate_platform" = "default" ]; then
             # On first pass, we set the default version.
             PYTHON_VERSION="$candidate_version"
-        elif [ "${PYTHON_PLATFORM%$candidate_platform*}" = "" ]; then
+        elif [ -z "${PYTHON_PLATFORM%$candidate_platform*}" ]; then
             # If matching a specific platform, we overwrite the default version.
             PYTHON_VERSION="$candidate_version"
         fi
@@ -524,7 +524,7 @@ install_dependencies(){
     # Deps command was just requested.
     # End the process here so that we will not re-run it as part of the
     # general command handling.
-    if [ "$COMMAND" == "deps" ] ; then
+    if [ "$COMMAND" = "deps" ] ; then
         exit 0
     fi
 
@@ -802,7 +802,7 @@ if [ "$COMMAND" = "purge" ] ; then
 fi
 
 # Initialize BUILD_ENV_VARS file when building Python from scratch.
-if [ "$COMMAND" == "detect_os" ]; then
+if [ "$COMMAND" = "detect_os" ]; then
     echo "PYTHON_VERSION=$PYTHON_NAME" > BUILD_ENV_VARS
     echo "OS=$OS" >> BUILD_ENV_VARS
     echo "ARCH=$ARCH" >> BUILD_ENV_VARS
@@ -822,7 +822,7 @@ copy_python
 install_dependencies
 
 # Update pythia.conf dependencies when running deps.
-if [ "$COMMAND" == "deps" ] ; then
+if [ "$COMMAND" = "deps" ] ; then
     install_base_deps
 fi
 
