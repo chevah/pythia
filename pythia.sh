@@ -57,8 +57,6 @@ export PATH=$PATH:'/sbin:/usr/sbin:/usr/local/bin'
 #
 # Global variables.
 #
-# Used to return non-scalar value from functions.
-RESULT=''
 WAS_PYTHON_JUST_INSTALLED=0
 DIST_FOLDER='dist'
 
@@ -410,7 +408,6 @@ test_version_exists() {
 #
 get_python_dist() {
     local remote_base_url=$1
-    local download_mode=$2
     local python_distributable=python-${PYTHON_VERSION}-${OS}-${ARCH}
     local onlinetest_errorcode
 
@@ -477,7 +474,7 @@ copy_python() {
             # We don't have a cached python distributable.
             echo "No ${LOCAL_PYTHON_BINARY_DIST} environment." \
                 "Start downloading it..."
-            get_python_dist "$BINARY_DIST_URI" "strict"
+            get_python_dist "$BINARY_DIST_URI"
         fi
 
         echo "Copying Python distribution files... "
@@ -826,7 +823,7 @@ if [ "$COMMAND" = "get_python" ] ; then
     OS=$2
     ARCH=$3
     resolve_python_version
-    get_python_dist "$BINARY_DIST_URI" "fallback"
+    get_python_dist "$BINARY_DIST_URI"
     exit 0
 fi
 
