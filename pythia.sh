@@ -187,9 +187,11 @@ delete_folder() {
     local target=$1
     # On Windows, we use internal command prompt for maximum speed.
     # See: https://stackoverflow.com/a/6208144/539264
-    if [ "$OS" = "win" -a -d "$target" ]; then
-        cmd //c "del /f/s/q $target > nul"
-        cmd //c "rmdir /s/q $target"
+    if [ "$OS" = "win" ]; then
+        if [ -d "$target" ]; then
+            cmd //c "del /f/s/q $target > nul"
+            cmd //c "rmdir /s/q $target"
+        fi
     else
         rm -rf "$target"
     fi
@@ -331,8 +333,7 @@ install_base_deps() {
 #
 set_download_commands() {
     set +o errexit
-    command -v curl > /dev/null
-    if [ $? -eq 0 ]; then
+    if command -v curl > /dev/null; then
         # Options not used because of no support in older curl versions:
         #     --retry-connrefused (since curl 7.52.0)
         #     --retry-all-errors (since curl 7.71.0)
@@ -568,12 +569,15 @@ check_os_version() {
     # one by one with the corresponding integers from the supported version.
     for (( i=0 ; i < ${#version_good_array[@]}; i++ )); do
         version_constructed="${version_constructed}${version_raw_array[$i]}"
-        if [ "${version_raw_array[$i]}" -gt "${version_good_array[$i]}" -a \
-            "$flag_supported" = "good_enough" ]; then
-            flag_supported="true"
-        elif [ "${version_raw_array[$i]}" -lt "${version_good_array[$i]}" -a \
-            "$flag_supported" = "good_enough" ]; then
-            flag_supported="false"
+        if [ "${version_raw_array[$i]}" -gt "${version_good_array[$i]}" ]; then
+            if [ "$flag_supported" = "good_enough" ]; then
+                flag_supported="true"
+            fi
+        elif [ "${version_raw_array[$i]}" -lt "${version_good_array[$i]}" ]
+        then
+            if [ "$flag_supported" = "good_enough" ]; then
+                flag_supported="false"
+            fi
         fi
     done
 
@@ -597,19 +601,16 @@ check_linux_libc() {
     local ldd_output_file=".chevah_libc_version"
     set +o errexit
 
-    command -v ldd > /dev/null
-    if [ $? -ne 0 ]; then
+    if ! command -v ldd > /dev/null; then
         (>&2 echo "No ldd binary found, can't check for glibc!")
         exit 18
     fi
 
     ldd --version > "$ldd_output_file" 2>&1
-    grep -E "GNU libc|GLIBC" "$ldd_output_file" > /dev/null
-    if [ $? -eq 0 ]; then
+    if grep -E -q "GNU libc|GLIBC" "$ldd_output_file"; then
         check_glibc_version
     else
-        grep -E ^"musl libc" $ldd_output_file > /dev/null
-        if [ $? -eq 0 ]; then
+        if grep -E -q ^"musl libc" $ldd_output_file; then
             check_musl_version
         else
             (>&2 echo "Unknown libc reported by ldd... Unsupported Linux.")
@@ -663,7 +664,7 @@ check_glibc_version(){
         exit 21
     fi
 
-    # Decrement supported_glibc2_version if building against an older glibc.
+    # Decrement supported_glibc2_version above if building against older glibc.
     if [ "${glibc_version_array[1]}" -lt "$supported_glibc2_version" ]; then
         (>&2 echo "NOT good. Detected version is older: $glibc_version!")
         exit 22
@@ -678,6 +679,7 @@ check_glibc_version(){
 check_musl_version(){
     local musl_version
     local musl_version_array
+    local musl_version_unsupported="false"
     local supported_musl11_version=24
 
     echo "No specific runtime for the current distribution / version / arch."
@@ -695,20 +697,27 @@ check_musl_version(){
 
     IFS=. read -r -a musl_version_array <<< "$musl_version"
 
-    if [ "${musl_version_array[0]}" -lt 1 \
-        -o "${musl_version_array[1]}" -lt 1 ];then
+    # Decrement supported_musl11_version above if building against older musl.
+    if [ "${musl_version_array[0]}" -lt 1 ]; then
+        musl_version_unsupported="true"
+    elif [ "${musl_version_array[0]}" -eq 1 ]; then      
+        if [ "${musl_version_array[1]}" -lt 1 ];then
+            musl_version_unsupported="true"
+        elif [ "${musl_version_array[1]}" -eq 1 ];then
+            if [ "${musl_version_array[2]}" -lt "$supported_musl11_version" ]
+            then
+                (>&2 echo "NOT good. Detected version is older: $musl_version!")
+                exit 27
+            fi
+        fi
+    fi
+
+    if [ "$musl_version_unsupported" = "true" ]; then
         (>&2 echo "Only musl 1.1 or greater supported! Detected: $musl_version")
         exit 26
     fi
 
-    # Decrement supported_musl11_version if building against an older musl.
-    if [ "${musl_version_array[0]}" -eq 1 -a "${musl_version_array[1]}" -eq 1 \
-        -a "${musl_version_array[2]}" -lt "$supported_musl11_version" ]; then
-        (>&2 echo "NOT good. Detected version is older: $musl_version!")
-        exit 27
-    else
-        echo "All is good. Detected musl version: $musl_version."
-    fi
+    echo "All is good. Detected musl version: $musl_version."
 
     # Supported musl version detected, set $OS for a generic musl Linux build.
     OS="linux_musl"
