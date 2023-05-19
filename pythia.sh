@@ -430,7 +430,7 @@ copy_python() {
     local python_distributable="$CACHE_FOLDER/$LOCAL_PYTHON_BINARY_DIST"
     local python_installed_version
 
-    COPY_PYTHON_RECURSIONS="$(expr $COPY_PYTHON_RECURSIONS + 1)"
+    COPY_PYTHON_RECURSIONS="$((COPY_PYTHON_RECURSIONS + 1))"
 
     if [ "$COPY_PYTHON_RECURSIONS" -gt 2 ]; then
         (>&2 echo "Too many calls to copy_python: $COPY_PYTHON_RECURSIONS")
@@ -453,7 +453,7 @@ copy_python() {
             cache_ver_file="$python_distributable"/lib/PYTHIA_VERSION
             cache_version="UNVERSIONED"
             if [ -f "$cache_ver_file" ]; then
-                cache_version="$(cat "$cache_ver_file" | cut -d"-" -f1)"
+                cache_version="$(cut -d"-" -f1 < "$cache_ver_file")"
             fi
             if [ "$PYTHON_VERSION" != "$cache_version" ]; then
                 # We have a different version in the cache.
@@ -482,9 +482,9 @@ copy_python() {
         local version_file="$BUILD_FOLDER"/lib/PYTHIA_VERSION
 
         # If we are upgrading the cache from Python 2,
-        # cat fails if this file is missing, so we create it blank.
+        # This file is required, so we create it if non-existing.
         touch "$version_file"
-        python_installed_version="$(cat "$version_file" | cut -d"-" -f1)"
+        python_installed_version="$(cut -d"-" -f1 < "$version_file")"
         if [ "$PYTHON_VERSION" != "$python_installed_version" ]; then
             # We have a different python installed.
             # Check if we have the to-be-updated version and fail if
@@ -604,11 +604,11 @@ check_linux_libc() {
     fi
 
     ldd --version > "$ldd_output_file" 2>&1
-    egrep "GNU libc|GLIBC" "$ldd_output_file" > /dev/null
+    grep -E "GNU libc|GLIBC" "$ldd_output_file" > /dev/null
     if [ $? -eq 0 ]; then
         check_glibc_version
     else
-        egrep ^"musl libc" $ldd_output_file > /dev/null
+        grep -E ^"musl libc" $ldd_output_file > /dev/null
         if [ $? -eq 0 ]; then
             check_musl_version
         else
@@ -684,7 +684,7 @@ check_musl_version(){
     echo "Minimum musl version for this arch: 1.1.$supported_musl11_version."
 
     # Tested with musl 1.1.24/1.2.2.
-    musl_version="$(egrep ^"Version" "$ldd_output_file" | cut -d" " -f2)"
+    musl_version="$(grep -E ^"Version" "$ldd_output_file" | cut -d" " -f2)"
     rm "$ldd_output_file"
 
     if [[ "$musl_version" =~ [^[:digit:]\.] ]]; then
