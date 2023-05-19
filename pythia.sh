@@ -283,7 +283,7 @@ resolve_python_version() {
     PYTHON_PLATFORM="$OS-$ARCH"
 
     # Using ':' as a delimiter, populate a dedicated array.
-    IFS=: read -a version_configuration_array <<< "$version_configuration"
+    IFS=: read -r -a version_configuration_array <<< "$version_configuration"
     # Iterate through all the elements of the array to find the best candidate.
     for (( i=0 ; i < ${#version_configuration_array[@]}; i++ )); do
         candidate="${version_configuration_array[$i]}"
@@ -561,8 +561,8 @@ check_os_version() {
     fi
 
     # Using '.' as a delimiter, populate the version_* arrays.
-    IFS=. read -a version_raw_array <<< "$version_raw"
-    IFS=. read -a version_good_array <<< "$version_good"
+    IFS=. read -r -a version_raw_array <<< "$version_raw"
+    IFS=. read -r -a version_good_array <<< "$version_good"
 
     # Iterate through all the integers from the good version to compare them
     # one by one with the corresponding integers from the supported version.
@@ -656,7 +656,7 @@ check_glibc_version(){
         exit 20
     fi
 
-    IFS=. read -a glibc_version_array <<< "$glibc_version"
+    IFS=. read -r -a glibc_version_array <<< "$glibc_version"
 
     if [ "${glibc_version_array[0]}" -ne 2 ]; then
         (>&2 echo "Only glibc 2 is supported! Detected version: $glibc_version")
@@ -693,7 +693,7 @@ check_musl_version(){
         exit 25
     fi
 
-    IFS=. read -a musl_version_array <<< "$musl_version"
+    IFS=. read -r -a musl_version_array <<< "$musl_version"
 
     if [ "${musl_version_array[0]}" -lt 1 \
         -o "${musl_version_array[1]}" -lt 1 ];then
