@@ -294,7 +294,7 @@ resolve_python_version() {
         if [ "$candidate_platform" = "default" ]; then
             # On first pass, we set the default version.
             PYTHON_VERSION="$candidate_version"
-        elif [ -z "${PYTHON_PLATFORM%$candidate_platform*}" ]; then
+        elif [ -z "${PYTHON_PLATFORM%"$candidate_platform"*}" ]; then
             # If matching a specific platform, we overwrite the default version.
             PYTHON_VERSION="$candidate_version"
         fi
@@ -729,6 +729,7 @@ check_musl_version(){
 # In some cases we normalize or even override ARCH at the end of this function.
 #
 detect_os() {
+    os_version_chevah=""
     OS="$(uname -s)"
 
     case "$OS" in
