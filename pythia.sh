@@ -176,7 +176,7 @@ purge_cache() {
     clean_build
 
     echo "Cleaning download cache ..."
-    rm -rf "$CACHE_FOLDER"/*
+    rm -rf "${CACHE_FOLDER:?}"/*
 }
 
 
@@ -309,7 +309,7 @@ install_base_deps() {
     set +e
     # There is a bug in pip/setuptools when using custom build folders.
     # See https://github.com/pypa/pip/issues/3564
-    rm -rf "$BUILD_FOLDER"/pip-build
+    rm -rf "${BUILD_FOLDER:?}"/pip-build
     "$PYTHON_BIN" -m \
         pip install \
             --index-url="$PIP_INDEX_URL" \
@@ -503,7 +503,7 @@ copy_python() {
             # Remove it and try to install it again.
             echo "Updating Python from" \
                 "$python_installed_version to $PYTHON_VERSION"
-            rm -rf "$BUILD_FOLDER"/*
+            rm -rf "${BUILD_FOLDER:?}"/*
             rm -rf "$python_distributable"
             copy_python
         fi
