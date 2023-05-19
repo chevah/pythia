@@ -9,7 +9,7 @@ set -o errexit    # always exit on error
 set -o errtrace   # trap errors in functions as well
 set -o pipefail   # don't ignore exit codes when piping output
 
-# Get PIP_INDEX_URL for PIP_ARGS in build.conf.
+# Get PIP_INDEX_URL for PIP_ARGS.
 source pythia.conf
 
 # Set versions for the software to be built and other defaults.
