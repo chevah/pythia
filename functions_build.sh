@@ -33,7 +33,6 @@ select_chevahbs_command() {
 
 #
 # Internal function for downloading sources on-the-fly as needed.
-# Do not quote the *_CMD vars, as required parameters might be included!
 #
 download_sources(){
     local project_name=$1
@@ -45,13 +44,13 @@ download_sources(){
     # Only download the sources if they are not present.
     if [ ! -e "$archive_filename" ]; then
         echo "## Downloading $project_name version $project_ver... ##"
-        execute $GET_CMD "$archive_filename" "$link"
+        execute  "${GET_CMD[@]}" "$archive_filename" "$link"
     else
         echo "    $archive_filename already present, not downloading again."
     fi
 
     echo "## Verifying checksums for $archive_filename... ##"
-    execute $SHA_CMD sha512.sum
+    execute "${SHA_CMD[@]}" sha512.sum
 
     # Current dir is src/$project_name, and sources have full hierarchy.
     # So far, all upstream archives respected the $name-$version convention
@@ -59,11 +58,11 @@ download_sources(){
     case "$archive_ext" in
         tar.gz|tgz)
             echo "## Unpacking archive $archive_filename... ##"
-            execute $TAR_CMD "$archive_filename" -C ../../build/
+            execute "${TAR_CMD[@]}" "$archive_filename" -C ../../build/
             ;;
         zip)
             echo "## Unpacking archive $archive_filename... ##"
-            execute $ZIP_CMD "$archive_filename" -d ../../build/
+            execute "${ZIP_CMD[@]}" "$archive_filename" -d ../../build/
             ;;
         exe|amd64*)
             # No need to use ../../build/"$project_name"-"$project_ver"/ here.

@@ -52,14 +52,15 @@ PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 export CC="gcc"
 # Other needed tools (GNU flavours preferred).
 export MAKE="make"
+# To properly quote them, these are defined as arrays of commands and options.
+export SHA_CMD=(sha512sum --check --status --warn)
+export TAR_CMD=(tar xfz)
+export ZIP_CMD=(unzip -q)
 # $GET_CMD must save to custom filename, which must be appended before the link.
-# E.g., to use wget, GET_CMD should be "wget --quiet -O".
-export GET_CMD="curl --silent --location --output"
-export SHA_CMD="sha512sum --check --status --warn"
-export TAR_CMD="tar xfz"
-export ZIP_CMD="unzip -q"
-if [ x$(id -u) != "x0" ]; then
-    export SUDO_CMD="sudo"
+# E.g., to use wget, GET_CMD should be (wget --quiet -O).
+export GET_CMD=(curl --silent --location --output)
+if [ x"$(id -u)" != "x0" ]; then
+    export SUDO_CMD=(sudo)
 fi
 
 # OS quirks.
@@ -164,7 +165,7 @@ build_python() {
 download_get_pip() {
     echo "## Downloading get-pip.py... ##"
     if [ ! -e "$BUILD_DIR"/get-pip.py ]; then
-        execute $GET_CMD \
+        execute "${GET_CMD[@]}" \
             "$BUILD_DIR"/get-pip.py "$BOOTSTRAP_GET_PIP"
     fi
 }

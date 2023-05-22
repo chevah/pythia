@@ -18,16 +18,16 @@ case $OS in
             pywin32==${PYWIN32_VERSION} \
             "
         # On Windows, only one of the installers is downloaded.
-        export SHA_CMD="$SHA_CMD --ignore-missing"
+        export SHA_CMD=($SHA_CMD --ignore-missing)
         ;;
     linux*)
         if [ -f /etc/alpine-release ]; then
             # The busybox ersatz binary on Alpine Linux is different.
-            export SHA_CMD="sha512sum -csw"
+            export SHA_CMD=(sha512sum -csw)
         elif [ -f /etc/redhat-release ]; then
             if grep -q "CentOS release 5" /etc/redhat-release; then
                 # There are issues with Let's Encrypt certs on CentOS 5.
-                export GET_CMD="curl --silent --insecure --location --output"
+                export GET_CMD=(curl --silent --insecure --location --output)
             fi
         fi
         # Build as portable as possible, only libc should be needed.
@@ -50,7 +50,7 @@ case $OS in
         # But 10.13 has version 2.2.7, while cryptography 2.9 requires 2.7.
         # Therefore, build OpenSSL for both stdlib and cryptography.
         export BUILD_OPENSSL="yes"
-        export SHA_CMD="shasum --algorithm 512 --check --status --warn"
+        export SHA_CMD=(shasum --algorithm 512 --check --status --warn)
         ;;
     fbsd*)
         export CC="clang"
@@ -61,7 +61,7 @@ case $OS in
         export BUILD_BZIP2="no"
         export BUILD_XZ="yes"
         # Install package "p5-Digest-SHA" to get shasum binary.
-        export SHA_CMD="shasum --algorithm 512 --check --status --warn"
+        export SHA_CMD=(shasum --algorithm 512 --check --status --warn)
         ;;
     obsd*)
         export CC="clang"
@@ -69,7 +69,7 @@ case $OS in
         # libffi not available in the base system, only as port/package.
         export BUILD_LIBFFI="yes"
         export BUILD_XZ="yes"
-        export SHA_CMD="sha512 -q -c"
+        export SHA_CMD=(sha512 -q -c)
         ;;
     sol*)
         # By default, Sun's Studio compiler is used.
@@ -94,7 +94,7 @@ case $OS in
         export BUILD_LIBFFI="yes"
         export BUILD_XZ="yes"
         # Native tar is not that compatible, but the GNU tar should be present.
-        export TAR_CMD="gtar xfz"
+        export TAR_CMD=(gtar xfz)
         ;;
 esac
 

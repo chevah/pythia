@@ -27,7 +27,8 @@ CHOCO_PRESENT="unknown"
 # Check for OS packages required for the build.
 MISSING_PACKAGES=""
 PACKAGES="$CC make m4 git patch curl sha512sum tar unzip"
-CHECK_CMD="command -v"
+# This is defined as an array of commands and opts, to allow it to be quoted.
+CHECK_CMD=(command -v)
 
 choco_shim() {
     local pkg=$1
@@ -38,11 +39,11 @@ choco_shim() {
 case "$OS" in
     rhel*|amzn*)
         PACKAGES="$RPM_PKGS"
-        CHECK_CMD="rpm --query"
+        CHECK_CMD=(rpm --query)
         ;;
     ubuntu*)
         PACKAGES="$DEB_PKGS"
-        CHECK_CMD="dpkg --status"
+        CHECK_CMD=(dpkg --status)
         ;;
     win)
         # The windows build is special.
@@ -77,11 +78,11 @@ esac
 # External checks with various exit codes are checked below.
 set +o errexit
 
-# If $CHECK_CMD is still "command -v", it's only a check for needed commands.
+# If $CHECK_CMD is still (command -v), it's only a check for needed commands.
 if [ -n "$PACKAGES" ]; then
     for package in $PACKAGES ; do
         echo "Checking if $package is available..."
-        $CHECK_CMD $package
+        "${CHECK_CMD[@]}" $package
         if [ $? -ne 0 ]; then
             echo "Missing required dependency: $package"
             MISSING_PACKAGES="$MISSING_PACKAGES $package"
@@ -118,11 +119,11 @@ fi
 echo "# Checking if it's possible to avoid linking to system uuid libs... #"
 case "$OS" in
     ubuntu*)
-        $CHECK_CMD uuid-dev \
+        "${CHECK_CMD[@]}" uuid-dev \
             && echo "To not link to uuid libs, run: apt remove -y uuid-dev"
         ;;
     rhel*|amzn*)
-        $CHECK_CMD libuuid-devel \
+        "${CHECK_CMD[@]}" libuuid-devel \
             && echo -n "To not link to uuid libs, run: " \
             && echo "yum remove -y e2fsprogs-devel libuuid-devel"
         ;;
