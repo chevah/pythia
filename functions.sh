@@ -6,7 +6,7 @@
 # Check if debugging environment variable is set and initialize with 0 if not.
 DEBUG=${DEBUG-0}
 
-# shellcheck disable=SC2034 # Only hit through compgen.
+# shellcheck disable=SC2034 # Only used through compgen.
 help_text_help="Show help for a command."
 command_help() {
     local command=${1:-}
@@ -50,7 +50,7 @@ select_command() {
                 exit 98
             fi
             set -o errexit
-        ;;
+            ;;
     esac
 }
 

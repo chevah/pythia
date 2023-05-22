@@ -66,7 +66,7 @@ fi
 source os_quirks.sh
 
 
-# shellcheck disable=SC2034 # Only hit through compgen.
+# shellcheck disable=SC2034 # Only used through compgen.
 help_text_clean="Clean build dir. Add -a to clean downloads from src/ too."
 command_clean() {
     echo "#### Removing previous build/ sub-directory, if existing... ####"
@@ -81,7 +81,7 @@ command_clean() {
 }
 
 
-# shellcheck disable=SC2034 # Only hit through compgen.
+# shellcheck disable=SC2034 # Only used through compgen.
 help_text_build="Build Python binaries for current platform."
 command_build() {
     # Check for packages required to build on current OS.
@@ -211,7 +211,7 @@ command_install_python_modules() {
 }
 
 
-# shellcheck disable=SC2034 # Only hit through compgen.
+# shellcheck disable=SC2034 # Only used through compgen.
 help_text_test="Run own tests for the newly-build Python distribution."
 command_test() {
     local test_file="test_python_binary_dist.py"
@@ -240,7 +240,7 @@ command_test() {
 }
 
 
-# shellcheck disable=SC2034 # Only hit through compgen.
+# shellcheck disable=SC2034 # Only used through compgen.
 help_text_compat="Run the test suite from chevah/compat master."
 command_compat() {
     local new_python_conf="${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}"
