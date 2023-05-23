@@ -59,11 +59,6 @@ ZIP_CMD=(unzip -q)
 # $GET_CMD must save to custom filename, which must be appended before the link.
 # E.g., to use wget, GET_CMD should be (wget --quiet -O).
 GET_CMD=(curl --silent --location --output)
-if [ x"$(id -u)" != "x0" ]; then
-    SUDO_CMD=(sudo)
-else
-    SUDO_CMD=()
-fi
 
 # OS quirks.
 source os_quirks.sh
@@ -286,7 +281,6 @@ command_compat() {
     echo "SHA_CMD=(${SHA_CMD[@]})"
     echo "TAR_CMD=(${TAR_CMD[@]})"
     echo "ZIP_CMD=(${ZIP_CMD[@]})"
-    echo "SUDO_CMD=(${SUDO_CMD[@]})"
 )> .chevah_arrays
 
 if [ "$DEBUG" -ne 0 ]; then
