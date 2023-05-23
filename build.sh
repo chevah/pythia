@@ -65,15 +65,17 @@ source os_quirks.sh
 
 
 # shellcheck disable=SC2034 # Only used through compgen.
-help_text_clean="Clean build dir. Add -a to clean downloads from src/ too."
+help_text_clean="Clean build dir. Add -a to remove downloads and saved values."
 command_clean() {
     echo "#### Removing previous build/ sub-directory, if existing... ####"
     execute rm -rf "$BUILD_DIR"
 
     if [ $# -ne 0 ]; then
         if [ $1 = "-a" ]; then
-            echo "## Removing any downloads from src/... ##"
+            echo "## Removing all downloads from src/... ##"
             execute rm -fv src/*/*.{tar.gz,tgz,zip}
+            echo "## Removing all hidden files with saved values... ##"
+            execute rm -fv BUILD_ENV_VARS .chevah_arrays
         fi
     fi
 }
