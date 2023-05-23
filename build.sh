@@ -61,6 +61,8 @@ ZIP_CMD=(unzip -q)
 GET_CMD=(curl --silent --location --output)
 if [ x"$(id -u)" != "x0" ]; then
     SUDO_CMD=(sudo)
+else
+    SUDO_CMD=()
 fi
 
 # OS quirks.
