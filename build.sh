@@ -53,14 +53,14 @@ export CC="gcc"
 # Other needed tools (GNU flavours preferred).
 export MAKE="make"
 # To properly quote them, these are defined as arrays of commands and options.
-export SHA_CMD=(sha512sum --check --status --warn)
-export TAR_CMD=(tar xfz)
-export ZIP_CMD=(unzip -q)
+SHA_CMD=(sha512sum --check --status --warn)
+TAR_CMD=(tar xfz)
+ZIP_CMD=(unzip -q)
 # $GET_CMD must save to custom filename, which must be appended before the link.
 # E.g., to use wget, GET_CMD should be (wget --quiet -O).
-export GET_CMD=(curl --silent --location --output)
+GET_CMD=(curl --silent --location --output)
 if [ x"$(id -u)" != "x0" ]; then
-    export SUDO_CMD=(sudo)
+    SUDO_CMD=(sudo)
 fi
 
 # OS quirks.
@@ -271,5 +271,26 @@ command_compat() {
 }
 
 
+
+#
 # Launch the whole thing.
+#
+
+# Bash arrays are not exported to child processes. More at
+# https://www.mail-archive.com/bug-bash@gnu.org/msg01774.html
+# Therefore, put them into a file to be sourced by chevahbs scripts.
+(
+    echo "GET_CMD=(${GET_CMD[@]})"
+    echo "SHA_CMD=(${SHA_CMD[@]})"
+    echo "TAR_CMD=(${TAR_CMD[@]})"
+    echo "ZIP_CMD=(${ZIP_CMD[@]})"
+    echo "SUDO_CMD=(${SUDO_CMD[@]})"
+)> .chevah_arrays
+
+if [ "$DEBUG" -ne 0 ]; then
+    echo -e "\tBash arrays to import in chevahbs scripts:"
+    cat .chevah_arrays
+fi
+
 select_command $@
+rm .chevah_arrays
