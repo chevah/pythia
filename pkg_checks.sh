@@ -19,21 +19,12 @@ DEB_PKGS="$BASE_PKGS tar diffutils \
     git zlib1g-dev liblzma-dev libffi-dev libncurses5-dev libssl-dev"
 RPM_PKGS="$BASE_PKGS tar diffutils \
     git-core libffi-devel zlib-devel xz-devel ncurses-devel openssl-devel"
-# Windows is special, but package management is possible through Chocolatey.
-# Some tools are bundled with MINGW: curl, sha512sum, unzip.
-CHOCO_PKGS=""
-CHOCO_PRESENT="unknown"
 
 # Check for OS packages required for the build.
 MISSING_PACKAGES=""
 PACKAGES="$CC make m4 git patch curl sha512sum tar unzip"
 # This is defined as an array of commands and opts, to allow it to be quoted.
 CHECK_CMD=(command -v)
-
-choco_shim() {
-    local pkg=$1
-    choco list --local-only --limit-output | grep -iq ^"${pkg}|"
-}
 
 # $CHECK_CMD should exit with 0 only when checked packages is installed.
 case "$OS" in
@@ -46,17 +37,7 @@ case "$OS" in
         CHECK_CMD=(dpkg --status)
         ;;
     win)
-        # The windows build is special.
-        echo "## Looking for Chocolatey... ##"
-        command -v choco
-        if [ $? -eq 0 ]; then
-            # Chocolatey is present, let's use it.
-            CHOCO_PRESENT="yes"
-            PACKAGES=$CHOCO_PKGS
-            CHECK_CMD=choco_shim
-        else
-            PACKAGES="make curl sha512sum"
-        fi
+        PACKAGES="curl sha512sum"
         ;;
     macos)
         # Avoid using Homebrew tools from /usr/local, some break when messing
@@ -114,23 +95,6 @@ if [ $? -ne 0 ]; then
     execute ln -s /bin/true ~/bin/makeinfo
     export PATH="$PATH:~/bin/"
 fi
-
-# To avoid having Python's uuid module linked to system libs.
-echo "# Checking if it's possible to avoid linking to system uuid libs... #"
-case "$OS" in
-    ubuntu*)
-        "${CHECK_CMD[@]}" uuid-dev \
-            && echo "To not link to uuid libs, run: apt remove -y uuid-dev"
-        ;;
-    rhel*|amzn*)
-        "${CHECK_CMD[@]}" libuuid-devel \
-            && echo -n "To not link to uuid libs, run: " \
-            && echo "yum remove -y e2fsprogs-devel libuuid-devel"
-        ;;
-    *)
-        (>&2 echo "Not guarding against linking to uuid libs on this system!")
-        ;;
-esac
 
 # This script is sourced, execution does not end here.
 set -o errexit
