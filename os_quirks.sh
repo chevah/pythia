@@ -11,6 +11,7 @@ case $OS in
         #   * "setproctitle" from https://www.lfd.uci.edu/~gohlke/pythonlibs/
         BUILD_BZIP2="no"
         BUILD_SQLITE="no"
+        BUILD_OPENSSL="no"
         PIP_LIBRARIES="$PIP_LIBRARIES \
             pywin32==${PYWIN32_VERSION} \
             "
@@ -29,7 +30,6 @@ case $OS in
         BUILD_LIBFFI="yes"
         BUILD_ZLIB="yes"
         BUILD_XZ="yes"
-        BUILD_OPENSSL="yes"
         ;;
     macos)
         export CC="clang"
@@ -44,7 +44,6 @@ case $OS in
         # 10.13 and newer come with LibreSSL instead of the old OpenSSL libs.
         # But 10.13 has version 2.2.7, while cryptography 2.9 requires 2.7.
         # Therefore, build OpenSSL for both stdlib and cryptography.
-        BUILD_OPENSSL="yes"
         SHA_CMD=(shasum --algorithm 512 --check --status --warn)
         ;;
     fbsd*)
