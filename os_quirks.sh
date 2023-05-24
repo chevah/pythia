@@ -4,11 +4,9 @@
 
 case $OS in
     win)
-        # On Windows, python executable is installed at a different path.
-        PYTHON_BIN="${INSTALL_DIR}/lib/python.exe"
+        # On Windows, the python executable is installed in a different path.
+        PYTHON_BIN="$INSTALL_DIR/lib/python.exe"
         # There are no actual dependency builds, only binary wheels are used.
-        # But not all are from pypi.org. Wheels copied from other places:
-        #   * "setproctitle" from https://www.lfd.uci.edu/~gohlke/pythonlibs/
         BUILD_BZIP2="no"
         BUILD_SQLITE="no"
         BUILD_OPENSSL="no"
@@ -20,13 +18,8 @@ case $OS in
         if [ -f /etc/alpine-release ]; then
             # The busybox ersatz binary on Alpine Linux is different.
             SHA_CMD=(sha512sum -csw)
-        elif [ -f /etc/redhat-release ]; then
-            if grep -q "CentOS release 5" /etc/redhat-release; then
-                # There are issues with Let's Encrypt certs on CentOS 5.
-                GET_CMD=(curl --silent --insecure --location --output)
-            fi
         fi
-        # Build as portable as possible, only libc should be needed.
+        # Build as portable as possible, only libc (glibc/musl) should be needed.
         BUILD_LIBFFI="yes"
         BUILD_ZLIB="yes"
         BUILD_XZ="yes"
@@ -41,9 +34,6 @@ case $OS in
         # System includes bzip2 libs by default.
         BUILD_BZIP2="no"
         BUILD_XZ="yes"
-        # 10.13 and newer come with LibreSSL instead of the old OpenSSL libs.
-        # But 10.13 has version 2.2.7, while cryptography 2.9 requires 2.7.
-        # Therefore, build OpenSSL for both stdlib and cryptography.
         SHA_CMD=(shasum --algorithm 512 --check --status --warn)
         ;;
     fbsd*)
@@ -84,7 +74,7 @@ case $OS in
         # System includes bzip2 libs by default.
         BUILD_BZIP2="no"
         # Solaris 11 is much more modern, but still has some quirks.
-        # Multiple system libffi libs present, this is a problem in 11.4.
+        # Multiple system libffi libs are present, this is a problem in 11.4.
         BUILD_LIBFFI="yes"
         BUILD_XZ="yes"
         # Native tar is not that compatible, but the GNU tar should be present.
@@ -93,14 +83,19 @@ case $OS in
 esac
 
 # Compiler-dependent flags. At this moment, the compiler is known.
-if [ "${OS%sol*}" = "" ]; then
-    # Not all packages enable PIC, force it to avoid relocation issues.
-    export CFLAGS="$CFLAGS -Kpic"
-elif [ "${OS%fbsd*}" = "" -o "${OS%obsd*}" = "" ]; then
-    # Use PIC (Position Independent Code) on FreeBSD and OpenBSD with Clang.
-    export CFLAGS="${CFLAGS:-} -fPIC"
-elif [ "$CC" = "gcc" -a ${ARCH%%64} != "$ARCH" ]; then
-    # Use PIC (Position Independent Code) with GCC on 64-bit arches.
+case "$OS" in
+    sol*)
+        # Not all packages enable PIC, force it to avoid relocation issues.
+        export CFLAGS="$CFLAGS -Kpic"
+        ;;
+    fbsd*|obsd*)
+        # Use PIC (Position Independent Code) on FreeBSD and OpenBSD with Clang.
+        export CFLAGS="${CFLAGS:-} -fPIC"
+        ;;
+esac
+
+# Use PIC (Position Independent Code) with GCC on 64-bit arches (currently all).
+if [ "$CC" = "gcc" ]; then
     export CFLAGS="${CFLAGS:-} -fPIC"
 fi
 
@@ -125,3 +120,13 @@ case "$OS" in
         ;;
 esac
 export MAKE="${MAKE:-} -j${CPUS}"
+
+if [ "$DEBUG" -ne 0 ]; then
+    build_flags=(OS ARCH CC CFLAGS MAKE BUILD_LIBFFI BUILD_ZLIB BUILD_BZIP2 \
+        BUILD_XZ BUILD_LIBEDIT BUILD_OPENSSL BUILD_SQLITE)
+    echo -e "\tBuild variables:"
+    for build_var in "${build_flags[@]}"; do
+        # This uses Bash's indirect expansion.
+        echo "$build_var: ${!build_var}"
+    done
+fi
