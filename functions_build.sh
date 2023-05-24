@@ -16,13 +16,13 @@ select_chevahbs_command() {
     fi
     COMMAND=$1
     OS=$2
+    # shellcheck disable=SC2034 # INSTALL_DIR is used through chevahbs scripts.
     INSTALL_DIR=$3
     # Shift first 3 arguments, remaining ones are passed along as $@.
     shift 3
 
     chevahbs_command="chevahbs_$COMMAND"
-    type "$chevahbs_command" &> /dev/null
-    if [ $? -eq 0 ]; then
+    if type "$chevahbs_command" &> /dev/null; then
         "$chevahbs_command" "$@"
     else
         (>&2 echo "Don't know what to do with command: $COMMAND.")
@@ -128,7 +128,7 @@ build() {
 
     # The build script is then copied alongide patches to the current build dir.
     execute cp src/"$project_name"/chevahbs "$own_build_dir"/
-    if [ "$(ls src/"$project_name"/*.patch 2>/dev/null | wc -l)" -gt 0 ]; then
+    if [ "$(find src/"$project_name" -name '*.patch' | wc -l)" -gt 0 ]; then
         echo "The following patches are to be copied:"
         execute ls -1 src/"$project_name"/*.patch
         execute cp src/"$project_name"/*.patch "$own_build_dir"/
@@ -230,10 +230,15 @@ cleanup_install_dir() {
         esac
         # Test that only bin/ and lib/ sub-dirs are left.
         for element in *; do
-            if [ "$element" != "bin" -a "$element" != "lib" ]; then
-                echo "Unwanted element in root dir: $element"
-                exit 97
-            fi
+            case "$element" in
+                bin | lib)
+                    true
+                    ;;
+                *)
+                    echo "Unwanted element in root dir: $element"
+                    exit 97
+                    ;;
+            esac
         done
     execute popd
 
