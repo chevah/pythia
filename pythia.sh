@@ -20,6 +20,8 @@
 # * CHEVAH_PYTHON - name of the python versions
 # * CHEVAH_OS - name of the current OS
 # * CHEVAH_ARCH - CPU type of the current OS
+# * CHEVAH_CACHE - path to the cache directory
+# * PIP_INDEX_URL - URL for the used PyPI server.
 #
 # The build directory is used from CHEVAH_BUILD env,
 # then read from pythia.conf as CHEVAH_BUILD_DIR,

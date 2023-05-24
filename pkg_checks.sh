@@ -40,8 +40,9 @@ case "$OS" in
         PACKAGES="curl sha512sum"
         ;;
     macos)
-        # Avoid using Homebrew tools from /usr/local, some break when messing
+        # Avoid using Homebrew tools from /usr/local. It is also needed to mess
         # with libs there to avoid polluting the build with unwanted deps.
+        # See the macOS jobs in the "bare" GitHub Actions workflow for details.
         export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
         PACKAGES="$CC make m4 git patch libtool perl curl shasum tar unzip"
         ;;

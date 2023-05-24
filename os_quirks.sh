@@ -2,9 +2,6 @@
 #
 # OS quirks for the Pythia build system.
 
-# Avoid Rust for now, it brings more trouble.
-export CRYPTOGRAPHY_DONT_BUILD_RUST=1
-
 case $OS in
     win)
         # On Windows, python executable is installed at a different path.
@@ -12,8 +9,8 @@ case $OS in
         # There are no actual dependency builds, only binary wheels are used.
         # But not all are from pypi.org. Wheels copied from other places:
         #   * "setproctitle" from https://www.lfd.uci.edu/~gohlke/pythonlibs/
-        export BUILD_BZIP2="no"
-        export BUILD_SQLITE="no"
+        BUILD_BZIP2="no"
+        BUILD_SQLITE="no"
         PIP_LIBRARIES="$PIP_LIBRARIES \
             pywin32==${PYWIN32_VERSION} \
             "
@@ -29,10 +26,10 @@ case $OS in
             fi
         fi
         # Build as portable as possible, only libc should be needed.
-        export BUILD_LIBFFI="yes"
-        export BUILD_ZLIB="yes"
-        export BUILD_XZ="yes"
-        export BUILD_OPENSSL="yes"
+        BUILD_LIBFFI="yes"
+        BUILD_ZLIB="yes"
+        BUILD_XZ="yes"
+        BUILD_OPENSSL="yes"
         ;;
     macos)
         export CC="clang"
@@ -42,22 +39,22 @@ case $OS in
         # "10.4", and then tries to avoid the broken readline in OS X 10.4.
         export MACOSX_DEPLOYMENT_TARGET=10.13
         # System includes bzip2 libs by default.
-        export BUILD_BZIP2="no"
-        export BUILD_XZ="yes"
+        BUILD_BZIP2="no"
+        BUILD_XZ="yes"
         # 10.13 and newer come with LibreSSL instead of the old OpenSSL libs.
         # But 10.13 has version 2.2.7, while cryptography 2.9 requires 2.7.
         # Therefore, build OpenSSL for both stdlib and cryptography.
-        export BUILD_OPENSSL="yes"
+        BUILD_OPENSSL="yes"
         SHA_CMD=(shasum --algorithm 512 --check --status --warn)
         ;;
     fbsd*)
         export CC="clang"
         export CXX="clang++"
         # libffi not available in the base system, only as port/package.
-        export BUILD_LIBFFI="yes"
+        BUILD_LIBFFI="yes"
         # System includes bzip2 libs by default.
-        export BUILD_BZIP2="no"
-        export BUILD_XZ="yes"
+        BUILD_BZIP2="no"
+        BUILD_XZ="yes"
         # Install package "p5-Digest-SHA" to get shasum binary.
         SHA_CMD=(shasum --algorithm 512 --check --status --warn)
         ;;
@@ -65,8 +62,8 @@ case $OS in
         export CC="clang"
         export CXX="clang++"
         # libffi not available in the base system, only as port/package.
-        export BUILD_LIBFFI="yes"
-        export BUILD_XZ="yes"
+        BUILD_LIBFFI="yes"
+        BUILD_XZ="yes"
         SHA_CMD=(sha512 -q -c)
         ;;
     sol*)
@@ -86,11 +83,11 @@ case $OS in
             export LDFLAGS="${LDFLAGS:-} -m64 -L/usr/lib/64 -R/usr/lib/64"
         fi
         # System includes bzip2 libs by default.
-        export BUILD_BZIP2="no"
+        BUILD_BZIP2="no"
         # Solaris 11 is much more modern, but still has some quirks.
         # Multiple system libffi libs present, this is a problem in 11.4.
-        export BUILD_LIBFFI="yes"
-        export BUILD_XZ="yes"
+        BUILD_LIBFFI="yes"
+        BUILD_XZ="yes"
         # Native tar is not that compatible, but the GNU tar should be present.
         TAR_CMD=(gtar xfz)
         ;;
