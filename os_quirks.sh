@@ -10,16 +10,16 @@ case $OS in
         BUILD_BZIP2="no"
         BUILD_SQLITE="no"
         BUILD_OPENSSL="no"
-        PIP_LIBRARIES="$PIP_LIBRARIES \
-            pywin32==${PYWIN32_VERSION} \
-            "
+        PIP_LIBRARIES=("${PIP_LIBRARIES[@]}" \
+            pywin32=="$PYWIN32_VERSION" \
+            )
         ;;
     linux*)
         if [ -f /etc/alpine-release ]; then
             # The busybox ersatz binary on Alpine Linux is different.
             SHA_CMD=(sha512sum -csw)
         fi
-        # Build as portable as possible, only libc (glibc/musl) should be needed.
+        # Build as portable as possible, only glibc/musl should be needed.
         BUILD_LIBFFI="yes"
         BUILD_ZLIB="yes"
         BUILD_XZ="yes"
