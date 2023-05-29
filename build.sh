@@ -9,8 +9,8 @@ set -o errexit    # always exit on error
 set -o errtrace   # trap errors in functions as well
 set -o pipefail   # don't ignore exit codes when piping output
 
-# Get PIP_INDEX_URL for PIP_ARGS.
-source pythia.conf
+# Default PyPI server to use. Can be overwritten in build.conf.
+PIP_INDEX_URL="https://pypi.org/simple"
 
 # Set versions for the software to be built and other defaults.
 source build.conf

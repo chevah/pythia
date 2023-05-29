@@ -82,11 +82,11 @@ LOCAL_PYTHON_BINARY_DIST=""
 OS="not-detected-yet"
 ARCH="not-detected-yet"
 
-# Initialize default values from pythia.conf
+# Initialize default values, some are overwritten from pythia.conf.
+PYTHON_NAME="not.yet.defined"
 PYTHON_CONFIGURATION="NOT-YET-DEFINED"
 PYTHON_VERSION="not.defined.yet"
 PYTHON_PLATFORM="unknown-os-and-arch"
-PYTHON_NAME="python3.11"
 BINARY_DIST_URI="https://github.com/chevah/pythia/releases/download"
 PIP_INDEX_URL="https://pypi.org/simple"
 # This is defined as an array to be passed as a chain of options.
