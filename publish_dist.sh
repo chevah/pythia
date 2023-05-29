@@ -7,6 +7,9 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
+# This is also defined in build.conf.
+DIST_DIR="dist"
+
 dest_server="bin.chevah.com"
 dest_user="github-upload"
 root_link="https://$dest_server:20443/testing"
@@ -16,10 +19,9 @@ root_link="https://$dest_server:20443/testing"
 sftp_opts=(-b build/publish_dist_sftp_batch -o IdentityFile=priv_key \
     -o StrictHostKeyChecking=yes)
 
-# Get $OS var and set sftp command accordingly.
-source BUILD_ENV_VARS
+OS="$(uname -s)"
 case "$OS" in
-    win)
+    MINGW*|MSYS*)
         # To use an RSA key, upstream SFTP is installed through GitHub actions.
         sftp_cmd="/c/Progra~1/OpenSSH-Win64/sftp.exe"
         ;;
@@ -29,10 +31,6 @@ case "$OS" in
 esac
 
 "$sftp_cmd" "${sftp_opts[@]}" "$dest_user"@"$dest_server"
-
-# Get $DIST_DIR.
-source pythia.conf
-source build.conf
 
 # As dist/ is rebuilt on every build, it should only have 1 sub-dir with 1 pkg.
 upload_dir="$(cd "$DIST_DIR" && ls -1)"
