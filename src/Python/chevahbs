@@ -17,7 +17,7 @@ chevahbs_getsources() {
     local ext="tgz"
     local link=https://www.python.org/ftp/python/"$ver"/"$name"-"$ver"."$ext"
 
-    download_sources $name $ver $link $ext
+    download_sources "$name" "$ver" "$link" "$ext"
 }
 
 
@@ -35,11 +35,12 @@ chevahbs_patch() {
 
 
 chevahbs_configure() {
-    CONFIG_ARGS="--disable-shared"
+    # To properly quote multiple options, this is a Bash array.
+    CONFIG_OPTS=(--disable-shared)
 
     # This requires the patch referenced in chevahbs_patch().
     if [ "$BUILD_LIBEDIT" = "yes" ]; then
-        CONFIG_ARGS="${CONFIG_ARGS} --with-readline=editline"
+        CONFIG_OPTS=("${CONFIG_OPTS[@]}" --with-readline=editline)
     fi
 
     echo "# Copying collected header files among Python's ones... #"
@@ -47,10 +48,10 @@ chevahbs_configure() {
 
     # Copying headers to Include/ is not enough to find the OpenSSL ones.
     if [ "$BUILD_OPENSSL" = "yes" ]; then
-        CONFIG_ARGS="${CONFIG_ARGS} --with-openssl=${INSTALL_DIR}"
+        CONFIG_OPTS=("${CONFIG_OPTS[@]}" --with-openssl="$INSTALL_DIR")
     fi
 
-    case $OS in
+    case "$OS" in
         linux)
             # Needed for building Python 3.11's sqlite3 module on Linux.
             # Note that this is not needed on Alpine.
@@ -70,22 +71,22 @@ chevahbs_configure() {
     execute cp Modules/getbuildinfo.c Modules/getbuildinfo.c.orig
     # Don't use 'sed -i' here, it's not supported on macOS yet (tested on 13.3).
     execute sed -e \
-        s/gitid\ =\ \"main\"/gitid\ =\ \"$PYTHIA_VERSION\"/g \
+        s/gitid\ =\ \"main\"/gitid\ =\ \""$PYTHIA_VERSION"\"/g \
         Modules/getbuildinfo.c.orig > Modules/getbuildinfo.c
-    execute ./configure --prefix="$INSTALL_DIR" $CONFIG_ARGS
+    execute ./configure --prefix="$INSTALL_DIR" "${CONFIG_OPTS[@]}"
 }
 
 
 chevahbs_compile() {
-    execute $MAKE
+    execute "${MAKE_CMD[@]}"
     # FIXME:12: Enable Python's own tests again.
     # Don't use execute below, some tests might fail innocuously.
-    # $MAKE test
+    # execute "${MAKE_CMD[@]}" test
 }
 
 
 chevahbs_install() {
-    case $OS in
+    case "$OS" in
         alpine*)
             # EMUTRAMP required for full functionality under a grsec kernel.
             # Don't use "paxmark", file attributes will be lost when tar'ed.
@@ -95,8 +96,8 @@ chevahbs_install() {
             ;;
     esac
 
-    execute $MAKE install
+    execute "${MAKE_CMD[@]}" install
 }
 
 
-select_chevahbs_command $@
+select_chevahbs_command "$@"

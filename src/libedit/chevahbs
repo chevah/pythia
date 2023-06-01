@@ -14,7 +14,7 @@ chevahbs_getsources() {
     local ext="tar.gz"
     local link=https://thrysoee.dk/editline/"$name"-"$ver"."$ext"
 
-    download_sources $name $ver $link $ext
+    download_sources "$name" "$ver" "$link" "$ext"
 }
 
 
@@ -29,30 +29,31 @@ chevahbs_patch() {
 
 
 chevahbs_configure() {
-    CONF_OPTS="--disable-shared --enable-static"
-    case $OS in
+    # To properly quote multiple options, this is a Bash array.
+    CONF_OPTS=(--disable-shared --enable-static)
+    case "$OS" in
         sol*)
             # Required when linking to libedit, which has a simpler configure.
             CFLAGS="$CFLAGS -xcode=pic32"
     esac
-    execute ./configure --prefix="" $CONF_OPTS
+    execute ./configure --prefix="" "${CONF_OPTS[@]}"
 }
 
 
 chevahbs_compile() {
-    case $OS in
+    case "$OS" in
         sol*)
             # Path to newer awk.
             PATH="/usr/xpg4/bin:$PATH"
             ;;
     esac
-    execute $MAKE
+    execute "${MAKE_CMD[@]}"
 }
 
 
 chevahbs_install() {
-    execute $MAKE install DESTDIR=$INSTALL_DIR
+    execute "${MAKE_CMD[@]}" install DESTDIR="$INSTALL_DIR"
 }
 
 
-select_chevahbs_command $@
+select_chevahbs_command "$@"

@@ -15,7 +15,7 @@ chevahbs_getsources() {
     local ext="tar.gz"
     local link=https://sourceware.org/pub/bzip2/"$name"-"$ver"."$ext"
 
-    download_sources $name $ver $link $ext
+    download_sources "$name" "$ver" "$link" "$ext"
 }
 
 
@@ -33,15 +33,15 @@ chevahbs_configure() {
 
 
 chevahbs_compile() {
-    execute $MAKE
+    execute "${MAKE_CMD[@]}"
 }
 
 
 chevahbs_install() {
     # bzip2's installation copies too many files, let's do it manually.
-    execute cp bzlib.h ${INSTALL_DIR}/include/ 
-    execute cp libbz2.a ${INSTALL_DIR}/lib/ 
+    execute cp bzlib.h "$INSTALL_DIR"/include/ 
+    execute cp libbz2.a "$INSTALL_DIR"/lib/ 
 }
 
 
-select_chevahbs_command $@
+select_chevahbs_command "$@"

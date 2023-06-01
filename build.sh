@@ -29,7 +29,7 @@ export PYTHON_BUILD_VERSION PYTHIA_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_XZ BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
 # OS detection is slow on Windows, only execute it when the file is missing.
-if [ ! -r ./BUILD_ENV_VARS ]; then
+if [ ! -s ./BUILD_ENV_VARS ]; then
     execute ./pythia.sh detect_os
 fi
 # Import build env vars as set by pythia.sh.
@@ -47,12 +47,13 @@ PYTHON_BUILD_DIR="$PYTHON_VERSION-$OS-$ARCH"
 INSTALL_DIR="$PWD/$BUILD_DIR/$PYTHON_BUILD_DIR"
 PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 
+
 # Explicitly choose the C compiler in order to make it possible to switch
 # between native compilers and GCC on platforms such as the BSDs and Solaris.
 export CC="gcc"
 # Other needed tools (GNU flavours preferred).
-export MAKE="make"
-# The CMD_* vars are defined as arrays of commands & options for proper quoting.
+# For proper quoting, _CMD vars are Bash arrays of commands and optional flags.
+MAKE_CMD=(make)
 SHA_CMD=(sha512sum --check --status --warn)
 TAR_CMD=(tar xfz)
 ZIP_CMD=(unzip -q)
@@ -281,6 +282,7 @@ command_compat() {
 # Therefore, put them into a file to be sourced by chevahbs scripts.
 # The unusual quoting avoids mixing strings and arrays.
 (
+    echo "MAKE_CMD=(" "${MAKE_CMD[@]}" ")"
     echo "GET_CMD=(" "${GET_CMD[@]}" ")"
     echo "SHA_CMD=(" "${SHA_CMD[@]}" ")"
     echo "TAR_CMD=(" "${TAR_CMD[@]}" ")"

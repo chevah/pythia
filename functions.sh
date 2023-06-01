@@ -75,7 +75,7 @@ execute() {
     if [ "$DEBUG" -ne 0 ]; then
         (>&2 echo -e "\tExit code was: $exit_code")
     fi
-    if [ $exit_code -ne 0 ]; then
+    if [ "$exit_code" -ne 0 ]; then
         (>&2 echo "PWD :" "$(pwd)")
         (>&2 echo "Fail:" "$@")
         exit 97

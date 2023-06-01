@@ -59,7 +59,7 @@ case $OS in
         # By default, Sun's Studio compiler is used.
         export CC="cc"
         export CXX="CC"
-        export MAKE="gmake"
+        export MAKE_CMD=(gmake)
         # Needed for the subprocess32 module.
         # More at https://github.com/google/python-subprocess32/issues/40.
         export CFLAGS="${CFLAGS:-} -DHAVE_DIRFD"
@@ -119,10 +119,10 @@ case "$OS" in
         CPUS=$(getconf _NPROCESSORS_ONLN)
         ;;
 esac
-export MAKE="${MAKE:-} -j${CPUS}"
+export MAKE_CMD=("${MAKE_CMD[@]}" -j"$CPUS")
 
 if [ "$DEBUG" -ne 0 ]; then
-    build_flags=(OS ARCH CC CFLAGS MAKE BUILD_LIBFFI BUILD_ZLIB BUILD_BZIP2 \
+    build_flags=(OS ARCH CC CFLAGS BUILD_LIBFFI BUILD_ZLIB BUILD_BZIP2 \
         BUILD_XZ BUILD_LIBEDIT BUILD_OPENSSL BUILD_SQLITE)
     echo -e "\tBuild variables:"
     for build_var in "${build_flags[@]}"; do

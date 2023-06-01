@@ -15,24 +15,25 @@ chevahbs_getsources() {
     local ext="tar.gz"
     local link=https://www.zlib.net/"$name"-"$ver"."$ext"
 
-    download_sources $name $ver $link $ext
+    download_sources "$name" "$ver" "$link" "$ext"
 }
 
 
 chevahbs_configure() {
-    CONF_OPTS="--static"
-    execute ./configure --prefix="" $CONF_OPTS
+    # To properly quote multiple options, this is a Bash array.
+    CONF_OPTS=(--static)
+    execute ./configure --prefix="" "${CONF_OPTS[@]}"
 }
 
 
 chevahbs_compile() {
-    execute $MAKE
+    execute "${MAKE_CMD[@]}"
 }
 
 
 chevahbs_install() {
-    execute $MAKE install DESTDIR=$INSTALL_DIR
+    execute "${MAKE_CMD[@]}" install DESTDIR="$INSTALL_DIR"
 }
 
 
-select_chevahbs_command $@
+select_chevahbs_command "$@"

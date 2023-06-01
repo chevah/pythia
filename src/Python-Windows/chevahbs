@@ -19,16 +19,16 @@ INSTALL_DIR=$3/lib
 
 # Construct the relevant download link for the Windows version.
 EXT="amd64.zip"
-ARCHIVE="python-${VER}.${EXT}"
-LINK="https://www.python.org/ftp/python/${VER}/python-${VER}-embed-${EXT}"
+ARCHIVE="python-$VER.$EXT"
+LINK="https://www.python.org/ftp/python/$VER/python-$VER-embed-$EXT"
 
 # Download without unpacking (amd64.zip extension is treated specially).
-download_sources $NAME $VER $LINK $EXT
+download_sources "$NAME" "$VER" "$LINK" "$EXT"
 
 # Installation consists of unpacking the ZIP'ed embeddable distribution.
-echo "## Extracting ZIP archive to ${INSTALL_DIR}... ##"
-execute unzip -q "$ARCHIVE" -d "${INSTALL_DIR}"
+echo "## Extracting ZIP archive to $INSTALL_DIR... ##"
+execute unzip -q "$ARCHIVE" -d "$INSTALL_DIR"
 
 echo "## Adding site-packages to python*._pth file... ##"
-echo "import site" >> ${INSTALL_DIR}/python311._pth
-echo "site.main()" >> ${INSTALL_DIR}/python311._pth
+echo "import site" >> "$INSTALL_DIR"/python311._pth
+echo "site.main()" >> "$INSTALL_DIR"/python311._pth
