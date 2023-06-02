@@ -230,9 +230,9 @@ command_test() {
     echo "::group::Chevah tests"
     echo "#### Executing Chevah shell tests... ####"
     if [ "$OS" = "win" ]; then
-        echo "Shellcheck not supported on Windows, sorry!"
+        echo "Shellcheck not supported on Windows, skipping!"
     elif [ "$ARCH" = "arm64" ]; then
-        echo "Shellcheck not supported on Apple Silicon, sorry!"
+        echo "Shellcheck not supported on Apple Silicon, skipping!"
     else
         # Fist, get shellcheck binary in build/.
         execute src/chevah-bash-tests/get-shellcheck.sh "$BUILD_DIR"
@@ -250,11 +250,11 @@ command_test() {
             case "$src_dir" in
                 *tests)
                     # These dirs don't have chevahbs files.
-                    true
+                    echo -e "\tSkipping $src_dir!"
                     ;;
                 *)
+                    # chevahbs uses relative paths, must be checked locally.
                     execute pushd "$src_dir"
-                    echo "$src_dir"
                     execute ../../"$BUILD_DIR"/shellcheck -x chevahbs
                     execute popd
                     ;;

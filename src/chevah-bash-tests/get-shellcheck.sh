@@ -3,6 +3,8 @@
 # Get the latest Shellcheck version into our build folder.
 #
 # Should be called with the build folder as the first argument.
+# Snatched from chevah/server repo, and improved to also work on macOS x64.
+# Another change: this uses $BUILD_DIR, not $BUILD_DIR/bin.
 
 # Script initialisation.
 set -o nounset

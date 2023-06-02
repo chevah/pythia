@@ -341,7 +341,7 @@ set_download_commands() {
         #     --retry-all-errors (since curl 7.71.0)
         # Retry 2 times, allocating 10s for the connection phase,
         # at most 300s for an attempt, sleeping for 5s between retries.
-        # Variables wouldn't work when quoted, using arrays instead.
+        # Variables wouldn't work when quoted, using Bash arrays instead.
         CURL_RETRY_OPTS=(\
             --retry 2 \
             --connect-timeout 10 \

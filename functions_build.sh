@@ -16,7 +16,6 @@ select_chevahbs_command() {
     fi
     COMMAND=$1
     OS=$2
-    # shellcheck disable=SC2034 # INSTALL_DIR is used through chevahbs scripts.
     INSTALL_DIR=$3
     # Shift first 3 arguments, remaining ones are passed along as $@.
     shift 3
@@ -46,7 +45,7 @@ download_sources(){
         echo "## Downloading $project_name version $project_ver... ##"
         execute  "${GET_CMD[@]}" "$archive_filename" "$link"
     else
-        echo "    $archive_filename already present, not downloading again."
+        echo -e "\t$archive_filename already present, not downloading again."
     fi
 
     echo "## Verifying checksums for $archive_filename... ##"
@@ -66,7 +65,7 @@ download_sources(){
             ;;
         exe|amd64*)
             # No need to use ../../build/"$project_name"-"$project_ver"/ here.
-            echo "    Nothing to unpack in build/ for $archive_filename."
+            echo -e "\tNothing to unpack in build/ for $archive_filename."
             ;;
         *)
             (>&2 echo "Unknown archive type for $archive_filename, exiting!")
@@ -166,7 +165,7 @@ cleanup_install_dir() {
 
         case $OS in
             win)
-                echo "    Skipping further cleaning of install dir"
+                echo -e "\tSkipping further cleaning of install dir"
                 ;;
             *)
                 execute rm -rf tmp
