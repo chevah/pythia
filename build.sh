@@ -223,14 +223,20 @@ command_test() {
     fi
 
     echo "::group::Chevah tests"
-    echo "#### Executing Chevah Bash tests... ####"
-    execute src/chevah-bash-tests/get-shellcheck.sh "$BUILD_DIR"
-    execute "$BUILD_DIR"/bin/shellcheck -x pythia.sh build.sh publish_dist.sh
-    for src_dir in src/*; do
-        pushd "$src_dir"
-        execute ../../"$BUILD_DIR"/bin/shellcheck -x chevahbs *.sh
-        popd "$src_dir"
-    done
+    echo "#### Executing Chevah shell tests... ####"
+    if [ "$OS" = "win" ]; then
+        echo "Shellcheck not supported on Windows, sorry!"
+    elif [ "$ARCH" = "arm64" ]; then
+        echo "Shellcheck not supported on Apple Silicon, sorry!"
+    else
+        execute src/chevah-bash-tests/get-shellcheck.sh "$BUILD_DIR"
+        execute "$BUILD_DIR"/shellcheck -x pythia.sh build.sh publish_dist.sh
+        for src_dir in src/*; do
+            pushd "$src_dir"
+            execute ../../"$BUILD_DIR"/shellcheck -x chevahbs *.sh
+            popd "$src_dir"
+        done
+    fi
     echo "#### Executing Chevah Python tests... ####"
     execute cp src/chevah-python-tests/"$test_file" "$BUILD_DIR"
     execute cp src/chevah-python-tests/get_binaries_deps.sh "$BUILD_DIR"
