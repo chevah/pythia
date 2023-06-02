@@ -250,13 +250,15 @@ command_test() {
             case "$src_dir" in
                 *tests)
                     # These dirs don't have chevahbs files.
-                    break
+                    true
+                    ;;
+                *)
+                    execute pushd "$src_dir"
+                    echo "$src_dir"
+                    execute ../../"$BUILD_DIR"/shellcheck -x chevahbs
+                    execute popd
                     ;;
             esac
-            execute pushd "$src_dir"
-            echo "$src_dir"
-            execute ../../"$BUILD_DIR"/shellcheck -x chevahbs
-            execute popd
         done
     fi
     echo "#### Executing Chevah Python tests... ####"
