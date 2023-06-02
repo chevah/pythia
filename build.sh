@@ -103,13 +103,13 @@ command_build() {
     # On certain OS'es, some modules require this (zlib, bz2, lzma, sqlite3).
     export CPPFLAGS="${CPPFLAGS:-} -I${INSTALL_DIR}/include"
 
-    build_dep $BUILD_LIBFFI   libffi           $LIBFFI_VERSION
-    build_dep $BUILD_ZLIB     zlib             $ZLIB_VERSION
-    build_dep $BUILD_BZIP2    bzip2            $BZIP2_VERSION
-    build_dep $BUILD_XZ       xz               $XZ_VERSION
-    build_dep $BUILD_LIBEDIT  libedit          $LIBEDIT_VERSION
-    build_dep $BUILD_SQLITE   sqlite-autoconf  $SQLITE_VERSION
-    build_dep $BUILD_OPENSSL  openssl          $OPENSSL_VERSION
+    build_dep "$BUILD_LIBFFI"   libffi           "$LIBFFI_VERSION"
+    build_dep "$BUILD_ZLIB"     zlib             "$ZLIB_VERSION"
+    build_dep "$BUILD_BZIP2"    bzip2            "$BZIP2_VERSION"
+    build_dep "$BUILD_XZ"       xz               "$XZ_VERSION"
+    build_dep "$BUILD_LIBEDIT"  libedit          "$LIBEDIT_VERSION"
+    build_dep "$BUILD_SQLITE"   sqlite-autoconf  "$SQLITE_VERSION"
+    build_dep "$BUILD_OPENSSL"  openssl          "$OPENSSL_VERSION"
 
     build_python
 
@@ -217,6 +217,11 @@ help_text_test="Run own tests for the newly-build Python distribution."
 command_test() {
     local test_file="test_python_binary_dist.py"
     local python_binary="$PYTHON_BIN"
+
+    if [ ! -d build/ ]; then
+        (>&2 echo "No build/ sub-directory present, try 'build' first!")
+        exit 220
+    fi
     if [ "$OS" != "win" ]; then
         # Post-cleanup, the binary in /bin is named "python", not "python3.x".
         local python_binary="$INSTALL_DIR/bin/python"
@@ -229,12 +234,29 @@ command_test() {
     elif [ "$ARCH" = "arm64" ]; then
         echo "Shellcheck not supported on Apple Silicon, sorry!"
     else
+        # Fist, get shellcheck binary in build/.
         execute src/chevah-bash-tests/get-shellcheck.sh "$BUILD_DIR"
+        # Check main scripts, these include other scripts in the current dir.
         execute "$BUILD_DIR"/shellcheck -x pythia.sh build.sh publish_dist.sh
+        # Also check what other '.sh' files there are under src/ dir.
+        other_scripts=()
+        # No mapfile, needs Bash 4. See https://www.shellcheck.net/wiki/SC2207.
+        while IFS="" read -r line; do
+            other_scripts+=("$line")
+        done < <(find src/ -name '*.sh')
+        execute "$BUILD_DIR"/shellcheck -x "${other_scripts[@]}"
+        # Finally, check the chevahbs scripts in src/*/ sub-dirs.
         for src_dir in src/*; do
-            pushd "$src_dir"
-            execute ../../"$BUILD_DIR"/shellcheck -x chevahbs *.sh
-            popd "$src_dir"
+            case "$src_dir" in
+                *tests)
+                    # These dirs don't have chevahbs files.
+                    break
+                    ;;
+            esac
+            execute pushd "$src_dir"
+            echo "$src_dir"
+            execute ../../"$BUILD_DIR"/shellcheck -x chevahbs
+            execute popd
         done
     fi
     echo "#### Executing Chevah Python tests... ####"
