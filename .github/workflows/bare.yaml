@@ -104,6 +104,13 @@ jobs:
     - name: Build Pythia
       run: ./build.sh build
 
+    # Fix back Homebrew, to make everything functional for test and tmate debugging.
+    - name: Unhack Homebrew
+      run: |
+        sudo chmod -v a+r /usr/local/opt/gettext/lib/libintl*
+        sudo chmod -v a+r /usr/local/include/libintl.h
+        sudo mv -v /usr/local/bin/git{.saved,}
+
     - name: Test Pythia
       run: ./build.sh test
 
@@ -115,14 +122,6 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         ./publish_dist.sh ; rm priv_key
-
-    # Fix back Homebrew, to make everything functional for tmate debugging.
-    - name: Unhack Homebrew
-      if: failure() && env.TMATE_DEBUG == 'yes'
-      run: |
-        sudo chmod -v a+r /usr/local/opt/gettext/lib/libintl*
-        sudo chmod -v a+r /usr/local/include/libintl.h
-        sudo mv -v /usr/local/bin/git{.saved,}
 
     - name: Tmate debug on failure
       if: failure() && env.TMATE_DEBUG == 'yes'
