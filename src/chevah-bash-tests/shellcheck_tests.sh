@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 #
 # Script for checking all shell scripts in this repo with Shellcheck.
-# Not to be executed independently, it's sourced during the 'test' phase.
+# To be executed from the root of the repository.
 
-if [ "$OS" = "win" ]; then
-    echo "Shellcheck not supported on Windows, skipping!"
-    exit
-fi
+source ./functions.sh
+
+# BUILD_DIR is also defined in build.conf.
+BUILD_DIR="build"
+OS="$(uname)"
+ARCH="$(uname -m)"
+
+case "$OS" in
+        MINGW*|MSYS*)
+           echo "Shellcheck not supported on Windows, skipping!"
+            exit
+           ;;
+esac
 
 if [ "$ARCH" = "arm64" ]; then
     echo "Shellcheck not supported on Apple Silicon, skipping!"

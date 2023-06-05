@@ -225,7 +225,7 @@ command_test() {
     fi
 
     echo "#### Executing Chevah shell tests... ####"
-    source src/chevah-bash-tests/shellcheck_tests.sh
+    ./src/chevah-bash-tests/shellcheck_tests.sh
 
     echo "#### Executing Chevah Python tests... ####"
     if [ "$OS" != "win" ]; then
