@@ -35,39 +35,37 @@ for sh_file in ./*.sh; do
         other_sh_files=("${other_sh_files[@]}" "$sh_file")
     fi
 done
-echo "Checking executable shell scripts, including their sources:"
+echo "Executable shell scripts to be checked (including their sources):"
 for exec_sh_file in "${exec_sh_files[@]}"; do
     echo -e "\t$exec_sh_file"
 done
 execute "$BUILD_DIR"/shellcheck -ax "${exec_sh_files[@]}"
-echo "Skipping non-executable shell scripts (should be sourced by the above):"
+echo "Non-executable scripts to be skipped (should be sourced by the above):"
 for other_sh_file in "${other_sh_files[@]}"; do
     echo -e "\t$other_sh_file"
 done
 
-echo "## Checking extra .sh files in ./src/, including sources... ##"
+echo "## Checking extra .sh files in \"./src/\"... ##"
 extra_scripts=()
 # Do not use mapfile, needs Bash 4. See https://www.shellcheck.net/wiki/SC2207.
 while IFS="" read -r line; do
     extra_scripts+=("$line")
-done < <(find ./src/ -name '*.sh')
-echo "Extra .sh scripts found in ./src/:"
+done < <(find ./src -name '*.sh')
+echo "Extra shell scripts to be checked under ./src (including sources):"
 for extra_script in "${extra_scripts[@]}"; do
     echo -e "\t$extra_script"
 done
 execute "$BUILD_DIR"/shellcheck -ax "${extra_scripts[@]}"
 echo "## Checking the chevahbs scripts in ./src/*/ sub-dirs in their dirs... ##"
+echo "chevahbs files to be checked were found in the following sub-dirs:"
 for src_dir in ./src/*; do
-    case "$src_dir" in
-        *tests)
-            # These dirs don't have chevahbs files.
-            echo -e "\tSkipping $src_dir!"
-            ;;
-        *)
+    if [ -d "$src_dir" ]; then
+        if [ -e "$src_dir"/chevahbs ]; then
+            echo -e "\t$src_dir"
             # chevahbs uses relative paths, must be checked locally.
-            execute pushd "$src_dir"
+            execute cd "$src_dir"
             execute ../../"$BUILD_DIR"/shellcheck -x chevahbs
-            execute popd
-            ;;
-    esac
+            execute cd ../../
+        fi
+    fi
 done
