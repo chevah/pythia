@@ -218,50 +218,20 @@ command_test() {
     local test_file="test_python_binary_dist.py"
     local python_binary="$PYTHON_BIN"
 
+    echo "::group::Chevah tests"
     if [ ! -d build/ ]; then
         (>&2 echo "No build/ sub-directory present, try 'build' first!")
         exit 220
     fi
+
+    echo "#### Executing Chevah shell tests... ####"
+    source src/chevah-bash-tests/shellcheck_tests.sh
+
+    echo "#### Executing Chevah Python tests... ####"
     if [ "$OS" != "win" ]; then
         # Post-cleanup, the binary in /bin is named "python", not "python3.x".
         local python_binary="$INSTALL_DIR/bin/python"
     fi
-
-    echo "::group::Chevah tests"
-    echo "#### Executing Chevah shell tests... ####"
-    if [ "$OS" = "win" ]; then
-        echo "Shellcheck not supported on Windows, skipping!"
-    elif [ "$ARCH" = "arm64" ]; then
-        echo "Shellcheck not supported on Apple Silicon, skipping!"
-    else
-        # Fist, get shellcheck binary in build/.
-        execute src/chevah-bash-tests/get-shellcheck.sh "$BUILD_DIR"
-        # Check main scripts, these include other scripts in the current dir.
-        execute "$BUILD_DIR"/shellcheck -x pythia.sh build.sh publish_dist.sh
-        # Also check what other '.sh' files there are under src/ dir.
-        other_scripts=()
-        # No mapfile, needs Bash 4. See https://www.shellcheck.net/wiki/SC2207.
-        while IFS="" read -r line; do
-            other_scripts+=("$line")
-        done < <(find src/ -name '*.sh')
-        execute "$BUILD_DIR"/shellcheck -x "${other_scripts[@]}"
-        # Finally, check the chevahbs scripts in src/*/ sub-dirs.
-        for src_dir in src/*; do
-            case "$src_dir" in
-                *tests)
-                    # These dirs don't have chevahbs files.
-                    echo -e "\tSkipping $src_dir!"
-                    ;;
-                *)
-                    # chevahbs uses relative paths, must be checked locally.
-                    execute pushd "$src_dir"
-                    execute ../../"$BUILD_DIR"/shellcheck -x chevahbs
-                    execute popd
-                    ;;
-            esac
-        done
-    fi
-    echo "#### Executing Chevah Python tests... ####"
     execute cp src/chevah-python-tests/"$test_file" "$BUILD_DIR"
     execute cp src/chevah-python-tests/get_binaries_deps.sh "$BUILD_DIR"
     execute pushd "$BUILD_DIR"
