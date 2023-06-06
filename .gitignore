@@ -1,7 +1,7 @@
 /build/
 /dist/
 /BUILD_ENV_VARS
-/.chevah_arrays
+/.build_env_arrays
 /src/*/*.tar.gz
 /src/*/*.tgz
 /src/*/*.zip

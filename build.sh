@@ -303,4 +303,3 @@ if [ "$DEBUG" -ne 0 ]; then
 fi
 
 select_command "$@"
-rm -f "$BUILD_ENV_ARRAYS_FILE"
