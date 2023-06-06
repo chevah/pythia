@@ -8,7 +8,7 @@
 # The relative paths work in both src/blabla and build/blabla.
 source ../../functions.sh
 source ../../functions_build.sh
-source ../../.chevah_arrays
+source ../../"$BUILD_ENV_ARRAYS_FILE"
 
 # The usual two arguments, e.g. "Python" and "3.9.0",
 # but the installation path is also needed, because this script is special.

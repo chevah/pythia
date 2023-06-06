@@ -6,7 +6,7 @@
 # The relative paths work in both src/blabla and build/blabla.
 source ../../functions.sh
 source ../../functions_build.sh
-source ../../.chevah_arrays
+source ../../"$BUILD_ENV_ARRAYS_FILE"
 
 
 chevahbs_getsources() {

@@ -5,7 +5,7 @@
 # Import shared code.
 source ../../functions.sh
 source ../../functions_build.sh
-source ../../.chevah_arrays
+source ../../"$BUILD_ENV_ARRAYS_FILE"
 
 
 chevahbs_getsources() {

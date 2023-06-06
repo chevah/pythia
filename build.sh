@@ -68,7 +68,7 @@ source os_quirks.sh
 # shellcheck disable=SC2034 # Only used through compgen.
 help_text_clean="Clean build dir. Add -a to remove downloads and saved values."
 command_clean() {
-    echo "#### Removing previous build/ sub-directory, if existing... ####"
+    echo "#### Removing previous build sub-directory, if existing... ####"
     execute rm -rf "$BUILD_DIR"
 
     if [ $# -ne 0 ]; then
@@ -76,7 +76,7 @@ command_clean() {
             echo "## Removing all downloads from src/... ##"
             execute rm -fv src/*/*.{tar.gz,tgz,zip}
             echo "## Removing all local files with saved values... ##"
-            execute rm -fv BUILD_ENV_VARS .chevah_arrays
+            execute rm -fv BUILD_ENV_VARS "$BUILD_ENV_ARRAYS_FILE"
         fi
     fi
 }
@@ -295,12 +295,12 @@ command_compat() {
     echo "SHA_CMD=(" "${SHA_CMD[@]}" ")"
     echo "TAR_CMD=(" "${TAR_CMD[@]}" ")"
     echo "ZIP_CMD=(" "${ZIP_CMD[@]}" ")"
-)> .chevah_arrays
+)> "$BUILD_ENV_ARRAYS_FILE"
 
 if [ "$DEBUG" -ne 0 ]; then
     echo -e "\tBash arrays to import in chevahbs scripts:"
-    cat .chevah_arrays
+    cat "$BUILD_ENV_ARRAYS_FILE"
 fi
 
 select_command "$@"
-rm .chevah_arrays
+rm -f "$BUILD_ENV_ARRAYS_FILE"
