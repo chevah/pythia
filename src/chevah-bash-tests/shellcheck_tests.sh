@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
 # Script for checking all shell scripts in this repo with Shellcheck.
+# Available independently of all other scripts, except the common functions.sh.
 # To be executed from the root of the repository.
 
 source ./functions.sh
@@ -12,15 +13,16 @@ ARCH="$(uname -m)"
 
 case "$OS" in
         MINGW*|MSYS*)
-           echo "Shellcheck not supported on Windows, skipping!"
+            echo "Shellcheck not supported on Windows, skipping!"
             exit
-           ;;
+            ;;
+        Darwin)
+            if [ "$ARCH" = "arm64" ]; then
+                echo "Shellcheck not supported on Apple Silicon, skipping!"
+                exit
+            fi
+            ;;
 esac
-
-if [ "$ARCH" = "arm64" ]; then
-    echo "Shellcheck not supported on Apple Silicon, skipping!"
-    exit
-fi
 
 echo "## Getting shellcheck binary in $BUILD_DIR/ if missing... ##"
 execute ./src/chevah-bash-tests/get-shellcheck.sh "$BUILD_DIR"
@@ -56,13 +58,14 @@ for extra_script in "${extra_scripts[@]}"; do
     echo -e "\t$extra_script"
 done
 execute "$BUILD_DIR"/shellcheck -ax "${extra_scripts[@]}"
+
 echo "## Checking the chevahbs scripts in ./src/*/ sub-dirs in their dirs... ##"
 echo "chevahbs files to be checked were found in the following sub-dirs:"
 for src_dir in ./src/*; do
     if [ -d "$src_dir" ]; then
         if [ -e "$src_dir"/chevahbs ]; then
             echo -e "\t$src_dir"
-            # chevahbs uses relative paths, must be checked locally.
+            # chevahbs uses relative paths, must be checked from the same dir.
             execute cd "$src_dir"
             execute ../../"$BUILD_DIR"/shellcheck -x chevahbs
             execute cd ../../
