@@ -813,7 +813,7 @@ if [ "$COMMAND" = "purge" ] ; then
     exit 0
 fi
 
-# Initialize BUILD_ENV_VARS file when building Python from scratch.
+# Pass OS-specific values through a file when building Python from scratch.
 if [ "$COMMAND" = "detect_os" ]; then
     echo "PYTHON_VERSION=$PYTHON_NAME" > BUILD_ENV_VARS
     echo "OS=$OS" >> BUILD_ENV_VARS

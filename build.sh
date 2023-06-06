@@ -28,11 +28,10 @@ exit_on_error $? 250
 export PYTHON_BUILD_VERSION PYTHIA_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_XZ BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
-# OS detection is slow on Windows, only execute it when the file is missing.
+# OS detection is done by the common pythia.sh. The vales are saved in a file.
 if [ ! -s ./BUILD_ENV_VARS ]; then
     execute ./pythia.sh detect_os
 fi
-# Import build env vars as set by pythia.sh.
 source ./BUILD_ENV_VARS
 
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
