@@ -223,9 +223,6 @@ command_test() {
         exit 220
     fi
 
-    echo "#### Executing Chevah shell tests... ####"
-    ./src/chevah-bash-tests/shellcheck_tests.sh
-
     echo "#### Executing Chevah Python tests... ####"
     if [ "$OS" != "win" ]; then
         # Post-cleanup, the binary in /bin is named "python", not "python3.x".
@@ -244,6 +241,9 @@ command_test() {
         safety=="$SAFETY_VERSION"
     execute "$python_binary" -m safety check --full-report
     echo "::endgroup::"
+
+    echo "#### Executing Chevah shell tests... ####"
+    ./src/chevah-bash-tests/shellcheck_tests.sh
 
     execute popd
 }
