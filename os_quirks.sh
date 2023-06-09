@@ -107,26 +107,16 @@ case "$OS" in
         ;;
     macos|fbsd*|obsd*)
         # Logical CPUs.
-        CPUS=$(sysctl -n hw.ncpu)
+        CPUS="$(sysctl -n hw.ncpu)"
         ;;
     sol*)
         # Physical CPUs. 
-        CPUS=$(/usr/sbin/psrinfo -p)
+        CPUS="$(/usr/sbin/psrinfo -p)"
         ;;
     *)
         # Only Linux distros should be left, look for logical CPUS.
         # Don't use lscpu/nproc or other stuff not present on older distros.
-        CPUS=$(getconf _NPROCESSORS_ONLN)
+        CPUS="$(getconf _NPROCESSORS_ONLN)"
         ;;
 esac
-export MAKE_CMD=("${MAKE_CMD[@]}" -j"$CPUS")
-
-if [ "$DEBUG" -ne 0 ]; then
-    build_flags=(OS ARCH CC CFLAGS BUILD_LIBFFI BUILD_ZLIB BUILD_BZIP2 \
-        BUILD_XZ BUILD_LIBEDIT BUILD_OPENSSL BUILD_SQLITE)
-    echo -e "\tBuild variables:"
-    for build_var in "${build_flags[@]}"; do
-        # This uses Bash's indirect expansion.
-        echo "$build_var: ${!build_var}"
-    done
-fi
+MAKE_CMD=("${MAKE_CMD[@]}" -j"$CPUS")

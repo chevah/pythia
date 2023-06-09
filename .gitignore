@@ -1,7 +1,6 @@
 /build/
 /dist/
-/BUILD_ENV_VARS
-/.build_env_arrays
+/BUILD_ENV_*
 /src/*/*.tar.gz
 /src/*/*.tgz
 /src/*/*.zip

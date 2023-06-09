@@ -22,14 +22,14 @@ RPM_PKGS="$BASE_PKGS tar diffutils \
 
 # Check for OS packages required for the build.
 MISSING_PACKAGES=""
-# Generic list of required commands.
+# Generic list of required commands (not an array because it's never executed).
 PACKAGES="$CC make m4 git patch curl sha512sum tar unzip"
 # This is defined as an array of commands and opts, to allow it to be quoted.
 CHECK_CMD=(command -v)
 
 # $CHECK_CMD should exit with 0 only when checked packages is installed.
 case "$OS" in
-    rhel* | amzn*)
+    rhel*|amzn*)
         PACKAGES="$RPM_PKGS"
         CHECK_CMD=(rpm --query)
         ;;
@@ -38,6 +38,7 @@ case "$OS" in
         CHECK_CMD=(dpkg --status)
         ;;
     win)
+        # Nothing to actually build on Windows.
         PACKAGES="curl sha512sum"
         ;;
     macos)

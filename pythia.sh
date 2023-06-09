@@ -341,7 +341,7 @@ set_download_commands() {
         #     --retry-all-errors (since curl 7.71.0)
         # Retry 2 times, allocating 10s for the connection phase,
         # at most 300s for an attempt, sleeping for 5s between retries.
-        # Variables wouldn't work when quoted, using Bash arrays instead.
+        # Strings wouldn't work when quoted, using Bash arrays instead.
         CURL_RETRY_OPTS=(\
             --retry 2 \
             --connect-timeout 10 \
@@ -613,7 +613,7 @@ check_linux_libc() {
     set +o errexit
 
     if ! command -v ldd > /dev/null; then
-        (>&2 echo "No ldd binary found, can't check for glibc!")
+        (>&2 echo "No ldd binary found, can't check the libc version!")
         exit 18
     fi
 
@@ -624,7 +624,7 @@ check_linux_libc() {
         if grep -E -q ^"musl libc" $ldd_output_file; then
             check_musl_version
         else
-            (>&2 echo "Unknown libc reported by ldd... Unsupported Linux.")
+            (>&2 echo "Unknown libc reported by ldd... Unsupported Linux!")
             rm "$ldd_output_file"
             exit 19
         fi
@@ -740,7 +740,7 @@ check_musl_version(){
 # In some cases we normalize or even override ARCH at the end of this function.
 #
 detect_os() {
-    os_version_chevah=""
+    local os_version_chevah=""
     OS="$(uname -s)"
 
     case "$OS" in

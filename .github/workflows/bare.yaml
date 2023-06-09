@@ -104,7 +104,7 @@ jobs:
     - name: Build Pythia
       run: ./build.sh build
 
-    # Fix back Homebrew, to have things working for tests and tmate debugging.
+    # Fix back Homebrew, for working Shellcheck tests and tmate debugging.
     - name: Unhack Homebrew
       run: |
         sudo chmod -v a+r /usr/local/opt/gettext/lib/libintl*

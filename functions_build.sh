@@ -97,12 +97,12 @@ chevahbs_build() {
 # Build-related stuff.
 #
 build() {
-    # This has the form: "libffi", "zlib", "bzip", "libedit", etc.
-    # It's present in 'src/` and contains `chevahbs`, checksums, patches.
+    # First parameter can be "libffi", "zlib", "bzip", "Python", etc.
+    # It's a sub-dir in src/ containing chevahbs scripts / checksums / patches.
     # Also used when downloading the gzipped tarball and unpacking it.
-    project_name=$1
-    # This has the form: "3.2.1", "1.2.11". etc.
-    project_ver=$2
+    project_name="$1"
+    # Second parameter has the form: "3.2.1", "1.1.1t", "3410200", etc.
+    project_ver="$2"
     echo "::group::Build" "$@"
     echo "#### Building $1 version $2... ####"
 
@@ -230,7 +230,7 @@ cleanup_install_dir() {
         # Test that only bin/ and lib/ sub-dirs are left.
         for element in *; do
             case "$element" in
-                bin | lib)
+                bin|lib)
                     true
                     ;;
                 *)

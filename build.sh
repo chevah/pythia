@@ -28,7 +28,7 @@ exit_on_error $? 250
 export PYTHON_BUILD_VERSION PYTHIA_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_XZ BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
-# OS detection is done by the common pythia.sh. The vales are saved in a file.
+# OS detection is done by the common pythia.sh. The values are saved in a file.
 if [ ! -s ./BUILD_ENV_VARS ]; then
     execute ./pythia.sh detect_os
 fi
@@ -45,7 +45,6 @@ export ARCH OS
 PYTHON_BUILD_DIR="$PYTHON_VERSION-$OS-$ARCH"
 INSTALL_DIR="$PWD/$BUILD_DIR/$PYTHON_BUILD_DIR"
 PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
-
 
 # Explicitly choose the C compiler in order to make it possible to switch
 # between native compilers and GCC on platforms such as the BSDs and Solaris.
@@ -91,7 +90,7 @@ command_build() {
     echo "::endgroup::"
 
     # Clean build dir to avoid contamination from previous builds,
-    # but without removing the download archives, to speed up the build.
+    # but without removing the download archives, to speed up next builds.
     command_clean "$@"
 
     # Build stuff statically on most platforms, install headers and libs in the
@@ -176,7 +175,7 @@ command_install_python_modules() {
     echo "#### Installing Python modules... ####"
 
     # Install latest PIP, then instruct it to get exact versions of setuptools.
-    # Otherwise, get-pip.py will always try to get latest versions.
+    # Otherwise, get-pip.py always tries to get latest versions.
     download_get_pip
     echo "# Installing latest pip with preferred setuptools version... #"
     execute "$PYTHON_BIN" "$BUILD_DIR"/get-pip.py "${PIP_ARGS[@]}" \
@@ -218,8 +217,8 @@ command_test() {
     local python_binary="$PYTHON_BIN"
 
     echo "::group::Chevah tests"
-    if [ ! -d build/ ]; then
-        (>&2 echo "No build/ sub-directory present, try 'build' first!")
+    if [ ! -d "$BUILD_DIR" ]; then
+        (>&2 echo "No $BUILD_DIR sub-directory present, try 'build' first!")
         exit 220
     fi
 
@@ -284,20 +283,26 @@ command_compat() {
 # Launch the whole thing.
 #
 
-# Bash arrays are not exported to child processes. More at
-# https://www.mail-archive.com/bug-bash@gnu.org/msg01774.html
-# Therefore, put them into a file to be sourced by chevahbs scripts.
+# Pass the _CMD stuff to the "chevahbs" scripts in a file to be sourced.
 # The unusual quoting avoids mixing strings and arrays.
+# Indentation helps when showing the arrays during debugging.
 (
-    echo "MAKE_CMD=(" "${MAKE_CMD[@]}" ")"
-    echo "GET_CMD=(" "${GET_CMD[@]}" ")"
-    echo "SHA_CMD=(" "${SHA_CMD[@]}" ")"
-    echo "TAR_CMD=(" "${TAR_CMD[@]}" ")"
-    echo "ZIP_CMD=(" "${ZIP_CMD[@]}" ")"
-)> "$BUILD_ENV_ARRAYS_FILE"
+    echo -e "\tMAKE_CMD=(" "${MAKE_CMD[@]}" ")"
+    echo -e "\tGET_CMD=(" "${GET_CMD[@]}" ")"
+    echo -e "\tSHA_CMD=(" "${SHA_CMD[@]}" ")"
+    echo -e "\tTAR_CMD=(" "${TAR_CMD[@]}" ")"
+    echo -e "\tZIP_CMD=(" "${ZIP_CMD[@]}" ")"
+) > "$BUILD_ENV_ARRAYS_FILE"
 
 if [ "$DEBUG" -ne 0 ]; then
-    echo -e "\tBash arrays to import in chevahbs scripts:"
+    build_flags=(OS ARCH CC CFLAGS BUILD_LIBFFI BUILD_ZLIB BUILD_BZIP2 \
+        BUILD_XZ BUILD_LIBEDIT BUILD_OPENSSL BUILD_SQLITE)
+    echo -e "Build variables:"
+    for build_var in "${build_flags[@]}"; do
+        # This uses Bash's indirect expansion.
+        echo -e "\t$build_var: ${!build_var}"
+    done
+    echo "Bash arrays to import in chevahbs scripts:"
     cat "$BUILD_ENV_ARRAYS_FILE"
 fi
 
