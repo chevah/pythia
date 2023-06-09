@@ -4,12 +4,12 @@
 #
 
 # Check if debugging environment variable is set and initialize with 0 if not.
-DEBUG=${DEBUG-0}
+DEBUG="${DEBUG-0}"
 
 # shellcheck disable=SC2034 # Only used through compgen.
 help_text_help="Show help for a command."
 command_help() {
-    local command=${1:-}
+    local command="${1:-}"
     local help_command="help_$command"
     # Test for a valid help method, otherwise call general help.
     set +o errexit
@@ -18,7 +18,7 @@ command_help() {
     else
         echo "Available commands are:"
         for help_text in $(compgen -A variable help_text_); do
-            command_name=${help_text#help_text_}
+            command_name="${help_text#help_text_}"
             echo -e "    $command_name\t${!help_text}"
         done
     fi
@@ -31,7 +31,7 @@ command_help() {
 # Select functions which are made public.
 #
 select_command() {
-    local command=${1:-}
+    local command="${1:-}"
     case "$command" in
         "")
             command_help
@@ -56,8 +56,8 @@ select_command() {
 
 
 exit_on_error() {
-    error_code=$1
-    exit_code=$2
+    error_code="$1"
+    exit_code="$2"
     if [ "$error_code" -ne 0 ]; then
         exit "$exit_code"
     fi
@@ -71,7 +71,7 @@ execute() {
 
     #Make sure $@ is called in quotes as otherwise it will not work.
     "$@"
-    exit_code=$?
+    exit_code="$?"
     if [ "$DEBUG" -ne 0 ]; then
         (>&2 echo -e "\tExit code was: $exit_code")
     fi

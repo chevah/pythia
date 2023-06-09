@@ -14,9 +14,9 @@ select_chevahbs_command() {
     if [ "$DEBUG" -ne 0 ]; then
         echo "select_chevahbs_command:" "$@"
     fi
-    COMMAND=$1
-    OS=$2
-    INSTALL_DIR=$3
+    COMMAND="$1"
+    OS="$2"
+    INSTALL_DIR="$3"
     # Shift first 3 arguments, remaining ones are passed along as $@.
     shift 3
 
@@ -34,10 +34,10 @@ select_chevahbs_command() {
 # Internal function for downloading sources on-the-fly as needed.
 #
 download_sources(){
-    local project_name=$1
-    local project_ver=$2
-    local link=$3
-    local archive_ext=$4
+    local project_name="$1"
+    local project_ver="$2"
+    local link="$3"
+    local archive_ext="$4"
     # Sometimes the archive is not named $name-$version.$ext, let's force it.
     local archive_filename="$project_name-$project_ver.$archive_ext"
     # Only download the sources if they are not present.
@@ -256,7 +256,7 @@ cleanup_install_dir() {
 #  * target_dir = name of the dir to be archived.
 #
 make_dist(){
-    local target_dir=$1
+    local target_dir="$1"
     local full_ver="$PYTHON_BUILD_VERSION.$PYTHIA_VERSION"
     local target_path="../$DIST_DIR/$full_ver"
     local target_tar="$target_path/python-$full_ver-$OS-$ARCH.tar"

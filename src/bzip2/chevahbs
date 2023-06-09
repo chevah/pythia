@@ -10,8 +10,8 @@ source ../../"$BUILD_ENV_ARRAYS_FILE"
 
 
 chevahbs_getsources() {
-    local name=$1
-    local ver=$2
+    local name="$1"
+    local ver="$2"
     local ext="tar.gz"
     local link=https://sourceware.org/pub/bzip2/"$name"-"$ver"."$ext"
 

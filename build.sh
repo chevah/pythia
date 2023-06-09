@@ -131,9 +131,9 @@ command_build() {
 
 # This builds Python's dependencies: libffi, bzip2, openssl, etc.
 build_dep() {
-    local dep_boolean=$1
-    local dep_name=$2
-    local dep_version=$3
+    local dep_boolean="$1"
+    local dep_name="$2"
+    local dep_version="$3"
 
     if [ "$dep_boolean" = "yes" ]; then
         # This is where building happens.

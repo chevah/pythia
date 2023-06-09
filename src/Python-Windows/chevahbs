@@ -12,10 +12,10 @@ source ../../"$BUILD_ENV_ARRAYS_FILE"
 
 # The usual two arguments, e.g. "Python" and "3.9.0",
 # but the installation path is also needed, because this script is special.
-NAME=$1
-VER=$2
+NAME="$1"
+VER="$2"
 # There's no intrinsic need for this, but Chevah's server likes it this way.
-INSTALL_DIR=$3/lib
+INSTALL_DIR="$3"/lib
 
 # Construct the relevant download link for the Windows version.
 EXT="amd64.zip"

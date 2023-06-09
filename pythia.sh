@@ -42,8 +42,8 @@ set -o errtrace   # trap errors in functions as well
 set -o pipefail   # don't ignore exit codes when piping output
 
 # Initialize default values.
-COMMAND=${1-''}
-DEBUG=${DEBUG-0}
+COMMAND="${1-''}"
+DEBUG="${DEBUG-0}"
 
 # Set default locale.
 # We use C (alias for POSIX) for having a basic default value and
@@ -120,7 +120,7 @@ update_venv() {
 
     set +e
     "$PYTHON_BIN" -c "from paver.tasks import main; main()" deps
-    exit_code=$?
+    exit_code="$?"
     set -e
     if [ $exit_code -ne 0 ]; then
         (>&2 echo "Failed to run the initial './pythia.sh deps' command.")
@@ -129,7 +129,7 @@ update_venv() {
 
     set +e
     "$PYTHON_BIN" -c "from paver.tasks import main; main()" build
-    exit_code=$?
+    exit_code="$?"
     set -e
     if [ $exit_code -ne 0 ]; then
         (>&2 echo "Failed to run the initial './pythia.sh build' command.")
@@ -186,7 +186,7 @@ purge_cache() {
 # Delete the folder as quickly as possible.
 #
 delete_folder() {
-    local target=$1
+    local target="$1"
     # On Windows, we use internal command prompt for maximum speed.
     # See: https://stackoverflow.com/a/6208144/539264
     if [ "$OS" = "win" ]; then
@@ -211,7 +211,7 @@ execute() {
     # Make sure $@ is called in quotes as otherwise it will not work.
     set +e
     "$@"
-    exit_code=$?
+    exit_code="$?"
     set -e
     if [ $exit_code -ne 0 ]; then
         (>&2 echo "Failed:" "$@")
@@ -319,7 +319,7 @@ install_base_deps() {
             --index-url="$PIP_INDEX_URL" \
             "${BASE_REQUIREMENTS[@]}"
 
-    exit_code=$?
+    exit_code="$?"
 
     echo "::endgroup::"
 
@@ -362,8 +362,8 @@ set_download_commands() {
 # Download and extract a binary distribution.
 #
 get_binary_dist() {
-    local dist_name=$1
-    local remote_base_url=$2
+    local dist_name="$1"
+    local remote_base_url="$2"
 
     echo "Getting $dist_name from $remote_base_url..."
 
@@ -390,7 +390,7 @@ get_binary_dist() {
 # Check if we have a versioned Python distribution.
 #
 test_version_exists() {
-    local remote_base_url=$1
+    local remote_base_url="$1"
     local target_file="python-$PYTHON_VERSION-$OS-$ARCH.tar.gz"
 
     echo "Checking $remote_base_url/$PYTHON_VERSION/$target_file..."
@@ -402,13 +402,13 @@ test_version_exists() {
 # Download and extract in cache the python distributable.
 #
 get_python_dist() {
-    local remote_base_url=$1
+    local remote_base_url="$1"
     local python_distributable="python-$PYTHON_VERSION-$OS-$ARCH"
     local onlinetest_errorcode
 
     set +o errexit
     test_version_exists "$remote_base_url"
-    onlinetest_errorcode=$?
+    onlinetest_errorcode="$?"
     set -o errexit
 
     if [ $onlinetest_errorcode -eq 0 ]; then
@@ -494,7 +494,7 @@ copy_python() {
             # it does not exists.
             set +o errexit
             test_version_exists "$BINARY_DIST_URI"
-            local test_version=$?
+            local test_version="$?"
             set -o errexit
             if [ $test_version -ne 0 ]; then
                 (>&2 echo "The build is now at $python_installed_version.")
@@ -831,8 +831,8 @@ if [ "$COMMAND" = "detect_os" ]; then
 fi
 
 if [ "$COMMAND" = "get_python" ] ; then
-    OS=$2
-    ARCH=$3
+    OS="$2"
+    ARCH="$3"
     resolve_python_version
     get_python_dist "$BINARY_DIST_URI"
     exit 0
@@ -849,7 +849,7 @@ fi
 
 set +e
 execute_venv "$@"
-exit_code=$?
+exit_code="$?"
 set -e
 
 exit $exit_code
