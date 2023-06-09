@@ -537,42 +537,42 @@ install_dependencies(){
 #
 # Check version of current OS to see if it is supported.
 # If it's too old, exit with a nice informative message.
-# If it's supported, return through eval the version numbers to be used for
-# naming the package, e.g.: '12' for FreeBSD 12.x, '114' for Solaris 11.4.
+# If it's supported, return through eval the version digits to be used for
+# naming the package, e.g.: "12" for FreeBSD 12.x or "114" for Solaris 11.4.
 #
 check_os_version() {
     # First parameter should be the human-readable name for the current OS.
     # For example: "Solaris" for SunOS ,"macOS" for Darwin, etc.
-    # Second and third parameters must be strings composed of integers
+    # Second and third parameters must be strings composed of digits
     # delimited with dots, representing, in order, the oldest version
     # supported for the current OS and the current detected version.
-    # The fourth parameter is used to return through eval the relevant numbers
-    # for naming the Python package for the current OS, as detailed above.
+    # The fourth parameter is used to return through eval the relevant digits
+    # for naming the Pythia package for the current OS, as detailed above.
     local name_fancy="$1"
     local version_good="$2"
     local version_raw="$3"
     local version_chevah="$4"
     # Version string built in this function, passed back for naming the package.
-    # Uses the same number of version sections as the $version_chevah variable,
+    # Uses the same number of version digits as the "$version_chevah" variable,
     # e.g. for FreeBSD it would be "12", even if OS version is actually "12.1".
     local version_built=""
-    # If major/minor/patch/etc version sections are the same, it's good enough.
+    # If major/minor/patch/etc. version digits are the same, it's good enough.
     local flag_supported="good_enough"
     local version_raw_array
     local version_good_array
 
     if [[ "$version_raw" =~ [^[:digit:]\.] ]]; then
-        (>&2 echo "OS version should only have numbers and periods, but:")
+        (>&2 echo "OS version should only have digits and dots, but:")
         (>&2 echo "    \$version_raw=$version_raw")
         exit 12
     fi
 
-    # Using '.' as a delimiter, populate the version_* arrays.
+    # Using '.' as a delimiter, populate corresponding version_* arrays.
     IFS=. read -r -a version_raw_array <<< "$version_raw"
     IFS=. read -r -a version_good_array <<< "$version_good"
 
-    # Iterate through all the integers from the good version to compare them
-    # one by one with the corresponding integers from the version to check.
+    # Iterate through all the digits from the good version to compare them
+    # one by one with the corresponding digits from the detected version.
     for (( i=0 ; i < ${#version_good_array[@]}; i++ )); do
         version_built="${version_built}${version_raw_array[$i]}"
         # There is nothing to do if versions are the same, that's good enough.
@@ -591,7 +591,7 @@ check_os_version() {
         fi
     done
 
-    # If $flag_supported is "newer_version" or "good_enough" is irrelevant.
+    # If "$flag_supported" is "newer_version" / "good_enough" is now irrelevant.
     if [ "$flag_supported" = "false" ]; then
         (>&2 echo "Detected version of $name_fancy is: $version_raw.")
         (>&2 echo "For versions older than $name_fancy $version_good,")
@@ -663,7 +663,7 @@ check_glibc_version(){
     rm "$ldd_output_file"
 
     if [[ "$glibc_version" =~ [^[:digit:]\.] ]]; then
-        (>&2 echo "Glibc version should only have numbers and periods, but:")
+        (>&2 echo "Glibc version should only have digits and dots, but:")
         (>&2 echo "    \$glibc_version=$glibc_version")
         exit 20
     fi
@@ -701,7 +701,7 @@ check_musl_version(){
     rm "$ldd_output_file"
 
     if [[ "$musl_version" =~ [^[:digit:]\.] ]]; then
-        (>&2 echo "Musl version should only have numbers and periods, but:")
+        (>&2 echo "Musl version should only have digits and dots, but:")
         (>&2 echo "    \$musl_version=$musl_version")
         exit 25
     fi
