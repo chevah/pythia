@@ -96,5 +96,22 @@ if ! command -v makeinfo >/dev/null; then
     export PATH="$PATH:~/bin/"
 fi
 
+# To avoid having Python's uuid module linked to system libs.
+echo "# Checking if it's possible to avoid linking to system uuid libs... #"
+case "$OS" in
+    ubuntu*)
+        "${CHECK_CMD[@]}" uuid-dev \
+            && echo "To not link to uuid libs, run: apt remove -y uuid-dev"
+        ;;
+    rhel*|amzn*)
+        "${CHECK_CMD[@]}" libuuid-devel \
+            && echo -n "To not link to uuid libs, run: " \
+            && echo "yum remove -y e2fsprogs-devel libuuid-devel"
+        ;;
+    *)
+        (>&2 echo "Not guarding against linking to uuid libs on this system!")
+        ;;
+esac
+
 # This script is sourced, execution does not end here.
 set -o errexit
