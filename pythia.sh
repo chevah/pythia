@@ -548,11 +548,15 @@ check_os_version() {
     # supported for the current OS and the current detected version.
     # The fourth parameter is used to return through eval the relevant numbers
     # for naming the Python package for the current OS, as detailed above.
-    local name_fancy=$1
-    local version_good=$2
-    local version_raw=$3
-    local version_chevah=$4
-    local version_constructed=""
+    local name_fancy="$1"
+    local version_good="$2"
+    local version_raw="$3"
+    local version_chevah="$4"
+    # Version string built in this function, passed back for naming the package.
+    # Uses the same number of version sections as the $version_chevah variable,
+    # e.g. for FreeBSD it would be "12", even if OS version is actually "12.1".
+    local version_built=""
+    # If major/minor/patch/etc version sections are the same, it's good enough.
     local flag_supported="good_enough"
     local version_raw_array
     local version_good_array
@@ -568,21 +572,26 @@ check_os_version() {
     IFS=. read -r -a version_good_array <<< "$version_good"
 
     # Iterate through all the integers from the good version to compare them
-    # one by one with the corresponding integers from the supported version.
+    # one by one with the corresponding integers from the version to check.
     for (( i=0 ; i < ${#version_good_array[@]}; i++ )); do
-        version_constructed="${version_constructed}${version_raw_array[$i]}"
+        version_built="${version_built}${version_raw_array[$i]}"
+        # There is nothing to do if versions are the same, that's good enough.
         if [ "${version_raw_array[$i]}" -gt "${version_good_array[$i]}" ]; then
+            # First newer version! Comparing more minor versions is irrelevant.
+            # Up to now, compared versions were the same, if there were others.
             if [ "$flag_supported" = "good_enough" ]; then
-                flag_supported="true"
+                flag_supported="newer_version"
             fi
-        elif [ "${version_raw_array[$i]}" -lt "${version_good_array[$i]}" ]
-        then
+        elif [ "${version_raw_array[$i]}" -lt "${version_good_array[$i]}" ];then
+            # First older version! Comparing more minor versions is irrelevant.
+            # Up to now, compared versions were the same, if there were others.
             if [ "$flag_supported" = "good_enough" ]; then
                 flag_supported="false"
             fi
         fi
     done
 
+    # If $flag_supported is "newer_version" or "good_enough" is irrelevant.
     if [ "$flag_supported" = "false" ]; then
         (>&2 echo "Detected version of $name_fancy is: $version_raw.")
         (>&2 echo "For versions older than $name_fancy $version_good,")
@@ -590,8 +599,8 @@ check_os_version() {
         exit 13
     fi
 
-    # The sane way to return fancy values with a bash function is to use eval.
-    eval "$version_chevah"="'$version_constructed'"
+    # The sane way to return fancy values with a Bash function is to use eval.
+    eval "$version_chevah"="'$version_built'"
 }
 
 #
