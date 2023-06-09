@@ -4,6 +4,12 @@
 # Available independently of all other scripts, except the common functions.sh.
 # To be executed from the root of the repository.
 
+# Bash checks
+set -o nounset    # always check if variables exist
+set -o errexit    # always exit on error
+set -o errtrace   # trap errors in functions as well
+set -o pipefail   # don't ignore exit codes when piping output
+
 source ./functions.sh
 
 # BUILD_DIR is also defined in build.conf.
