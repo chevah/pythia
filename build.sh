@@ -9,8 +9,8 @@ set -o errexit    # always exit on error
 set -o errtrace   # trap errors in functions as well
 set -o pipefail   # don't ignore exit codes when piping output
 
-# Get PIP_INDEX_URL for PIP_ARGS in build.conf.
-source pythia.conf
+# Default PyPI server to use. Can be overwritten in build.conf.
+PIP_INDEX_URL="https://pypi.org/simple"
 
 # Set versions for the software to be built and other defaults.
 source build.conf
@@ -28,11 +28,10 @@ exit_on_error $? 250
 export PYTHON_BUILD_VERSION PYTHIA_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_XZ BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
-# OS detection is slow on Windows, only execute it when the file is missing.
-if [ ! -r ./BUILD_ENV_VARS ]; then
+# OS detection is done by the common pythia.sh. The values are saved in a file.
+if [ ! -s ./BUILD_ENV_VARS ]; then
     execute ./pythia.sh detect_os
 fi
-# Import build env vars as set by pythia.sh.
 source ./BUILD_ENV_VARS
 
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
@@ -51,73 +50,75 @@ PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 # between native compilers and GCC on platforms such as the BSDs and Solaris.
 export CC="gcc"
 # Other needed tools (GNU flavours preferred).
-export MAKE="make"
+# For proper quoting, _CMD vars are Bash arrays of commands and optional flags.
+MAKE_CMD=(make)
+SHA_CMD=(sha512sum --check --status --warn)
+TAR_CMD=(tar xfz)
+ZIP_CMD=(unzip -q)
 # $GET_CMD must save to custom filename, which must be appended before the link.
-# E.g., to use wget, GET_CMD should be "wget --quiet -O".
-export GET_CMD="curl --silent --location --output"
-export SHA_CMD="sha512sum --check --status --warn"
-export TAR_CMD="tar xfz"
-export ZIP_CMD="unzip -q"
-if [ x$(id -u) != "x0" ]; then
-    export SUDO_CMD="sudo"
-fi
+# E.g., to use wget, GET_CMD should be (wget --quiet -O).
+GET_CMD=(curl --silent --location --output)
 
-# OS quirks.
+# OS quirks. Sourced last to allow overwriting the above variables.
 source os_quirks.sh
 
 
-help_text_clean="Clean build dir. Add -a to clean downloads from src/ too."
+# shellcheck disable=SC2034 # Only used through compgen.
+help_text_clean="Clean build dir. Add -a to remove downloads and saved values."
 command_clean() {
-    echo "#### Removing previous build/ sub-directory, if existing... ####"
+    echo "#### Removing previous build sub-directory, if existing... ####"
     execute rm -rf "$BUILD_DIR"
 
     if [ $# -ne 0 ]; then
-        if [ $1 = "-a" ]; then
-            echo "## Removing any downloads from src/... ##"
+        if [ "$1" = "-a" ]; then
+            echo "## Removing all downloads from src/... ##"
             execute rm -fv src/*/*.{tar.gz,tgz,zip}
+            echo "## Removing all local files with saved values... ##"
+            execute rm -fv BUILD_ENV_VARS "$BUILD_ENV_ARRAYS_FILE"
         fi
     fi
 }
 
 
+# shellcheck disable=SC2034 # Only used through compgen.
 help_text_build="Build Python binaries for current platform."
 command_build() {
-    # Check for packages required to build on current OS.
     echo "::group::Package/command checks"
+    # Check for packages required to build on current OS.
     echo "#### Checking for required packages... ####"
     source pkg_checks.sh
     echo "::endgroup::"
 
     # Clean build dir to avoid contamination from previous builds,
-    # but without removing the download archives, to speed up the build.
-    command_clean
+    # but without removing the download archives, to speed up next builds.
+    command_clean "$@"
 
     # Build stuff statically on most platforms, install headers and libs in the
     # following locations, making sure they are picked up when building Python.
     execute mkdir -p "$INSTALL_DIR"/{include,lib}
     export LDFLAGS="-L${INSTALL_DIR}/lib/ ${LDFLAGS:-}"
-    export PKG_CONFIG_PATH="${INSTALL_DIR}/lib/pkgconfig/:${PKG_CONFIG_PATH:-}"
+    export PKG_CONFIG_PATH="$INSTALL_DIR/lib/pkgconfig/:${PKG_CONFIG_PATH:-}"
     # On certain OS'es, some modules require this (zlib, bz2, lzma, sqlite3).
     export CPPFLAGS="${CPPFLAGS:-} -I${INSTALL_DIR}/include"
 
-    build_dep $BUILD_LIBFFI   libffi           $LIBFFI_VERSION
-    build_dep $BUILD_ZLIB     zlib             $ZLIB_VERSION
-    build_dep $BUILD_BZIP2    bzip2            $BZIP2_VERSION
-    build_dep $BUILD_XZ       xz               $XZ_VERSION
-    build_dep $BUILD_LIBEDIT  libedit          $LIBEDIT_VERSION
-    build_dep $BUILD_SQLITE   sqlite-autoconf  $SQLITE_VERSION
-    build_dep $BUILD_OPENSSL  openssl          $OPENSSL_VERSION
+    build_dep "$BUILD_LIBFFI"   libffi           "$LIBFFI_VERSION"
+    build_dep "$BUILD_ZLIB"     zlib             "$ZLIB_VERSION"
+    build_dep "$BUILD_BZIP2"    bzip2            "$BZIP2_VERSION"
+    build_dep "$BUILD_XZ"       xz               "$XZ_VERSION"
+    build_dep "$BUILD_LIBEDIT"  libedit          "$LIBEDIT_VERSION"
+    build_dep "$BUILD_SQLITE"   sqlite-autoconf  "$SQLITE_VERSION"
+    build_dep "$BUILD_OPENSSL"  openssl          "$OPENSSL_VERSION"
 
     build_python
 
-    # Python modules installed with pip. Built locally if not on Windows.
+    # Python modules installed w/ pip. Some are built locally (not on Windows).
     command_install_python_modules
 
     # Cleanups the dir to be packaged, also moves include/ from the root dir.
     cleanup_install_dir
 
     # Build the new package.
-    make_dist ${PYTHON_BUILD_DIR}
+    make_dist "$PYTHON_BUILD_DIR"
 
     # Generate a SFTP batch for uploading the package.
     build_publish_dist_sftp_batch
@@ -129,18 +130,18 @@ command_build() {
 
 # This builds Python's dependencies: libffi, bzip2, openssl, etc.
 build_dep() {
-    local dep_boolean=$1
-    local dep_name=$2
-    local dep_version=$3
+    local dep_boolean="$1"
+    local dep_name="$2"
+    local dep_version="$3"
 
-    if [ $dep_boolean = "yes" ]; then
+    if [ "$dep_boolean" = "yes" ]; then
         # This is where building happens.
-        build $dep_name $dep_version
+        build "$dep_name" "$dep_version"
         # If there's something to be done post-build, here's the place.
-    elif [ $dep_boolean = "no" ]; then
-        (>&2 echo "    Skip building $dep_name")
+    elif [ "$dep_boolean" = "no" ]; then
+        (>&2 echo -e "\tSkip building $dep_name")
     else
-        (>&2 echo "Unknown env var for building ${dep_name}. Exiting!")
+        (>&2 echo "Unknown env var for building $dep_name. Exiting!")
         exit 248
     fi
 }
@@ -148,13 +149,13 @@ build_dep() {
 
 # This builds Python itself.
 build_python() {
-    if [ $OS = "win" ]; then
+    if [ "$OS" = "win" ]; then
         # Python "build" is a very special case under Windows.
         execute pushd src/Python-Windows
-        execute ./chevahbs Python $PYTHON_BUILD_VERSION $INSTALL_DIR
+        execute ./chevahbs Python "$PYTHON_BUILD_VERSION" "$INSTALL_DIR"
         execute popd
     else
-        build Python $PYTHON_BUILD_VERSION
+        build Python "$PYTHON_BUILD_VERSION"
     fi
 }
 
@@ -162,7 +163,7 @@ build_python() {
 download_get_pip() {
     echo "## Downloading get-pip.py... ##"
     if [ ! -e "$BUILD_DIR"/get-pip.py ]; then
-        execute $GET_CMD \
+        execute "${GET_CMD[@]}" \
             "$BUILD_DIR"/get-pip.py "$BOOTSTRAP_GET_PIP"
     fi
 }
@@ -174,80 +175,89 @@ command_install_python_modules() {
     echo "#### Installing Python modules... ####"
 
     # Install latest PIP, then instruct it to get exact versions of setuptools.
-    # Otherwise, get-pip.py will always try to get latest versions.
+    # Otherwise, get-pip.py always tries to get latest versions.
     download_get_pip
     echo "# Installing latest pip with preferred setuptools version... #"
-    execute $PYTHON_BIN "$BUILD_DIR"/get-pip.py $PIP_ARGS \
-        pip==$PIP_VERSION --no-setuptools setuptools==$SETUPTOOLS_VERSION
+    execute "$PYTHON_BIN" "$BUILD_DIR"/get-pip.py "${PIP_ARGS[@]}" \
+        pip=="$PIP_VERSION" --no-setuptools setuptools=="$SETUPTOOLS_VERSION"
 
     # pycparser is installed first as setup_requires is ugly.
     # https://pip.pypa.io/en/stable/reference/pip_install/#controlling-setup-requires
     echo "# Installing pycparser with preferred setuptools version... #"
-    execute $PYTHON_BIN -m pip \
-        install $PIP_ARGS -U pycparser==$PYCPARSER_VERSION
+    execute "$PYTHON_BIN" -m pip \
+        install "${PIP_ARGS[@]}" -U pycparser=="$PYCPARSER_VERSION"
 
-    if [ $OS = 'win' ]; then
-        echo "    Skip makefile updating on Windows"
+    if [ "$OS" = "win" ]; then
+        echo -e "\tSkip makefile updating on Windows"
     else
         echo "# Updating Python config Makefile for newly-built Python... #"
-        makefile="$(ls $INSTALL_DIR/lib/$PYTHON_VERSION/config*/Makefile)"
-        makefile_orig="${makefile}.orig"
+        makefile="$(ls "$INSTALL_DIR"/lib/"$PYTHON_VERSION"/config*/Makefile)"
+        makefile_orig="$makefile".orig
 
-        execute cp $makefile $makefile_orig
+        execute cp "$makefile" "$makefile_orig"
         execute sed "s#^prefix=.*#prefix= $INSTALL_DIR#" "$makefile_orig" \
             > "$makefile"
     fi
 
-    for library in $PIP_LIBRARIES ; do
-        execute "$PYTHON_BIN" -m pip install $PIP_ARGS $library
+    for library in "${PIP_LIBRARIES[@]}" ; do
+        execute "$PYTHON_BIN" -m pip install "${PIP_ARGS[@]}" "$library"
     done
 
     # When done, uninstall wheel.
-    execute $PYTHON_BIN -m pip uninstall --yes wheel
+    execute "$PYTHON_BIN" -m pip uninstall --yes wheel
 
     echo "::endgroup::"
 }
 
 
-help_text_test=\
-"Run own tests for the newly-build Python distribution."
+# shellcheck disable=SC2034 # Only used through compgen.
+help_text_test="Run own tests for the newly-build Python distribution."
 command_test() {
     local test_file="test_python_binary_dist.py"
     local python_binary="$PYTHON_BIN"
-    if [ $OS != 'win' ]; then
+
+    echo "::group::Chevah tests"
+    if [ ! -d "$BUILD_DIR" ]; then
+        (>&2 echo "No $BUILD_DIR sub-directory present, try 'build' first!")
+        exit 220
+    fi
+
+    echo "#### Executing Chevah Python tests... ####"
+    if [ "$OS" != "win" ]; then
         # Post-cleanup, the binary in /bin is named "python", not "python3.x".
         local python_binary="$INSTALL_DIR/bin/python"
     fi
-
-    echo "::group::Chevah tests"
-    echo "#### Executing Chevah tests... ####"
-    execute cp src/chevah-python-test/$test_file "$BUILD_DIR"
-    execute cp src/chevah-python-test/get_binaries_deps.sh "$BUILD_DIR"
+    execute cp src/chevah-python-tests/"$test_file" "$BUILD_DIR"
+    execute cp src/chevah-python-tests/get_binaries_deps.sh "$BUILD_DIR"
     execute pushd "$BUILD_DIR"
-    execute $python_binary $test_file
+    execute "$python_binary" "$test_file"
     echo "::endgroup::"
 
     echo "::group::Security tests"
     echo "## Testing for outdated packages and security issues... ##"
-    execute $python_binary -m pip list --outdated --format=columns
-    execute $python_binary -m pip install $PIP_ARGS safety=="$SAFETY_VERSION"
-    execute $python_binary -m safety check --full-report
+    execute "$python_binary" -m pip list --outdated --format=columns
+    execute "$python_binary" -m pip install "${PIP_ARGS[@]}" \
+        safety=="$SAFETY_VERSION"
+    execute "$python_binary" -m safety check --full-report
     echo "::endgroup::"
+
+    echo "#### Executing Chevah shell tests... ####"
+    ./src/chevah-bash-tests/shellcheck_tests.sh
 
     execute popd
 }
 
 
-help_text_compat=\
-"Run the test suite from chevah/compat master."
+# shellcheck disable=SC2034 # Only used through compgen.
+help_text_compat="Run the test suite from chevah/compat master."
 command_compat() {
-    local new_python_conf="${PYTHON_BUILD_VERSION}.${PYTHIA_VERSION}"
+    local new_python_conf="$PYTHON_BUILD_VERSION.$PYTHIA_VERSION"
     execute pushd "$BUILD_DIR"
 
     # This is quite hackish, as compat is arm-twisted to use the local version.
     echo "::group::Compat tests"
-    echo '#### Running chevah's compat tests... ####'
-    echo '## Removing any pre-existing compat code... ####'
+    echo "#### Running chevah's compat tests... ####"
+    echo "## Removing any pre-existing compat code... ##"
     execute rm -rf compat/
     execute git clone https://github.com/chevah/compat.git --depth=1 -b master
     execute pushd compat
@@ -268,5 +278,32 @@ command_compat() {
 }
 
 
+
+#
 # Launch the whole thing.
-select_command $@
+#
+
+# Pass the _CMD stuff to the "chevahbs" scripts in a file to be sourced.
+# The unusual quoting avoids mixing strings and arrays.
+# Indentation helps when showing the arrays during debugging.
+(
+    echo -e "\tMAKE_CMD=(" "${MAKE_CMD[@]}" ")"
+    echo -e "\tGET_CMD=(" "${GET_CMD[@]}" ")"
+    echo -e "\tSHA_CMD=(" "${SHA_CMD[@]}" ")"
+    echo -e "\tTAR_CMD=(" "${TAR_CMD[@]}" ")"
+    echo -e "\tZIP_CMD=(" "${ZIP_CMD[@]}" ")"
+) > "$BUILD_ENV_ARRAYS_FILE"
+
+if [ "$DEBUG" -ne 0 ]; then
+    build_flags=(OS ARCH CC CFLAGS BUILD_LIBFFI BUILD_ZLIB BUILD_BZIP2 \
+        BUILD_XZ BUILD_LIBEDIT BUILD_OPENSSL BUILD_SQLITE)
+    echo -e "Build variables:"
+    for build_var in "${build_flags[@]}"; do
+        # This uses Bash's indirect expansion.
+        echo -e "\t$build_var: ${!build_var}"
+    done
+    echo "Bash arrays to import in chevahbs scripts:"
+    cat "$BUILD_ENV_ARRAYS_FILE"
+fi
+
+select_command "$@"

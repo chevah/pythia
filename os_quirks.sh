@@ -2,39 +2,27 @@
 #
 # OS quirks for the Pythia build system.
 
-# Avoid Rust for now, it brings more trouble.
-export CRYPTOGRAPHY_DONT_BUILD_RUST=1
-
 case $OS in
     win)
-        # On Windows, python executable is installed at a different path.
-        PYTHON_BIN="${INSTALL_DIR}/lib/python.exe"
+        # On Windows, the python executable is installed in a different path.
+        PYTHON_BIN="$INSTALL_DIR/lib/python.exe"
         # There are no actual dependency builds, only binary wheels are used.
-        # But not all are from pypi.org. Wheels copied from other places:
-        #   * "setproctitle" from https://www.lfd.uci.edu/~gohlke/pythonlibs/
-        export BUILD_BZIP2="no"
-        export BUILD_SQLITE="no"
-        PIP_LIBRARIES="$PIP_LIBRARIES \
-            pywin32==${PYWIN32_VERSION} \
-            "
-        # On Windows, only one of the installers is downloaded.
-        export SHA_CMD="$SHA_CMD --ignore-missing"
+        BUILD_BZIP2="no"
+        BUILD_SQLITE="no"
+        BUILD_OPENSSL="no"
+        PIP_LIBRARIES=("${PIP_LIBRARIES[@]}" \
+            pywin32=="$PYWIN32_VERSION" \
+            )
         ;;
     linux*)
         if [ -f /etc/alpine-release ]; then
             # The busybox ersatz binary on Alpine Linux is different.
-            export SHA_CMD="sha512sum -csw"
-        elif [ -f /etc/redhat-release ]; then
-            if grep -q "CentOS release 5" /etc/redhat-release; then
-                # There are issues with Let's Encrypt certs on CentOS 5.
-                export GET_CMD="curl --silent --insecure --location --output"
-            fi
+            SHA_CMD=(sha512sum -csw)
         fi
-        # Build as portable as possible, only libc should be needed.
-        export BUILD_LIBFFI="yes"
-        export BUILD_ZLIB="yes"
-        export BUILD_XZ="yes"
-        export BUILD_OPENSSL="yes"
+        # Build as portable as possible, only glibc/musl should be needed.
+        BUILD_LIBFFI="yes"
+        BUILD_ZLIB="yes"
+        BUILD_XZ="yes"
         ;;
     macos)
         export CC="clang"
@@ -44,38 +32,34 @@ case $OS in
         # "10.4", and then tries to avoid the broken readline in OS X 10.4.
         export MACOSX_DEPLOYMENT_TARGET=10.13
         # System includes bzip2 libs by default.
-        export BUILD_BZIP2="no"
-        export BUILD_XZ="yes"
-        # 10.13 and newer come with LibreSSL instead of the old OpenSSL libs.
-        # But 10.13 has version 2.2.7, while cryptography 2.9 requires 2.7.
-        # Therefore, build OpenSSL for both stdlib and cryptography.
-        export BUILD_OPENSSL="yes"
-        export SHA_CMD="shasum --algorithm 512 --check --status --warn"
+        BUILD_BZIP2="no"
+        BUILD_XZ="yes"
+        SHA_CMD=(shasum --algorithm 512 --check --status --warn)
         ;;
     fbsd*)
         export CC="clang"
         export CXX="clang++"
         # libffi not available in the base system, only as port/package.
-        export BUILD_LIBFFI="yes"
+        BUILD_LIBFFI="yes"
         # System includes bzip2 libs by default.
-        export BUILD_BZIP2="no"
-        export BUILD_XZ="yes"
+        BUILD_BZIP2="no"
+        BUILD_XZ="yes"
         # Install package "p5-Digest-SHA" to get shasum binary.
-        export SHA_CMD="shasum --algorithm 512 --check --status --warn"
+        SHA_CMD=(shasum --algorithm 512 --check --status --warn)
         ;;
     obsd*)
         export CC="clang"
         export CXX="clang++"
         # libffi not available in the base system, only as port/package.
-        export BUILD_LIBFFI="yes"
-        export BUILD_XZ="yes"
-        export SHA_CMD="sha512 -q -c"
+        BUILD_LIBFFI="yes"
+        BUILD_XZ="yes"
+        SHA_CMD=(sha512 -q -c)
         ;;
     sol*)
         # By default, Sun's Studio compiler is used.
         export CC="cc"
         export CXX="CC"
-        export MAKE="gmake"
+        export MAKE_CMD=(gmake)
         # Needed for the subprocess32 module.
         # More at https://github.com/google/python-subprocess32/issues/40.
         export CFLAGS="${CFLAGS:-} -DHAVE_DIRFD"
@@ -88,25 +72,30 @@ case $OS in
             export LDFLAGS="${LDFLAGS:-} -m64 -L/usr/lib/64 -R/usr/lib/64"
         fi
         # System includes bzip2 libs by default.
-        export BUILD_BZIP2="no"
+        BUILD_BZIP2="no"
         # Solaris 11 is much more modern, but still has some quirks.
-        # Multiple system libffi libs present, this is a problem in 11.4.
-        export BUILD_LIBFFI="yes"
-        export BUILD_XZ="yes"
+        # Multiple system libffi libs are present, this is a problem in 11.4.
+        BUILD_LIBFFI="yes"
+        BUILD_XZ="yes"
         # Native tar is not that compatible, but the GNU tar should be present.
-        export TAR_CMD="gtar xfz"
+        TAR_CMD=(gtar xfz)
         ;;
 esac
 
 # Compiler-dependent flags. At this moment, the compiler is known.
-if [ "${OS%sol*}" = "" ]; then
-    # Not all packages enable PIC, force it to avoid relocation issues.
-    export CFLAGS="$CFLAGS -Kpic"
-elif [ "${OS%fbsd*}" = "" -o "${OS%obsd*}" = "" ]; then
-    # Use PIC (Position Independent Code) on FreeBSD and OpenBSD with Clang.
-    export CFLAGS="${CFLAGS:-} -fPIC"
-elif [ "$CC" = "gcc" -a ${ARCH%%64} != "$ARCH" ]; then
-    # Use PIC (Position Independent Code) with GCC on 64-bit arches.
+case "$OS" in
+    sol*)
+        # Not all packages enable PIC, force it to avoid relocation issues.
+        export CFLAGS="$CFLAGS -Kpic"
+        ;;
+    fbsd*|obsd*)
+        # Use PIC (Position Independent Code) on FreeBSD and OpenBSD with Clang.
+        export CFLAGS="${CFLAGS:-} -fPIC"
+        ;;
+esac
+
+# Use PIC (Position Independent Code) with GCC on 64-bit arches (currently all).
+if [ "$CC" = "gcc" ]; then
     export CFLAGS="${CFLAGS:-} -fPIC"
 fi
 
@@ -118,16 +107,16 @@ case "$OS" in
         ;;
     macos|fbsd*|obsd*)
         # Logical CPUs.
-        CPUS=$(sysctl -n hw.ncpu)
+        CPUS="$(sysctl -n hw.ncpu)"
         ;;
     sol*)
         # Physical CPUs. 
-        CPUS=$(/usr/sbin/psrinfo -p)
+        CPUS="$(/usr/sbin/psrinfo -p)"
         ;;
     *)
         # Only Linux distros should be left, look for logical CPUS.
         # Don't use lscpu/nproc or other stuff not present on older distros.
-        CPUS=$(getconf _NPROCESSORS_ONLN)
+        CPUS="$(getconf _NPROCESSORS_ONLN)"
         ;;
 esac
-export MAKE="${MAKE:-} -j${CPUS}"
+MAKE_CMD=("${MAKE_CMD[@]}" -j"$CPUS")
