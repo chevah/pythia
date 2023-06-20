@@ -79,9 +79,8 @@ chevahbs_configure() {
 
 chevahbs_compile() {
     execute "${MAKE_CMD[@]}"
-    # FIXME:12: Enable Python's own tests again.
     # Don't use execute below, some tests might fail innocuously.
-    # execute "${MAKE_CMD[@]}" test
+    "${MAKE_CMD[@]}" test
 }
 
 
