@@ -79,8 +79,7 @@ chevahbs_configure() {
 
 chevahbs_compile() {
     execute "${MAKE_CMD[@]}"
-    # Don't use execute below, some tests might fail innocuously.
-    "${MAKE_CMD[@]}" test
+    execute "${MAKE_CMD[@]}" test
 }
 
 
