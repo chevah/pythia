@@ -49,6 +49,8 @@ PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 # Explicitly choose the C compiler in order to make it possible to switch
 # between native compilers and GCC on platforms such as the BSDs and Solaris.
 export CC="gcc"
+# Used for testing Python C++ extensions (test_cppext).
+export CXX="g++"
 # Other needed tools (GNU flavours preferred).
 # For proper quoting, _CMD vars are Bash arrays of commands and optional flags.
 MAKE_CMD=(make)
