@@ -79,20 +79,21 @@ chevahbs_configure() {
 
 chevahbs_compile() {
     execute "${MAKE_CMD[@]}"
-    execute "${MAKE_CMD[@]}" test
+    # Locales not fully supported on Alpine 3.12, failing locale-related tests.
+    if [ "$OS" != "linux_musl" ]; then
+        execute "${MAKE_CMD[@]}" test
+    fi
 }
 
 
 chevahbs_install() {
-    case "$OS" in
-        alpine*)
-            # EMUTRAMP required for full functionality under a grsec kernel.
-            # Don't use "paxmark", file attributes will be lost when tar'ed.
-            # Needed with non-grsec kernels as well, otherwise PAM-related
-            # compat tests crash with signal 11 (last tested on Alpine 3.12).
-            execute paxctl -cE python
-            ;;
-    esac
+    if [ "$OS" = "linux_musl" ]; then
+        # EMUTRAMP required for full functionality under a grsec kernel.
+        # Don't use "paxmark", file attributes will be lost when tar'ed.
+        # Needed with non-grsec kernels as well, otherwise PAM-related
+        # compat tests crash with signal 11 (last tested on Alpine 3.12).
+        execute paxctl -cE python
+    fi
 
     execute "${MAKE_CMD[@]}" install
 }
