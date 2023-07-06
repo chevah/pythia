@@ -79,8 +79,13 @@ chevahbs_configure() {
 
 chevahbs_compile() {
     execute "${MAKE_CMD[@]}"
-    # Locales not fully supported on Alpine 3.12, failing locale-related tests.
+    if [ "$OS" = "macos" ]; then
+        # Extra CA certs are needed to pass test_cppext and test_distutils.
+        execute sed s#/Library/Frameworks/Python.framework/Versions/@PYVER@/bin/python@PYVER@#"$PYTHON_BIN"# Mac/BuildScript/resources/install_certificates.command > install_certificates.command
+        execute /bin/sh ./install_certificates.command
+    fi
     if [ "$OS" != "linux_musl" ]; then
+        # Locales not supported on Alpine 3.12, failing locale-related tests.
         execute "${MAKE_CMD[@]}" test
     fi
 }
