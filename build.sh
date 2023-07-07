@@ -241,12 +241,11 @@ command_test() {
     execute "$python_binary" -m pip install "${PIP_ARGS[@]}" \
         safety=="$SAFETY_VERSION"
     execute "$python_binary" -m safety check --full-report
+    execute popd
     echo "::endgroup::"
 
     echo "#### Executing Chevah shell tests... ####"
-    ./src/chevah-bash-tests/shellcheck_tests.sh
-
-    execute popd
+    execute ./src/chevah-bash-tests/shellcheck_tests.sh
 }
 
 
