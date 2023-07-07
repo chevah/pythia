@@ -38,9 +38,9 @@ exec_sh_files=()
 other_sh_files=()
 for sh_file in ./*.sh; do
     if [ -x "$sh_file" ]; then
-        exec_sh_files=("${exec_sh_files[@]}" "$sh_file")
+        exec_sh_files+=("$sh_file")
     else
-        other_sh_files=("${other_sh_files[@]}" "$sh_file")
+        other_sh_files+=("$sh_file")
     fi
 done
 echo "Executable shell scripts to be checked (including their sources):"
