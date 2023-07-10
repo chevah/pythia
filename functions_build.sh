@@ -88,10 +88,17 @@ chevahbs_build() {
     chevahbs_configure "$@"
     echo "## Compiling... ##"
     chevahbs_compile "$@"
-    echo "## Installing... ##"
-    chevahbs_install "$@"
 }
 
+chevahbs_test() {
+    echo "## Testing... ##"
+    chevahbs_try "$@"
+}
+
+chevahbs_install() {
+    echo "## Installing... ##"
+    chevahbs_cp "$@"
+}
 
 #
 # Build-related stuff.
@@ -136,15 +143,25 @@ build() {
     # The actual build happens here.
     execute pushd "$own_build_dir"
     execute ./chevahbs build "$OS" "$install_dir" "$project_ver"
-        if [ -e "Makefile" ]; then
-            lib_config_dir="$install_dir/lib/config"
-            makefile_name="Makefile.$OS.$version_dir"
-            execute mkdir -p "$lib_config_dir"
-            execute cp Makefile "$lib_config_dir/$makefile_name"
-        fi
-    execute popd
-
     echo "::endgroup::"
+
+    echo "::group::Test" "$@"
+    echo "#### Testing $1 version $2... ####"
+    execute ./chevahbs test "$OS"
+    echo "::endgroup::"
+
+    echo "::group::Install" "$@"
+    echo "#### Installing $1 version $2... ####"
+    execute ./chevahbs install "$OS" "$install_dir"
+    if [ -e "Makefile" ]; then
+        lib_config_dir="$install_dir/lib/config"
+        makefile_name="Makefile.$OS.$version_dir"
+        execute mkdir -p "$lib_config_dir"
+        execute cp Makefile "$lib_config_dir/$makefile_name"
+    fi
+    echo "::endgroup::"
+
+    execute popd
 }
 
 

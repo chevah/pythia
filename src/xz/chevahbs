@@ -31,7 +31,12 @@ chevahbs_compile() {
 }
 
 
-chevahbs_install() {
+chevahbs_try() {
+    execute "${MAKE_CMD[@]}" check
+}
+
+
+chevahbs_cp() {
     execute "${MAKE_CMD[@]}" install DESTDIR="$INSTALL_DIR"
 }
 

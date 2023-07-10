@@ -33,7 +33,14 @@ chevahbs_compile() {
 }
 
 
-chevahbs_install() {
+# FIXME:48:
+# Test SQLite when building it from source.
+chevahbs_try() {
+    execute "${MAKE_CMD[@]}" check
+}
+
+
+chevahbs_cp() {
     execute "${MAKE_CMD[@]}" install DESTDIR="$INSTALL_DIR"
 }
 

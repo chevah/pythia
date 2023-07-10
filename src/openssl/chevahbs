@@ -30,11 +30,15 @@ chevahbs_configure() {
 
 chevahbs_compile() {
     execute "${MAKE_CMD[@]}"
+}
+
+
+chevahbs_try() {
     execute "${MAKE_CMD[@]}" test
 }
 
 
-chevahbs_install() {
+chevahbs_cp() {
     case "$OS" in
         linux*)
             echo "Installing manually to avoid messing with a lib64/ sub-dir:"
