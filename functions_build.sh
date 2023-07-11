@@ -157,9 +157,8 @@ build() {
         execute mkdir -p "$lib_config_dir"
         execute cp Makefile "$lib_config_dir/$makefile_name"
     fi
-    echo "::endgroup::"
-
     execute popd
+    echo "::endgroup::"
 }
 
 
