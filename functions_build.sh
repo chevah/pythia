@@ -108,7 +108,7 @@ build() {
     project_name="$1"
     # Second parameter has the form: "3.2.1", "1.1.1t", "3410200", etc.
     project_ver="$2"
-    echo "::group::" "$1" "build"
+    echo "::group::" "$1 $2" "build"
     echo "#### Building $1 version $2... ####"
 
     # This is where sources are unpacked, patched, and built.
@@ -143,12 +143,12 @@ build() {
     execute ./chevahbs build "$OS" "$install_dir" "$project_ver"
     echo "::endgroup::"
 
-    echo "::group::" "$1" "test"
+    echo "::group::" "$1 $2" "test"
     echo "#### Testing $1 version $2... ####"
     execute ./chevahbs test "$OS"
     echo "::endgroup::"
 
-    echo "::group::" "$1" "install"
+    echo "::group::" "$1 $2" "install"
     echo "#### Installing $1 version $2... ####"
     execute ./chevahbs install "$OS" "$install_dir"
     if [ -e "Makefile" ]; then
