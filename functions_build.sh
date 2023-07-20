@@ -88,10 +88,15 @@ chevahbs_build() {
     chevahbs_configure "$@"
     echo "## Compiling... ##"
     chevahbs_compile "$@"
-    echo "## Installing... ##"
-    chevahbs_install "$@"
 }
 
+chevahbs_test() {
+    chevahbs_try "$@"
+}
+
+chevahbs_install() {
+    chevahbs_cp "$@"
+}
 
 #
 # Build-related stuff.
@@ -103,7 +108,7 @@ build() {
     project_name="$1"
     # Second parameter has the form: "3.2.1", "1.1.1t", "3410200", etc.
     project_ver="$2"
-    echo "::group::Build" "$@"
+    echo "::group::" "$1 $2" "build"
     echo "#### Building $1 version $2... ####"
 
     # This is where sources are unpacked, patched, and built.
@@ -136,14 +141,23 @@ build() {
     # The actual build happens here.
     execute pushd "$own_build_dir"
     execute ./chevahbs build "$OS" "$install_dir" "$project_ver"
-        if [ -e "Makefile" ]; then
-            lib_config_dir="$install_dir/lib/config"
-            makefile_name="Makefile.$OS.$version_dir"
-            execute mkdir -p "$lib_config_dir"
-            execute cp Makefile "$lib_config_dir/$makefile_name"
-        fi
-    execute popd
+    echo "::endgroup::"
 
+    echo "::group::" "$1 $2" "test"
+    echo "#### Testing $1 version $2... ####"
+    execute ./chevahbs test "$OS"
+    echo "::endgroup::"
+
+    echo "::group::" "$1 $2" "install"
+    echo "#### Installing $1 version $2... ####"
+    execute ./chevahbs install "$OS" "$install_dir"
+    if [ -e "Makefile" ]; then
+        lib_config_dir="$install_dir/lib/config"
+        makefile_name="Makefile.$OS.$version_dir"
+        execute mkdir -p "$lib_config_dir"
+        execute cp Makefile "$lib_config_dir/$makefile_name"
+    fi
+    execute popd
     echo "::endgroup::"
 }
 

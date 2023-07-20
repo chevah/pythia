@@ -29,10 +29,10 @@ export PYTHON_BUILD_VERSION PYTHIA_VERSION
 export BUILD_ZLIB BUILD_BZIP2 BUILD_XZ BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
 # OS detection is done by the common pythia.sh. The values are saved in a file.
-if [ ! -s ./BUILD_ENV_VARS ]; then
+if [ ! -s BUILD_ENV_VARS ]; then
     execute ./pythia.sh detect_os
 fi
-source ./BUILD_ENV_VARS
+source BUILD_ENV_VARS
 
 # On Unix, use $ARCH to choose between 32bit or 64bit packages. It's possible
 # to force a 32bit build on a 64bit machine, e.g. by setting ARCH in pythia.sh
@@ -49,6 +49,8 @@ PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 # Explicitly choose the C compiler in order to make it possible to switch
 # between native compilers and GCC on platforms such as the BSDs and Solaris.
 export CC="gcc"
+# Used for testing Python C++ extensions (test_cppext).
+export CXX="g++"
 # Other needed tools (GNU flavours preferred).
 # For proper quoting, _CMD vars are Bash arrays of commands and optional flags.
 MAKE_CMD=(make)
@@ -74,7 +76,7 @@ command_clean() {
             echo "## Removing all downloads from src/... ##"
             execute rm -fv src/*/*.{tar.gz,tgz,zip}
             echo "## Removing all local files with saved values... ##"
-            execute rm -fv BUILD_ENV_VARS "$BUILD_ENV_ARRAYS_FILE"
+            execute rm -fv BUILD_ENV_VARS BUILD_ENV_ARRAYS
         fi
     fi
 }
@@ -239,12 +241,13 @@ command_test() {
     execute "$python_binary" -m pip install "${PIP_ARGS[@]}" \
         safety=="$SAFETY_VERSION"
     execute "$python_binary" -m safety check --full-report
+    execute popd
     echo "::endgroup::"
 
+    echo "::group::Shell tests"
     echo "#### Executing Chevah shell tests... ####"
-    ./src/chevah-bash-tests/shellcheck_tests.sh
-
-    execute popd
+    execute ./src/chevah-bash-tests/shellcheck_tests.sh
+    echo "::endgroup::"
 }
 
 
@@ -283,7 +286,9 @@ command_compat() {
 # Launch the whole thing.
 #
 
-# Pass the _CMD stuff to the "chevahbs" scripts in a file to be sourced.
+# Bash arrays are not exported to child processes. More details at
+# https://www.mail-archive.com/bug-bash@gnu.org/msg01774.html.
+# Therefore, pass _CMD stuff to the "chevahbs" scripts in a file to be sourced.
 # The unusual quoting avoids mixing strings and arrays.
 # Indentation helps when showing the arrays during debugging.
 (
@@ -292,7 +297,7 @@ command_compat() {
     echo -e "\tSHA_CMD=(" "${SHA_CMD[@]}" ")"
     echo -e "\tTAR_CMD=(" "${TAR_CMD[@]}" ")"
     echo -e "\tZIP_CMD=(" "${ZIP_CMD[@]}" ")"
-) > "$BUILD_ENV_ARRAYS_FILE"
+) > BUILD_ENV_ARRAYS
 
 if [ "$DEBUG" -ne 0 ]; then
     build_flags=(OS ARCH CC CFLAGS BUILD_LIBFFI BUILD_ZLIB BUILD_BZIP2 \
@@ -303,7 +308,7 @@ if [ "$DEBUG" -ne 0 ]; then
         echo -e "\t$build_var: ${!build_var}"
     done
     echo "Bash arrays to import in chevahbs scripts:"
-    cat "$BUILD_ENV_ARRAYS_FILE"
+    cat BUILD_ENV_ARRAYS
 fi
 
 select_command "$@"

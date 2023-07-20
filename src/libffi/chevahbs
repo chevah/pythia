@@ -6,7 +6,7 @@
 # The relative paths work in both src/blabla and build/blabla.
 source ../../functions.sh
 source ../../functions_build.sh
-source ../../"$BUILD_ENV_ARRAYS_FILE"
+source ../../"BUILD_ENV_ARRAYS"
 
 
 chevahbs_getsources() {
@@ -30,8 +30,22 @@ chevahbs_compile() {
     execute "${MAKE_CMD[@]}"
 }
 
+# This requires DejaGnu to actually do the tests.
+chevahbs_try() {
+    # Tests fail on Amazon 2: https://github.com/libffi/libffi/issues/785.
+    if [ "$OS" = "linux" ]; then
+        if [ -f /etc/os-release ]; then
+            if grep -q ^'PRETTY_NAME="Amazon Linux 2"'$ /etc/os-release; then
+                (>&2 echo -e "\tSkipping libffi tests on Amazon Linux 2.")
+                return
+            fi
+        fi
+    fi
+    execute "${MAKE_CMD[@]}" check
+}
 
-chevahbs_install() {
+
+chevahbs_cp() {
     case "$OS" in
         linux*)
             echo "Installing manually to avoid messing with a lib64/ sub-dir:"

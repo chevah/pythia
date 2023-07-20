@@ -6,7 +6,7 @@
 # The relative paths work in both src/blabla and build/blabla.
 source ../../functions.sh
 source ../../functions_build.sh
-source ../../"$BUILD_ENV_ARRAYS_FILE"
+source ../../"BUILD_ENV_ARRAYS"
 
 
 chevahbs_getsources() {
@@ -36,8 +36,12 @@ chevahbs_compile() {
     execute "${MAKE_CMD[@]}"
 }
 
+chevahbs_try() {
+    execute "${MAKE_CMD[@]}" test
+}
 
-chevahbs_install() {
+
+chevahbs_cp() {
     # bzip2's installation copies too many files, let's do it manually.
     execute cp bzlib.h "$INSTALL_DIR"/include/ 
     execute cp libbz2.a "$INSTALL_DIR"/lib/ 

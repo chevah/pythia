@@ -7,6 +7,7 @@
 #   * build tools: make, m4 (same as above)
 #   * patch (for applying patches from src/, these can be hotfixes to .py files)
 #   * git (for patching Python's version, if building Python)
+#   * a C++ compiler for testing Python C++ extensions (test_cppext).
 #   * automake, libtool, headers of a curses library (if building libedit)
 #   * perl 5.10.0 or newer, Test::More 0.96 or newer (if building OpenSSL)
 #   * curl, sha512sum, tar, unzip (for downloading and unpacking)
