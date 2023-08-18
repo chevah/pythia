@@ -640,20 +640,10 @@ check_glibc_version(){
 
     # Supported minimum minor glibc 2.X versions for various arches.
     # For x64, we build on Amazon 2 with glibc 2.26.
-    # For arm64, we used to build on Ubuntu 16.04 with glibc 2.23.
-    # Beware we haven't normalized arch names yet.
-    case "$ARCH" in
-        "amd64"|"x86_64"|"x64")
-            supported_glibc2_version=26
-            ;;
-        "aarch64"|"arm64")
-            supported_glibc2_version=23
-            ;;
-        *)
-            (>&2 echo "$ARCH is an unsupported arch for generic Linux!")
-            exit 17
-            ;;
-    esac
+    # For arm64, we also build on Amazon 2 with glibc 2.26 lately.
+    # If we get back to building against different libc versions per arch,
+    # beware we haven't normalized arch names yet.
+    supported_glibc2_version=26
 
     echo "No specific runtime for the current distribution / version / arch."
     echo "Minimum glibc version for this arch: 2.$supported_glibc2_version."
