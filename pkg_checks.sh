@@ -38,7 +38,7 @@ case "$OS" in
         PACKAGES="$DEB_PKGS"
         CHECK_CMD=(dpkg --status)
         ;;
-    win)
+    windows)
         # Nothing to actually build on Windows.
         PACKAGES="curl sha512sum"
         ;;
@@ -84,7 +84,7 @@ if [ -n "$PACKAGES" ]; then
 fi
 
 # Windows "build" is special, following checks are for other platforms.
-if [ "$OS" = "win" ]; then
+if [ "$OS" = "windows" ]; then
     set -o errexit
     return
 fi

@@ -178,7 +178,7 @@ cleanup_install_dir() {
         execute mv include/ lib/
 
         case $OS in
-            win)
+            windows)
                 echo -e "\tSkipping further cleaning of install dir"
                 ;;
             *)

@@ -189,7 +189,7 @@ delete_folder() {
     local target="$1"
     # On Windows, we use internal command prompt for maximum speed.
     # See: https://stackoverflow.com/a/6208144/539264
-    if [ "$OS" = "win" ]; then
+    if [ "$OS" = "windows" ]; then
         if [ -d "$target" ]; then
             cmd //c "del /f/s/q $target > nul"
             cmd //c "rmdir /s/q $target"
@@ -225,7 +225,7 @@ execute() {
 update_path_variables() {
     resolve_python_version
 
-    if [ "$OS" = "win" ] ; then
+    if [ "$OS" = "windows" ] ; then
         PYTHON_BIN="/lib/python.exe"
         PYTHON_LIB="/lib/Lib/"
     else
@@ -736,7 +736,7 @@ detect_os() {
     case "$OS" in
         MINGW*|MSYS*)
             ARCH="$(uname -m)"
-            OS="win"
+            OS="windows"
             ;;
         Linux)
             ARCH="$(uname -m)"

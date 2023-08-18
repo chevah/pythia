@@ -3,7 +3,7 @@
 # OS quirks for the Pythia build system.
 
 case $OS in
-    win)
+    windows)
         # On Windows, the python executable is installed in a different path.
         PYTHON_BIN="$INSTALL_DIR/lib/python.exe"
         # There are no actual dependency builds, only binary wheels are used.
@@ -101,7 +101,7 @@ fi
 
 # Get number of useful CPUs, to enable parallel builds where applicable.
 case "$OS" in
-    win)
+    windows)
         # Logical CPUs (including hyper-threading) in Windows 2000 or newer.
         CPUS="$NUMBER_OF_PROCESSORS"
         ;;

@@ -151,7 +151,7 @@ build_dep() {
 
 # This builds Python itself.
 build_python() {
-    if [ "$OS" = "win" ]; then
+    if [ "$OS" = "windows" ]; then
         # Python "build" is a very special case under Windows.
         execute pushd src/Python-Windows
         execute ./chevahbs Python "$PYTHON_BUILD_VERSION" "$INSTALL_DIR"
@@ -189,7 +189,7 @@ command_install_python_modules() {
     execute "$PYTHON_BIN" -m pip \
         install "${PIP_ARGS[@]}" -U pycparser=="$PYCPARSER_VERSION"
 
-    if [ "$OS" = "win" ]; then
+    if [ "$OS" = "windows" ]; then
         echo -e "\tSkip makefile updating on Windows"
     else
         echo "# Updating Python config Makefile for newly-built Python... #"
@@ -225,7 +225,7 @@ command_test() {
     fi
 
     echo "#### Executing Chevah Python tests... ####"
-    if [ "$OS" != "win" ]; then
+    if [ "$OS" != "windows" ]; then
         # Post-cleanup, the binary in /bin is named "python", not "python3.x".
         local python_binary="$INSTALL_DIR/bin/python"
     fi
