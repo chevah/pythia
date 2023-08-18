@@ -351,10 +351,10 @@ def main():
         import cryptography
         openssl_version = backend.openssl_version_text()
         # OpenSSL version embedded with the cryptography wheels.
-        expecting = u'OpenSSL 3.1.0 14 Mar 2023'
-        if openssl_version != expecting:
+        expecting_openssl_version = u'OpenSSL 3.1.2 1 Aug 2023'
+        if openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
-                expecting, openssl_version))
+                expecting_openssl_version, openssl_version))
             exit_code = 133
     except Exception as error:
         sys.stderr.write('"cryptography" failure. %s\n' % (error,))
