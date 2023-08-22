@@ -26,6 +26,11 @@ chevahbs_patch() {
     echo "# Applying disabled_modules.patch... #"
     execute patch < disabled_modules.patch
 
+    # Fixes https://github.com/python/cpython/issues/107077 for Python 3.11.
+    # Should fail for versions >3.11.4, signaling the need to remove it.
+    echo "# Applying GH-107588 patch to fix test_asyncio failure... #"
+    execute patch -p 1 < GH-107588.patch
+
     if [ "$BUILD_LIBEDIT" = "yes" ]; then
         # Adapted from https://bugs.python.org/issue13501.
         echo "# Applying readline_libedit.patch... #"
@@ -90,8 +95,6 @@ chevahbs_try() {
         # Locales not supported on Alpine 3.12, failing locale-related tests.
         (>&2 echo -e "\tNot running Python upstream tests on musl-based Linux.")
     else
-        # Disable parallelism during the test phase.
-        MAKE_CMD=(make)
         execute "${MAKE_CMD[@]}" test
     fi
 }
