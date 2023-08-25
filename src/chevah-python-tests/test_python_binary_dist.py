@@ -349,19 +349,19 @@ def main():
     try:
         from cryptography.hazmat.backends.openssl.backend import backend
         import cryptography
-        openssl_version = backend.openssl_version_text()
-        # OpenSSL version embedded with the cryptography wheels.
-        expecting = u'OpenSSL 3.1.0 14 Mar 2023'
-        if openssl_version != expecting:
+        # OpenSSL is embedded within the cryptography wheel.
+        current_openssl_version = backend.openssl_version_text()
+        expecting_openssl_version = u'OpenSSL 3.1.2 1 Aug 2023'
+        if current_openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
-                expecting, openssl_version))
+                expecting_openssl_version, current_openssl_version))
             exit_code = 133
     except Exception as error:
         sys.stderr.write('"cryptography" failure. %s\n' % (error,))
         exit_code = 134
     else:
         print('cryptography %s - %s' % (
-            cryptography.__version__, openssl_version))
+            cryptography.__version__, current_openssl_version))
 
     try:
         from ctypes import CDLL

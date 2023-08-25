@@ -15,11 +15,16 @@
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
-BASE_PKGS="gcc make m4 automake libtool patch unzip"
-DEB_PKGS="$BASE_PKGS tar diffutils \
-    git zlib1g-dev liblzma-dev libffi-dev libncurses5-dev libssl-dev"
-RPM_PKGS="$BASE_PKGS tar diffutils \
-    git-core libffi-devel zlib-devel xz-devel ncurses-devel openssl-devel"
+BASE_PKGS="gcc make m4 patch unzip perl"
+if [ "$BUILD_LIBEDIT" = "yes" ]; then
+    BASE_PKGS="$BASE_PKGS automake libtool"
+fi
+APK_PKGS="$BASE_PKGS git curl bash musl-dev linux-headers lddtree shadow \
+    openssh-client file unzip g++ musl-locales dejagnu"
+DEB_PKGS="$BASE_PKGS tar diffutils git curl \
+    openssh-client libtest-simple-perl xz-utils g++ dejagnu"
+RPM_PKGS="$BASE_PKGS tar diffutils git-core curl \
+    openssh-clients perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu"
 
 # Check for OS packages required for the build.
 MISSING_PACKAGES=""
@@ -30,15 +35,7 @@ CHECK_CMD=(command -v)
 
 # $CHECK_CMD should exit with 0 only when checked packages is installed.
 case "$OS" in
-    rhel*|amzn*)
-        PACKAGES="$RPM_PKGS"
-        CHECK_CMD=(rpm --query)
-        ;;
-    ubuntu*)
-        PACKAGES="$DEB_PKGS"
-        CHECK_CMD=(dpkg --status)
-        ;;
-    win)
+    windows)
         # Nothing to actually build on Windows.
         PACKAGES="curl sha512sum"
         ;;
@@ -56,7 +53,21 @@ case "$OS" in
         PACKAGES="$CC make m4 git patch libtool curl sha512 tar unzip"
         ;;
     linux*)
-        PACKAGES="$PACKAGES perl"
+        if [ -x /sbin/apk ]; then
+            # Assumes Alpine Linux 3.12.
+            CHECK_CMD=(apk info -q -e)
+            PACKAGES="$APK_PKGS"
+        elif [ -x /usr/bin/dpkg ]; then
+            # Assumes Ubuntu Linux 16.04.
+            CHECK_CMD=(dpkg --status)
+            PACKAGES="$DEB_PKGS"
+        elif [ -x /usr/bin/rpm ]; then
+            # Assumes Amazon Linux 2.
+            CHECK_CMD=(rpm --query)
+            PACKAGES="$RPM_PKGS"
+        else
+            PACKAGES="$PACKAGES perl"
+        fi
         ;;
 esac
 
@@ -84,7 +95,7 @@ if [ -n "$PACKAGES" ]; then
 fi
 
 # Windows "build" is special, following checks are for other platforms.
-if [ "$OS" = "win" ]; then
+if [ "$OS" = "windows" ]; then
     set -o errexit
     return
 fi

@@ -83,9 +83,9 @@ OS="not-detected-yet"
 ARCH="not-detected-yet"
 
 # Initialize default values, some are overwritten from pythia.conf.
-PYTHON_NAME="not.yet.defined"
 PYTHON_CONFIGURATION="NOT-YET-DEFINED"
-PYTHON_VERSION="not.defined.yet"
+PYTHON_NAME="not-yet-determined"
+PYTHON_VERSION="not-determined-yet"
 PYTHON_PLATFORM="unknown-os-and-arch"
 BINARY_DIST_URI="https://github.com/chevah/pythia/releases/download"
 PIP_INDEX_URL="https://pypi.org/simple"
@@ -189,7 +189,7 @@ delete_folder() {
     local target="$1"
     # On Windows, we use internal command prompt for maximum speed.
     # See: https://stackoverflow.com/a/6208144/539264
-    if [ "$OS" = "win" ]; then
+    if [ "$OS" = "windows" ]; then
         if [ -d "$target" ]; then
             cmd //c "del /f/s/q $target > nul"
             cmd //c "rmdir /s/q $target"
@@ -225,7 +225,7 @@ execute() {
 update_path_variables() {
     resolve_python_version
 
-    if [ "$OS" = "win" ] ; then
+    if [ "$OS" = "windows" ] ; then
         PYTHON_BIN="/lib/python.exe"
         PYTHON_LIB="/lib/Lib/"
     else
@@ -293,12 +293,15 @@ resolve_python_version() {
         candidate="${version_configuration_array[$i]}"
         candidate_platform="$(echo "$candidate" | cut -d"@" -f1)"
         candidate_version="$(echo "$candidate" | cut -d"@" -f2)"
+        candidate_name="$(echo "$candidate_version" | cut -d"." -f1-2)"
         if [ "$candidate_platform" = "default" ]; then
-            # On first pass, we set the default version.
+            # On first pass, we set the default version and name.
             PYTHON_VERSION="$candidate_version"
+            PYTHON_NAME="python${candidate_name}"
         elif [ -z "${PYTHON_PLATFORM%"$candidate_platform"*}" ]; then
-            # If matching a specific platform, we overwrite the default version.
+            # If matching a specific platform, we overwrite the defaults.
             PYTHON_VERSION="$candidate_version"
+            PYTHON_NAME="python${candidate_name}"
         fi
     done
 }
@@ -640,20 +643,10 @@ check_glibc_version(){
 
     # Supported minimum minor glibc 2.X versions for various arches.
     # For x64, we build on Amazon 2 with glibc 2.26.
-    # For arm64, we used to build on Ubuntu 16.04 with glibc 2.23.
-    # Beware we haven't normalized arch names yet.
-    case "$ARCH" in
-        "amd64"|"x86_64"|"x64")
-            supported_glibc2_version=26
-            ;;
-        "aarch64"|"arm64")
-            supported_glibc2_version=23
-            ;;
-        *)
-            (>&2 echo "$ARCH is an unsupported arch for generic Linux!")
-            exit 17
-            ;;
-    esac
+    # For arm64, we also build on Amazon 2 with glibc 2.26 lately.
+    # If we get back to building against different libc versions per arch,
+    # beware we haven't normalized arch names yet.
+    supported_glibc2_version=26
 
     echo "No specific runtime for the current distribution / version / arch."
     echo "Minimum glibc version for this arch: 2.$supported_glibc2_version."
@@ -746,7 +739,7 @@ detect_os() {
     case "$OS" in
         MINGW*|MSYS*)
             ARCH="$(uname -m)"
-            OS="win"
+            OS="windows"
             ;;
         Linux)
             ARCH="$(uname -m)"
