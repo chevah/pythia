@@ -83,8 +83,8 @@ OS="not-detected-yet"
 ARCH="not-detected-yet"
 
 # Initialize default values, some are overwritten from pythia.conf.
-PYTHON_NAME="not.yet.defined"
 PYTHON_CONFIGURATION="NOT-YET-DEFINED"
+PYTHON_NAME="not.yet.defined"
 PYTHON_VERSION="not.defined.yet"
 PYTHON_PLATFORM="unknown-os-and-arch"
 BINARY_DIST_URI="https://github.com/chevah/pythia/releases/download"
@@ -293,12 +293,15 @@ resolve_python_version() {
         candidate="${version_configuration_array[$i]}"
         candidate_platform="$(echo "$candidate" | cut -d"@" -f1)"
         candidate_version="$(echo "$candidate" | cut -d"@" -f2)"
+        candidate_name="$(echo "$candidate" | cut -d"@" -f2 | cut -d"." -f1-2)"
         if [ "$candidate_platform" = "default" ]; then
-            # On first pass, we set the default version.
+            # On first pass, we set the default version and name.
             PYTHON_VERSION="$candidate_version"
+            PYTHON_NAME="python${candidate_name}"
         elif [ -z "${PYTHON_PLATFORM%"$candidate_platform"*}" ]; then
-            # If matching a specific platform, we overwrite the default version.
+            # If matching a specific platform, we overwrite the defaults.
             PYTHON_VERSION="$candidate_version"
+            PYTHON_NAME="python${candidate_name}"
         fi
     done
 }
