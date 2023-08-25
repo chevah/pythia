@@ -349,7 +349,7 @@ def main():
     try:
         from cryptography.hazmat.backends.openssl.backend import backend
         import cryptography
-        # OpenSSL version is embedded within the cryptography wheels.
+        # OpenSSL is embedded within the cryptography wheel.
         current_openssl_version = backend.openssl_version_text()
         expecting_openssl_version = u'OpenSSL 3.1.2 1 Aug 2023'
         if current_openssl_version != expecting_openssl_version:
