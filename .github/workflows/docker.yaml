@@ -24,80 +24,8 @@ env:
 # Using a job name that doesn't contain the OS name, to minimize the risk of
 # confusion with the OS names of the containers, which are the relevant ones.
 jobs:
-
   linux:
     runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
-    strategy:
-      fail-fast: false
-      matrix:
-        # Alpine 3.12 has musl 1.1.24, Amazon 2 has glibc 2.26.
-        container: [ 'alpine:3.12', 'amazonlinux:2' ]
-    timeout-minutes: 45
-    steps:
-
-    # OpenSSL gets updated by apk, but that is the Alpine way, so it's fine.
-    - name: Alpine setup
-      if: startsWith(matrix.container, 'alpine')
-      run: |
-        apk upgrade -U
-        apk add git curl bash gcc make m4 patch musl-dev linux-headers lddtree shadow openssh-client file unzip perl g++ musl-locales dejagnu
-        apk del util-linux-dev
-        curl --output /usr/local/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
-        chmod +x /usr/local/bin/paxctl
-
-    - name: Amazon setup
-      if: startsWith(matrix.container, 'amazonlinux')
-      run: |
-        yum -y upgrade
-        yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu
-
-    - name: Ubuntu setup
-      if: startsWith(matrix.container, 'ubuntu')
-      run: |
-        apt update
-        apt --yes dist-upgrade
-        apt --yes install wget curl gcc make m4 patch openssh-client unzip git libtest-simple-perl xz-utils g++ dejagnu
-
-    - name: Clone repo independently
-      run: |
-        git clone https://github.com/chevah/pythia.git
-        cd pythia
-        git checkout ${GITHUB_HEAD_REF}
-
-    - name: Build Pythia
-      run: |
-        cd pythia
-        ./build.sh build
-
-    - name: Test Pythia
-      run: |
-        cd pythia
-        ./build.sh test
-
-    # Using `~/` is problematic under Docker, use `/root/`.
-    # Remove key in same step to avoid leaving it on disk if publishing fails.
-    - name: Upload testing package
-      run: |
-        mkdir -pv /root/.ssh/
-        cd pythia
-        touch priv_key
-        chmod 600 priv_key
-        echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
-        echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > /root/.ssh/known_hosts
-        ./publish_dist.sh ; rm priv_key
-
-    # If one of the above steps fails, fire up tmate for remote debugging.
-    # Not working on Alpine (not supported) and CentOS 5 (glibc too old).
-    - name: Tmate debug on failure
-      if: failure() && env.TMATE_DEBUG == 'yes'
-      uses: chevah/action-tmate@v3
-      with:
-        sudo: false
-        limit-access-to-actor: true
-
-  linux-arm64:
-    runs-on: laja
     container: ${{ matrix.container }}
     strategy:
       fail-fast: false
