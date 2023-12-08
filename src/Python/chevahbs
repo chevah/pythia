@@ -28,8 +28,8 @@ chevahbs_patch() {
 
     # Fixes https://github.com/python/cpython/pull/111717 for Python 3.11.6.
     # Should fail for versions >3.11.7, signaling the need to remove it.
-    echo "# Applying gh-111644 patch to fix test_asyncio failure... #"
-    execute patch -p 1 < gh-111644.patch
+    echo "# Applying gh-110894 patch to fix test_asyncio failure... #"
+    execute patch -p 1 < gh-110894.patch
 
     if [ "$BUILD_LIBEDIT" = "yes" ]; then
         # Adapted from https://bugs.python.org/issue13501.
