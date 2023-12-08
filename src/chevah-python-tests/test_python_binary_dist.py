@@ -353,7 +353,7 @@ def main():
         sys.stderr.write('standard "ssl" is missing.\n')
         exit_code = 132
     else:
-        print('stdlib ssl - %s' % (OPENSSL_VERSION,))
+        print('stdlib ssl - %s' % (current_openssl_version,))
 
     try:
         from ctypes import CDLL
