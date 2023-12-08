@@ -337,12 +337,14 @@ def main():
         print('zlib %s' % (zlib.ZLIB_VERSION,))
 
     try:
-        from ssl import OPENSSL_VERSION
+        from ssl import OPENSSL_VERSION as current_openssl_version
         import _hashlib
         exit_code = egg_check(_hashlib) | exit_code
         # Check OpenSSL version to prevent linking to OS libs.
-        current_openssl_version = OPENSSL_VERSION
         expecting_openssl_version = u'OpenSSL 3.1.4 24 Oct 2023'
+        if CHEVAH_OS == "windows":
+            # The upstream Windows packages embeds their own OpenSSL libs.
+            expecting_openssl_version = u'OpenSSL 3.0.11 19 Sep 2023'
         if current_openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting_openssl_version, current_openssl_version))
