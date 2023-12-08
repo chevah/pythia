@@ -340,6 +340,13 @@ def main():
         from ssl import OPENSSL_VERSION
         import _hashlib
         exit_code = egg_check(_hashlib) | exit_code
+        # Check OpenSSL version to prevent linking to OS libs.
+        current_openssl_version = OPENSSL_VERSION
+        expecting_openssl_version = u'OpenSSL 3.1.4 24 Oct 2023'
+        if current_openssl_version != expecting_openssl_version:
+            sys.stderr.write('Expecting %s, got %s.\n' % (
+                expecting_openssl_version, current_openssl_version))
+            exit_code = 133
     except:
         sys.stderr.write('standard "ssl" is missing.\n')
         exit_code = 132
