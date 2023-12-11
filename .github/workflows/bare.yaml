@@ -124,7 +124,7 @@ jobs:
         ./publish_dist.sh ; rm priv_key
 
     - name: Tmate debug on failure
-      if: failure() && env.TMATE_DEBUG == 'yes'
+      if: ${{ failure() && !cancelled() && runner.debug }}
       uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true
@@ -132,7 +132,7 @@ jobs:
 
   macos-m1:
     runs-on: m1
-    timeout-minutes: 30
+    timeout-minutes: ${{ matrix.tests.debug == 'yes' && 90 || 30 }}
     steps:
     - uses: actions/checkout@v2
       with:

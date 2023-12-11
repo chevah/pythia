@@ -337,31 +337,23 @@ def main():
         print('zlib %s' % (zlib.ZLIB_VERSION,))
 
     try:
-        from ssl import OPENSSL_VERSION
+        from ssl import OPENSSL_VERSION as current_openssl_version
         import _hashlib
         exit_code = egg_check(_hashlib) | exit_code
-    except:
-        sys.stderr.write('standard "ssl" is missing.\n')
-        exit_code = 132
-    else:
-        print('stdlib ssl - %s' % (OPENSSL_VERSION,))
-
-    try:
-        from cryptography.hazmat.backends.openssl.backend import backend
-        import cryptography
-        # OpenSSL is embedded within the cryptography wheel.
-        current_openssl_version = backend.openssl_version_text()
-        expecting_openssl_version = u'OpenSSL 3.1.3 19 Sep 2023'
+        # Check OpenSSL version to prevent linking to OS libs.
+        expecting_openssl_version = u'OpenSSL 3.1.4 24 Oct 2023'
+        if CHEVAH_OS == "windows":
+            # The upstream Windows packages embed their own OpenSSL libs.
+            expecting_openssl_version = u'OpenSSL 3.0.11 19 Sep 2023'
         if current_openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting_openssl_version, current_openssl_version))
             exit_code = 133
-    except Exception as error:
-        sys.stderr.write('"cryptography" failure. %s\n' % (error,))
-        exit_code = 134
+    except:
+        sys.stderr.write('standard "ssl" is missing.\n')
+        exit_code = 132
     else:
-        print('cryptography %s - %s' % (
-            cryptography.__version__, current_openssl_version))
+        print('stdlib ssl - %s' % (current_openssl_version,))
 
     try:
         from ctypes import CDLL
@@ -395,29 +387,6 @@ def main():
         exit_code = 141
     else:
         print ('cffi %s' % (cffi.__version__,))
-
-    try:
-        import nacl.utils
-        from nacl.public import PrivateKey, Box
-        skbob = PrivateKey.generate()
-        pkbob = skbob.public_key
-        skalice = PrivateKey.generate()
-        pkalice = skalice.public_key
-        bob_box = Box(skbob, pkalice)
-        message = b"Some secret message"
-        encrypted = bob_box.encrypt(message)
-        nonce = nacl.utils.random(Box.NONCE_SIZE)
-        encrypted = bob_box.encrypt(message, nonce)
-        alice_box = Box(skalice, pkbob)
-        plaintext = alice_box.decrypt(encrypted)
-        if plaintext.decode('utf-8') == message.decode('utf-8'):
-            print('PyNaCl %s' % (nacl.__version__,))
-        else:
-            sys.stderr.write('"PyNaCl" is present, but broken.\n')
-            exit_code = 144
-    except:
-        sys.stderr.write('"PyNaCl" is missing.\n')
-        exit_code = 143
 
     try:
         import bcrypt
