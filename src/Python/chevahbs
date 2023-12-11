@@ -92,8 +92,8 @@ chevahbs_try() {
     else
         if [ "$PYTHON_BUILD_VERSION" = "3.11.7" ]; then
             # test.test_asyncio.test_streams fails, no upstream fix found.
-            echo -e "\tSkipping Python tests for version 3.11.7..."
-            return
+            echo -e "\tSkipping asyncio streams tests for version 3.11.7..."
+            execute rm Lib/test/test_asyncio/test_streams.py
         fi
         execute "${MAKE_CMD[@]}" test
     fi
