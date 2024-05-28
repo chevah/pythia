@@ -93,22 +93,8 @@ jobs:
       with:
         fetch-depth: 2
 
-    # Some Homebrew libs pollute the build.
-    # Also make sure binaries depending on these libs are out of the way.
-    - name: Hack Homebrew
-      run: |
-        sudo chmod -v a-r /usr/local/include/libintl.h
-        sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
-
     - name: Build Pythia
       run: ./build.sh build
-
-    # Fix back Homebrew, for working Shellcheck tests and tmate debugging.
-    - name: Unhack Homebrew
-      run: |
-        sudo chmod -v a+r /usr/local/opt/gettext/lib/libintl*
-        sudo chmod -v a+r /usr/local/include/libintl.h
-        sudo mv -v /usr/local/bin/git{.saved,}
 
     - name: Test Pythia
       run: ./build.sh test
