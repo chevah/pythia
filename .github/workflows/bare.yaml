@@ -77,7 +77,8 @@ jobs:
 
 
   macos:
-    runs-on: macos-latest
+    # For macOS on Intel at GitHub.
+    runs-on: macos-13
     timeout-minutes: ${{ matrix.tests.debug == 'yes' && 90 || 30 }}
     steps:
     - uses: actions/checkout@v2
@@ -107,7 +108,8 @@ jobs:
 
 
   macos-m1:
-    runs-on: m1
+    # For macOS on Apple Silicon at GitHub.
+    runs-on: macos-latest
     timeout-minutes: ${{ matrix.tests.debug == 'yes' && 90 || 30 }}
     steps:
     - uses: actions/checkout@v2
@@ -128,3 +130,9 @@ jobs:
         echo "${{ secrets.SFTPPLUS_BIN_PRIV_KEY }}" > priv_key
         echo "${{ secrets.SFTPPLUS_BIN_HOST_KEY }}" > ~/.ssh/known_hosts
         ./publish_dist.sh ; rm priv_key
+
+    - name: Tmate debug on failure
+      if: ${{ failure() && !cancelled() && runner.debug }}
+      uses: chevah/action-tmate@v3
+      with:
+        limit-access-to-actor: true
