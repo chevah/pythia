@@ -18,7 +18,7 @@ jobs:
   windows:
     # The type of runner that the job will run on
     runs-on: windows-latest
-    timeout-minutes: ${{ matrix.tests.debug == 'yes' && 30 || 15 }}
+    timeout-minutes: ${{ matrix.tests.debug == 'yes' && 45 || 15 }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -85,8 +85,23 @@ jobs:
       with:
         fetch-depth: 2
 
+    # Some Homebrew libs pollute the build.
+    # Also make sure binaries depending on these libs are out of the way.
+    - name: Hack Homebrew
+      run: |
+        sudo mv -v /usr/local/bin/git{,.saved}
+        sudo chmod -v a-r /usr/local/include/libintl.h
+        sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
+
     - name: Build Pythia
       run: ./build.sh build
+
+    # Fix back Homebrew, for working Shellcheck tests and tmate debugging.
+    - name: Unhack Homebrew
+      run: |
+        sudo chmod -v a+r /usr/local/opt/gettext/lib/libintl*
+        sudo chmod -v a+r /usr/local/include/libintl.h
+        sudo mv -v /usr/local/bin/git{.saved,}
 
     - name: Test Pythia
       run: ./build.sh test
