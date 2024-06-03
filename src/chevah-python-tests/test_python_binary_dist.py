@@ -380,30 +380,6 @@ def main():
         exit_code = 140
 
     try:
-        import cffi
-        ffibuilder = cffi.FFI()
-    except:
-        sys.stderr.write('"cffi" is missing or broken.\n')
-        exit_code = 141
-    else:
-        print ('cffi %s' % (cffi.__version__,))
-
-    try:
-        import bcrypt
-        password = b"super secret password"
-        # Hash the password with a randomly-generated salt.
-        hashed = bcrypt.hashpw(password, bcrypt.gensalt())
-        # Check that an unhashed password matches hashed one.
-        if bcrypt.checkpw(password, hashed):
-            print('bcrypt %s' % (bcrypt.__version__,))
-        else:
-            sys.stderr.write('"bcrypt" is present, but broken.\n')
-            exit_code = 146
-    except:
-        sys.stderr.write('"bcrypt" is missing.\n')
-        exit_code = 147
-
-    try:
         import bz2
         test_string = b"just a random string to quickly test bz2"
         test_string_bzipped = bz2.compress(test_string)
@@ -428,15 +404,6 @@ def main():
     except:
         sys.stderr.write('"lzma" is missing.\n')
         exit_code = 151
-
-    try:
-        import setproctitle
-        current_process_title = setproctitle.getproctitle()
-    except:
-        sys.stderr.write('"setproctitle" is missing or broken.\n')
-        exit_code = 150
-    else:
-        print('setproctitle %s' % (setproctitle.__version__,))
 
     try:
         from sqlite3 import dbapi2 as sqlite
@@ -465,24 +432,6 @@ def main():
     else:
         print('"uuid" module is present.')
 
-    try:
-        from charset_normalizer import from_path
-        tmp_results = from_path('../README.rst')
-    except:
-        sys.stderr.write('"charset-normalizer" is missing or broken.\n')
-        exit_code = 164
-    else:
-        print('"charset-normalizer" module is present.')
-
-    try:
-        from markupsafe import escape
-        tmp_text = escape('<script>alert(document.cookie);</script>')
-    except:
-        sys.stderr.write('"markupsafe" is missing or broken.\n')
-        exit_code = 165
-    else:
-        print('"markupsafe" module is present.')
-
     if os.name == 'nt':
         # Windows specific modules.
         try:
@@ -493,13 +442,6 @@ def main():
             exit_code = 171
         else:
             print('ctypes %s' % (ctypes.__version__,))
-
-        try:
-            import win32api
-            win32api.GetCurrentThread()
-        except Exception as error:
-            sys.stderr.write('"pywin32" missing or broken.\n {}'.format(error))
-            exit_code = 172
 
     else:
         # Linux / Unix stuff.
