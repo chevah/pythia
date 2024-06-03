@@ -245,8 +245,8 @@ command_test() {
     if [ -n "${SAFETY_IGNORED_IDS-}" ]; then
         (>&2 echo "Following Safety DB IDs are to be excepted from checks:")
         (>&2 echo -e "\t${SAFETY_IGNORED_IDS}")
-        # From $SAFETY_IGNORED_ID, generate $SAFETY_IGNORED_OPTS..
-        SAFETY_IGNORE_OPTS="-i ${SAFETY_IGNORED_IDS//\ /-i\ }"
+        # From $SAFETY_IGNORED_IDS, generate $SAFETY_IGNORED_OPTS.
+        SAFETY_IGNORE_OPTS="-i $(echo $SAFETY_IGNORED_IDS | sed s/\ /-i /g)"
     fi
 
     execute "$python_binary" -m safety check --full-report "$SAFETY_IGNORE_OPTS"
