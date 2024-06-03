@@ -10,9 +10,6 @@ case $OS in
         BUILD_BZIP2="no"
         BUILD_SQLITE="no"
         BUILD_OPENSSL="no"
-        PIP_LIBRARIES=("${PIP_LIBRARIES[@]}" \
-            pywin32=="$PYWIN32_VERSION" \
-            )
         ;;
     linux*)
         if [ -f /etc/alpine-release ]; then
