@@ -249,6 +249,8 @@ command_test() {
         SAFETY_IGNORE_OPTS="-i $(echo $SAFETY_IGNORED_IDS | sed s/\ /\ -i\ /g)"
     fi
 
+    echo "SAFETY_IGNORED_IDS is: $SAFETY_IGNORED_IDS"
+    echo "SAFETY_IGNORE_OPTS is: $SAFETY_IGNORE_OPTS"
     execute "$python_binary" -m safety check --full-report "$SAFETY_IGNORE_OPTS"
     execute popd
     echo "::endgroup::"
