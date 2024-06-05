@@ -25,7 +25,7 @@ PYTHIA_VERSION="$(git log -n 1 --no-merges --pretty=format:%h)"
 exit_on_error $? 250
 
 # Export the variables needed by the chevahbs scripts and the test phase.
-export PYTHON_BUILD_VERSION PYTHIA_VERSION
+export PYTHON_BUILD_VERSION PYTHIA_VERSION PYTHIA_BUILD_TESTS
 export BUILD_ZLIB BUILD_BZIP2 BUILD_XZ BUILD_LIBEDIT BUILD_LIBFFI BUILD_OPENSSL
 
 # OS detection is done by the common pythia.sh. The values are saved in a file.
