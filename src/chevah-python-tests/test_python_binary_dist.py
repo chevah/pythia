@@ -344,7 +344,7 @@ def main():
         expecting_openssl_version = u'OpenSSL 3.0.14 4 Jun 2024'
         if CHEVAH_OS == "windows":
             # The upstream Windows packages embed their own OpenSSL libs.
-            expecting_openssl_version = u'OpenSSL 3.0.11 19 Sep 2023'
+            expecting_openssl_version = u'OpenSSL 3.0.13 30 Jan 2024'
         if current_openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting_openssl_version, current_openssl_version))
