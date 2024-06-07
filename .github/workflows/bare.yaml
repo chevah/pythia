@@ -18,7 +18,7 @@ jobs:
   windows:
     # The type of runner that the job will run on
     runs-on: windows-latest
-    timeout-minutes: ${{ matrix.tests.debug == 'yes' && 45 || 15 }}
+    timeout-minutes: ${{ tests.debug == 'yes' && 45 || 15 }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -53,7 +53,7 @@ jobs:
       run: bash -c './publish_dist.sh ; rm priv_key'
 
     - name: Tmate debug on failure
-      if: ${{ failure() && !cancelled() && runner.debug }}
+      if: ${{ !cancelled() && runner.debug }}
       uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true
@@ -79,7 +79,7 @@ jobs:
   macos:
     # For macOS on Intel at GitHub.
     runs-on: macos-13
-    timeout-minutes: ${{ matrix.tests.debug == 'yes' && 90 || 30 }}
+    timeout-minutes: ${{ tests.debug == 'yes' && 90 || 30 }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -116,7 +116,7 @@ jobs:
         ./publish_dist.sh ; rm priv_key
 
     - name: Tmate debug on failure
-      if: ${{ failure() && !cancelled() && runner.debug }}
+      if: ${{ !cancelled() && runner.debug }}
       uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true
@@ -125,7 +125,7 @@ jobs:
   macos-m1:
     # For macOS on Apple Silicon at GitHub.
     runs-on: macos-latest
-    timeout-minutes: ${{ matrix.tests.debug == 'yes' && 90 || 30 }}
+    timeout-minutes: ${{ tests.debug == 'yes' && 90 || 30 }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -147,7 +147,7 @@ jobs:
         ./publish_dist.sh ; rm priv_key
 
     - name: Tmate debug on failure
-      if: ${{ failure() && !cancelled() && runner.debug }}
+      if: ${{ !cancelled() && runner.debug }}
       uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true
