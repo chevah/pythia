@@ -18,7 +18,7 @@ jobs:
   windows:
     # The type of runner that the job will run on
     runs-on: windows-latest
-    timeout-minutes: ${{ runner.debug && 45 || 15 }}
+    timeout-minutes: ${{ matrix.tests.debug && 45 || 15 }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -79,7 +79,7 @@ jobs:
   macos:
     # For macOS on Intel at GitHub.
     runs-on: macos-13
-    timeout-minutes: ${{ runner.debug && 90 || 30 }}
+    timeout-minutes: ${{ matrix.tests.debug && 90 || 30 }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -125,7 +125,7 @@ jobs:
   macos-m1:
     # For macOS on Apple Silicon at GitHub.
     runs-on: macos-latest
-    timeout-minutes: ${{ runner.debug && 90 || 30 }}
+    timeout-minutes: ${{ matrix.tests.debug && 90 || 30 }}
     steps:
     - uses: actions/checkout@v2
       with:
