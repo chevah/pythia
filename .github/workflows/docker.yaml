@@ -15,11 +15,6 @@ concurrency:
   group: docker-${{ github.ref }}
   cancel-in-progress: true
 
-# Set to 'yes' to open a tunnel to GitHub's VMs through tmate on failures.
-# Also increase timeout-minutes for the relevant OS when debugging remotely.
-# Not all platforms are supported by tmate (currently no support for Amazon 2).
-env:
-  TMATE_DEBUG: 'no'
 
 # Using a job name that doesn't contain the OS name, to minimize the risk of
 # confusion with the OS names of the containers, which are the relevant ones.
@@ -32,7 +27,7 @@ jobs:
       matrix:
         # Alpine 3.12 has musl 1.1.24, Amazon 2 has glibc 2.26.
         container: [ 'alpine:3.12', 'amazonlinux:2' ]
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
 
     # OpenSSL gets updated by apk, but that is the Alpine way, so it's fine.
@@ -65,11 +60,13 @@ jobs:
         git checkout ${GITHUB_HEAD_REF}
 
     - name: Build Pythia
+      timeout-minutes: 30
       run: |
         cd pythia
         ./build.sh build
 
     - name: Test Pythia
+      timeout-minutes: 5
       run: |
         cd pythia
         ./build.sh test
@@ -77,6 +74,7 @@ jobs:
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.
     - name: Upload testing package
+      timeout-minutes: 5
       run: |
         mkdir -pv /root/.ssh/
         cd pythia
@@ -87,9 +85,10 @@ jobs:
         ./publish_dist.sh ; rm priv_key
 
     # If one of the above steps fails, fire up tmate for remote debugging.
-    # Not working on Alpine (not supported) and CentOS 5 (glibc too old).
+    # Not all platforms are supported by tmate.
+    # Currently not supported: Alpine, Amazon 2, CentOS 5 (no glibc or too old).
     - name: Tmate debug on failure
-      if: failure() && env.TMATE_DEBUG == 'yes'
+      if: ${{ !cancelled() && runner.debug }}
       uses: chevah/action-tmate@v3
       with:
         sudo: false
