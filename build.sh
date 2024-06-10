@@ -161,15 +161,27 @@ build_python() {
     fi
 }
 
-
+bootstrap_pip(){
+    echo "### Bootstrapping pip... ###"
+    if [ "$OS" = "windows" ]; then
+        # The embeddable Windows package doesn't include "ensurepip".
+        echo "## Downloading get-pip.py... ##"
+        if [ ! -e "$BUILD_DIR"/get-pip.py ]; then
+            execute "${GET_CMD[@]}" "$BUILD_DIR"/get-pip.py "$BOOTSTRAP_GET_PIP"
+            PIP_ARGS+=("--no-setuptools")
+        fi
+    else
+        echo "## Installing pip from included ensurepip module... ##"
+        execute "$PYTHON_BIN" -m ensurepip --upgrade
+    fi
+}
 # Compile and install all Python extra libraries.
 command_install_python_modules() {
     echo "::group::Install Python modules with pip $PIP_VERSION"
     echo "#### Installing Python modules... ####"
 
     # Install latest PIP, then instruct it to get exact version of setuptools.
-    echo "## Bootstrapping pip... ##"
-    execute "$PYTHON_BIN" -m ensurepip --upgrade
+    bootstrap_pip
     echo "# Installing latest pip with preferred setuptools version... #"
     execute "$PYTHON_BIN" -m pip install "${PIP_ARGS[@]}" \
         pip=="$PIP_VERSION" setuptools=="$SETUPTOOLS_VERSION"
