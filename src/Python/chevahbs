@@ -57,6 +57,10 @@ chevahbs_configure() {
             # Note that this is not needed on Alpine.
             LDFLAGS="$LDFLAGS -lm"
             ;;
+        linux_musl)
+            # Needed for Alpine Linux 3.20.
+            LDFLAGS="$LDFLAGS -lffi"
+            ;;
         fbsd*|sol11*)
             LDFLAGS="$LDFLAGS -lncurses"
             ;;
