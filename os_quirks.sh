@@ -26,10 +26,17 @@ case $OS in
     macos)
         export CC="clang"
         export CXX="clang++"
-        export CFLAGS="${CFLAGS:-} -mmacosx-version-min=10.13"
-        # setup.py skips building readline by default, as it sets this to
-        # "10.4", and then tries to avoid the broken readline in OS X 10.4.
-        export MACOSX_DEPLOYMENT_TARGET=10.13
+        if [ "$ARCH" = "x64" ]; then
+            export CFLAGS="${CFLAGS:-} -mmacosx-version-min=10.13"
+            # setup.py skips building readline by default, as it sets this to
+            # "10.4", and then tries to avoid the broken readline in OS X 10.4.
+            export MACOSX_DEPLOYMENT_TARGET=10.13
+        else
+            export CFLAGS="${CFLAGS:-} -mmacosx-version-min=11.0"
+            # setup.py skips building readline by default, as it sets this to
+            # "10.4", and then tries to avoid the broken readline in OS X 10.4.
+            export MACOSX_DEPLOYMENT_TARGET=11.0
+        fi
         # System includes bzip2 libs by default.
         BUILD_BZIP2="no"
         BUILD_XZ="yes"
