@@ -443,6 +443,13 @@ def main():
         else:
             print('ctypes %s' % (ctypes.__version__,))
 
+        try:
+            import win32api
+            win32api.GetCurrentThread()
+        except Exception as error:
+            sys.stderr.write('"pywin32" missing or broken.\n {}'.format(error))
+            exit_code = 172
+
     else:
         # Linux / Unix stuff.
         try:
