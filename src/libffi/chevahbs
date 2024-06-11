@@ -32,15 +32,6 @@ chevahbs_compile() {
 
 # This requires DejaGnu to actually do the tests.
 chevahbs_try() {
-    # Tests fail on Amazon 2: https://github.com/libffi/libffi/issues/785.
-    if [ "$OS" = "linux" ]; then
-        if [ -f /etc/os-release ]; then
-            if grep -q ^'PRETTY_NAME="Amazon Linux 2"'$ /etc/os-release; then
-                (>&2 echo -e "\tSkipping libffi tests on Amazon Linux 2.")
-                return
-            fi
-        fi
-    fi
     execute "${MAKE_CMD[@]}" check
 }
 
