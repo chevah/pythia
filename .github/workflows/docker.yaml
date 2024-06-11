@@ -44,7 +44,7 @@ jobs:
       if: startsWith(matrix.container, 'amazonlinux')
       run: |
         yum -y upgrade
-        yum -y install git-core gcc10 make m4 patch tar unzip perl perl-Test-Simple perl-IPC-Cmd xz gcc10-c++ dejagnu
+        yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu gcc10 gcc10-c++
         echo "CC=gcc10-cc" >> $GITHUB_ENV
         echo "CXX=gcc10-c++" >> $GITHUB_ENV
 
