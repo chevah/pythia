@@ -168,10 +168,10 @@ bootstrap_pip(){
         echo "## Downloading get-pip.py... ##"
         if [ ! -e "$BUILD_DIR"/get-pip.py ]; then
             execute "${GET_CMD[@]}" "$BUILD_DIR"/get-pip.py "$BOOTSTRAP_GET_PIP"
-            execute "$PYTHON_BIN" "$BUILD_DIR"/get-pip.py "${PIP_ARGS[@]}" \
-                pip=="$PIP_VERSION" --no-setuptools \
-                setuptools=="$SETUPTOOLS_VERSION"
         fi
+        execute "$PYTHON_BIN" "$BUILD_DIR"/get-pip.py "${PIP_ARGS[@]}" \
+            pip=="$PIP_VERSION" --no-setuptools \
+            setuptools=="$SETUPTOOLS_VERSION"
     else
         echo "## Installing pip from included ensurepip module... ##"
         execute "$PYTHON_BIN" -m ensurepip --upgrade
