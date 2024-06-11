@@ -14,6 +14,7 @@ case $OS in
         ;;
     linux*)
         # Build as portable as possible, only glibc/musl should be needed.
+        export CFLAGS="${CFLAGS:-} -mtune=generic"
         BUILD_LIBFFI="yes"
         BUILD_ZLIB="yes"
         BUILD_XZ="yes"
