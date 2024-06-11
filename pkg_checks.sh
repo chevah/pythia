@@ -15,16 +15,16 @@
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
-BASE_PKGS="gcc make m4 patch unzip perl"
+BASE_PKGS="make m4 patch unzip perl"
 if [ "$BUILD_LIBEDIT" = "yes" ]; then
     BASE_PKGS="$BASE_PKGS automake libtool"
 fi
-APK_PKGS="$BASE_PKGS git curl bash musl-dev linux-headers lddtree shadow \
+APK_PKGS="$BASE_PKGS gcc git curl bash musl-dev linux-headers lddtree shadow \
     openssh-client file unzip g++ musl-locales dejagnu"
-DEB_PKGS="$BASE_PKGS tar diffutils git curl \
+DEB_PKGS="$BASE_PKGS gcc tar diffutils git curl \
     openssh-client libtest-simple-perl xz-utils g++ dejagnu"
-RPM_PKGS="$BASE_PKGS tar diffutils git-core curl \
-    openssh-clients perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu"
+RPM_PKGS="$BASE_PKGS gcc10 tar diffutils git-core curl \
+    openssh-clients perl-Test-Simple perl-IPC-Cmd xz gcc10-c++ dejagnu"
 
 # Check for OS packages required for the build.
 MISSING_PACKAGES=""
