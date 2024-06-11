@@ -449,6 +449,15 @@ def main():
         except Exception as error:
             sys.stderr.write('"pywin32" missing or broken.\n {}'.format(error))
             exit_code = 172
+        else:
+            for path in sys.path:
+                if os.path.isdir(path):
+                    filename = os.path.join(path, 'pywin32.version.txt')
+                    if os.path.isfile(filename):
+                        with open(filename) as f:
+                            pywin32_version = f.read()
+                        pywin32_version = pywin32_version.strip()
+            print('pywin32 %s' % (pywin32_version))
 
     else:
         # Linux / Unix stuff.
