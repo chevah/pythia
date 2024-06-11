@@ -22,6 +22,7 @@ chevahbs_getsources() {
 chevahbs_configure() {
     # To properly quote multiple options, this is a Bash array.
     CONF_OPTS=(--disable-shared --enable-static)
+    CFLAGS="$CFLAGS -fPIC"
     execute ./configure --prefix="" "${CONF_OPTS[@]}"
 }
 
