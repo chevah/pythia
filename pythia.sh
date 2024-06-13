@@ -689,9 +689,12 @@ check_musl_version(){
     echo "No specific runtime for the current distribution / version / arch."
     echo "Minimum musl version for this arch: 1.1.$supported_musl11_version."
 
-    # Tested with musl 1.1.24/1.2.2.
+    # Tested with musl 1.1.24/1.2.2/1.2.5/1.2.5_git20240512.
     musl_version="$(grep -E ^"Version" "$ldd_output_file" | cut -d" " -f2)"
     rm "$ldd_output_file"
+
+    # Bleeding edge distributions might use git versions.
+    musl_version="${musl_version//_git/.}"
 
     if [[ "$musl_version" =~ [^[:digit:]\.] ]]; then
         (>&2 echo "Musl version should only have digits and dots, but:")

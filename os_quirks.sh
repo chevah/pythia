@@ -10,27 +10,33 @@ case $OS in
         BUILD_BZIP2="no"
         BUILD_SQLITE="no"
         BUILD_OPENSSL="no"
-        PIP_LIBRARIES=("${PIP_LIBRARIES[@]}" \
-            pywin32=="$PYWIN32_VERSION" \
-            )
+        PIP_LIBRARIES+=(pywin32=="$PYWIN32_VERSION")
         ;;
     linux*)
+        # Build as portable as possible, only glibc/musl should be needed.
+        export CFLAGS="${CFLAGS:-} -mtune=generic"
+        BUILD_LIBFFI="yes"
+        BUILD_ZLIB="yes"
+        BUILD_XZ="yes"
         if [ -f /etc/alpine-release ]; then
             # The busybox ersatz binary on Alpine Linux is different.
             SHA_CMD=(sha512sum -csw)
         fi
-        # Build as portable as possible, only glibc/musl should be needed.
-        BUILD_LIBFFI="yes"
-        BUILD_ZLIB="yes"
-        BUILD_XZ="yes"
         ;;
     macos)
         export CC="clang"
         export CXX="clang++"
-        export CFLAGS="${CFLAGS:-} -mmacosx-version-min=10.13"
-        # setup.py skips building readline by default, as it sets this to
-        # "10.4", and then tries to avoid the broken readline in OS X 10.4.
-        export MACOSX_DEPLOYMENT_TARGET=10.13
+        if [ "$ARCH" = "x64" ]; then
+            export CFLAGS="${CFLAGS:-} -mmacosx-version-min=10.13"
+            # setup.py skips building readline by default, as it sets this to
+            # "10.4", and then tries to avoid the broken readline in OS X 10.4.
+            export MACOSX_DEPLOYMENT_TARGET=10.13
+        else
+            export CFLAGS="${CFLAGS:-} -mmacosx-version-min=11.0"
+            # setup.py skips building readline by default, as it sets this to
+            # "10.4", and then tries to avoid the broken readline in OS X 10.4.
+            export MACOSX_DEPLOYMENT_TARGET=11.0
+        fi
         # System includes bzip2 libs by default.
         BUILD_BZIP2="no"
         BUILD_XZ="yes"

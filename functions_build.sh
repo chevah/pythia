@@ -91,7 +91,11 @@ chevahbs_build() {
 }
 
 chevahbs_test() {
-    chevahbs_try "$@"
+    if [ "${PYTHIA_BUILD_TESTS:-1}" -ne 0 ]; then
+        chevahbs_try "$@"
+    else
+        (>&2 echo "PYTHIA_BUILD_TESTS is set to 0. Skipping build tests!")
+    fi
 }
 
 chevahbs_install() {

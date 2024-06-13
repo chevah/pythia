@@ -57,6 +57,10 @@ chevahbs_configure() {
             # Note that this is not needed on Alpine.
             LDFLAGS="$LDFLAGS -lm"
             ;;
+        linux_musl)
+            # Needed for Alpine Linux 3.20.
+            LDFLAGS="$LDFLAGS -lffi"
+            ;;
         fbsd*|sol11*)
             LDFLAGS="$LDFLAGS -lncurses"
             ;;
@@ -90,11 +94,6 @@ chevahbs_try() {
         # Locales not supported on Alpine 3.12, failing locale-related tests.
         (>&2 echo -e "\tNot running Python upstream tests on musl-based Linux.")
     else
-        if [ "$PYTHON_BUILD_VERSION" = "3.11.7" ]; then
-            # test.test_asyncio.test_streams fails, no upstream fix found.
-            echo -e "\tSkipping asyncio streams tests for version 3.11.7..."
-            execute rm Lib/test/test_asyncio/test_streams.py
-        fi
         execute "${MAKE_CMD[@]}" test
     fi
 }
