@@ -15,7 +15,12 @@ chevahbs_getsources() {
     local name="$1"
     local ver="$2"
     local ext="tgz"
-    local link=https://www.python.org/ftp/python/"$ver"/"$name"-"$ver"."$ext"
+    local dir
+    local link
+
+    # For beta versions, remove everything after the b for the dir name.
+    dir=${ver%b*}
+    link=https://www.python.org/ftp/python/"$dir"/"$name"-"$ver"."$ext"
 
     download_sources "$name" "$ver" "$link" "$ext"
 }
