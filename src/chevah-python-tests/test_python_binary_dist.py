@@ -344,7 +344,7 @@ def main():
         expecting_openssl_version = u'OpenSSL 3.0.14 4 Jun 2024'
         if CHEVAH_OS == "windows":
             # The upstream Windows packages embed their own OpenSSL libs.
-            expecting_openssl_version = u'OpenSSL 3.0.11 19 Sep 2023'
+            expecting_openssl_version = u'OpenSSL 3.0.13 30 Jan 2024'
         if current_openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting_openssl_version, current_openssl_version))
@@ -442,6 +442,22 @@ def main():
             exit_code = 171
         else:
             print('ctypes %s' % (ctypes.__version__,))
+
+        try:
+            import win32api
+            win32api.GetCurrentThread()
+        except Exception as error:
+            sys.stderr.write('"pywin32" missing or broken.\n {}'.format(error))
+            exit_code = 172
+        else:
+            for path in sys.path:
+                if os.path.isdir(path):
+                    filename = os.path.join(path, 'pywin32.version.txt')
+                    if os.path.isfile(filename):
+                        with open(filename) as f:
+                            pywin32_version = f.read()
+                        pywin32_version = pywin32_version.strip()
+            print('pywin32 %s' % (pywin32_version))
 
     else:
         # Linux / Unix stuff.

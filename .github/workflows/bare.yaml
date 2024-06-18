@@ -18,7 +18,7 @@ jobs:
   windows:
     # The type of runner that the job will run on
     runs-on: windows-latest
-    timeout-minutes: ${{ matrix.tests.debug == 'yes' && 45 || 15 }}
+    timeout-minutes: 45
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -29,9 +29,11 @@ jobs:
 
     # Explicitly run our scripts with Bash, not PowerShell (GitHub's default).
     - name: Build Pythia
+      timeout-minutes: 10
       run: bash ./build.sh build
 
     - name: Test Pythia
+      timeout-minutes: 5
       run: bash ./build.sh test
 
     # To use an RSA key with SFTPPlus, install upstream OpenSSH package,
@@ -50,10 +52,11 @@ jobs:
     # Upload using a (per-OS selected) sftp command, then show final links.
     # Remove key in same step to avoid leaving it on disk if publishing fails.
     - name: Upload testing package
+      timeout-minutes: 5
       run: bash -c './publish_dist.sh ; rm priv_key'
 
     - name: Tmate debug on failure
-      if: ${{ failure() && !cancelled() && runner.debug }}
+      if: ${{ !cancelled() && runner.debug }}
       uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true
@@ -79,7 +82,7 @@ jobs:
   macos:
     # For macOS on Intel at GitHub.
     runs-on: macos-13
-    timeout-minutes: ${{ matrix.tests.debug == 'yes' && 90 || 30 }}
+    timeout-minutes: 90
     steps:
     - uses: actions/checkout@v2
       with:
@@ -94,6 +97,7 @@ jobs:
         sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
 
     - name: Build Pythia
+      timeout-minutes: 30
       run: ./build.sh build
 
     # Fix back Homebrew, for working Shellcheck tests and tmate debugging.
@@ -104,9 +108,11 @@ jobs:
         sudo mv -v /usr/local/bin/git{.saved,}
 
     - name: Test Pythia
+      timeout-minutes: 5
       run: ./build.sh test
 
     - name: Upload testing package
+      timeout-minutes: 5
       run: |
         mkdir -pv ~/.ssh/
         touch priv_key
@@ -116,7 +122,7 @@ jobs:
         ./publish_dist.sh ; rm priv_key
 
     - name: Tmate debug on failure
-      if: ${{ failure() && !cancelled() && runner.debug }}
+      if: ${{ !cancelled() && runner.debug }}
       uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true
@@ -125,19 +131,22 @@ jobs:
   macos-m1:
     # For macOS on Apple Silicon at GitHub.
     runs-on: macos-latest
-    timeout-minutes: ${{ matrix.tests.debug == 'yes' && 90 || 30 }}
+    timeout-minutes: 60
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 2
 
     - name: Build Pythia
+      timeout-minutes: 20
       run: ./build.sh build
 
     - name: Test Pythia
+      timeout-minutes: 5
       run: ./build.sh test
 
     - name: Upload testing package
+      timeout-minutes: 5
       run: |
         mkdir -pv ~/.ssh/
         touch priv_key
@@ -147,7 +156,7 @@ jobs:
         ./publish_dist.sh ; rm priv_key
 
     - name: Tmate debug on failure
-      if: ${{ failure() && !cancelled() && runner.debug }}
+      if: ${{ !cancelled() && runner.debug }}
       uses: chevah/action-tmate@v3
       with:
         limit-access-to-actor: true

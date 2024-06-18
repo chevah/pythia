@@ -48,9 +48,9 @@ PYTHON_BIN="$INSTALL_DIR/bin/$PYTHON_VERSION"
 
 # Explicitly choose the C compiler in order to make it possible to switch
 # between native compilers and GCC on platforms such as the BSDs and Solaris.
-export CC="gcc"
+export CC="${CC:-gcc}"
 # Used for testing Python C++ extensions (test_cppext).
-export CXX="g++"
+export CXX="${CXX:-g++}"
 # Other needed tools (GNU flavours preferred).
 # For proper quoting, _CMD vars are Bash arrays of commands and optional flags.
 MAKE_CMD=(make)
@@ -161,33 +161,38 @@ build_python() {
     fi
 }
 
-# This gets get-pip.py
-download_get_pip() {
-    echo "## Downloading get-pip.py... ##"
-    if [ ! -e "$BUILD_DIR"/get-pip.py ]; then
-        execute "${GET_CMD[@]}" \
-            "$BUILD_DIR"/get-pip.py "$BOOTSTRAP_GET_PIP"
+bootstrap_pip(){
+    echo "### Bootstrapping pip... ###"
+    if [ "$OS" = "windows" ]; then
+        # The embeddable Windows package doesn't include "ensurepip".
+        echo "## Downloading get-pip.py... ##"
+        if [ ! -e "$BUILD_DIR"/get-pip.py ]; then
+            execute "${GET_CMD[@]}" "$BUILD_DIR"/get-pip.py "$BOOTSTRAP_GET_PIP"
+        fi
+        execute "$PYTHON_BIN" "$BUILD_DIR"/get-pip.py "${PIP_ARGS[@]}" \
+            pip=="$PIP_VERSION" --no-setuptools \
+            setuptools=="$SETUPTOOLS_VERSION"
+    else
+        echo "## Installing pip from included ensurepip module... ##"
+        execute "$PYTHON_BIN" -m ensurepip --upgrade
     fi
 }
-
-
 # Compile and install all Python extra libraries.
 command_install_python_modules() {
     echo "::group::Install Python modules with pip $PIP_VERSION"
     echo "#### Installing Python modules... ####"
 
-    # Install latest PIP, then instruct it to get exact versions of setuptools.
-    # Otherwise, get-pip.py always tries to get latest versions.
-    download_get_pip
+    # Install latest PIP, then instruct it to get exact version of setuptools.
+    bootstrap_pip
     echo "# Installing latest pip with preferred setuptools version... #"
-    execute "$PYTHON_BIN" "$BUILD_DIR"/get-pip.py "${PIP_ARGS[@]}" \
-        pip=="$PIP_VERSION" --no-setuptools setuptools=="$SETUPTOOLS_VERSION"
+    execute "$PYTHON_BIN" -m pip install "${PIP_ARGS[@]}" \
+        pip=="$PIP_VERSION" setuptools=="$SETUPTOOLS_VERSION"
 
     # pycparser is installed first as setup_requires is ugly.
     # https://pip.pypa.io/en/stable/reference/pip_install/#controlling-setup-requires
     echo "# Installing pycparser with preferred setuptools version... #"
-    execute "$PYTHON_BIN" -m pip \
-        install "${PIP_ARGS[@]}" -U pycparser=="$PYCPARSER_VERSION"
+    execute "$PYTHON_BIN" -m pip install "${PIP_ARGS[@]}" \
+        -U pycparser=="$PYCPARSER_VERSION"
 
     if [ "$OS" = "windows" ]; then
         echo -e "\tSkip makefile updating on Windows"
