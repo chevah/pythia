@@ -20,7 +20,11 @@ INSTALL_DIR="$3"/lib
 # Construct the relevant download link for the Windows version.
 EXT="amd64.zip"
 ARCHIVE="python-$VER.$EXT"
-LINK="https://www.python.org/ftp/python/$VER/python-$VER-embed-$EXT"
+
+# For beta versions, remove everything after the b for the dir name.
+DIR=${VER%b*}
+
+LINK="https://www.python.org/ftp/python/$DIR/python-$VER-embed-$EXT"
 
 # Download without unpacking (amd64.zip extension is treated specially).
 download_sources "$NAME" "$VER" "$LINK" "$EXT"
