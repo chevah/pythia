@@ -143,7 +143,7 @@ def get_allowed_deps():
             '/usr/lib/libffi.dylib',
             '/usr/lib/libiconv.2.dylib',
             '/usr/lib/libncurses.5.4.dylib',
-            '/usr/lib/libedit.3.dylib',
+            '/usr/lib/libpanel.5.4.dylib',
             '/usr/lib/libresolv.9.dylib',
             '/usr/lib/libSystem.B.dylib',
             '/usr/lib/libz.1.dylib',
