@@ -40,7 +40,6 @@ case $OS in
         # System includes bzip2 libs by default.
         BUILD_BZIP2="no"
         BUILD_XZ="yes"
-        BUILD_LIBEDIT="yes"
         SHA_CMD=(shasum --algorithm 512 --check --status --warn)
         ;;
     fbsd*)

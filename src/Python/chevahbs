@@ -26,6 +26,15 @@ chevahbs_getsources() {
 }
 
 
+chevahbs_patch() {
+    if [ "$BUILD_LIBEDIT" = "yes" ]; then
+        # Adapted from https://bugs.python.org/issue13501.
+        echo "# Applying readline_libedit.patch... #"
+        execute patch -p 1 < readline_libedit.patch
+    fi
+}
+
+
 chevahbs_configure() {
     # To properly quote multiple options, this is a Bash array.
     CONFIG_OPTS=(--disable-shared)
