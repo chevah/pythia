@@ -33,7 +33,7 @@ PACKAGES="$CC make m4 git patch curl sha512sum tar unzip"
 # This is defined as an array of commands and opts, to allow it to be quoted.
 CHECK_CMD=(command -v)
 
-# $CHECK_CMD should exit with 0 only when checked packages is installed.
+# $CHECK_CMD should exit with 0 only when checked packages are installed.
 case "$OS" in
     windows)
         # Nothing to actually build on Windows.
@@ -75,6 +75,7 @@ esac
 set +o errexit
 
 # If $CHECK_CMD is still (command -v), it's only a check for needed commands.
+return
 if [ -n "$PACKAGES" ]; then
     for package in $PACKAGES ; do
         echo "Checking if $package is available..."

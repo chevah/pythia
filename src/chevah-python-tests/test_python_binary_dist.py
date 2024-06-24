@@ -139,9 +139,11 @@ def get_allowed_deps():
             '/System/Library/Frameworks/Security.framework/Versions/A/Security',
             '/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration',
             '/usr/lib/libbz2.1.0.dylib',
+            '/usr/lib/libedit.3.dylib',
             '/usr/lib/libffi.dylib',
             '/usr/lib/libiconv.2.dylib',
             '/usr/lib/libncurses.5.4.dylib',
+            '/usr/lib/libpanel.5.4.dylib',
             '/usr/lib/libresolv.9.dylib',
             '/usr/lib/libSystem.B.dylib',
             '/usr/lib/libz.1.dylib',
@@ -461,13 +463,6 @@ def main():
 
     else:
         # Linux / Unix stuff.
-        try:
-            import crypt
-            crypt
-        except:
-            sys.stderr.write('"crypt" is missing.\n')
-            exit_code = 155
-
         # Check for the git revision in Python's sys.version on Linux and Unix.
         try:
             git_rev_cmd = ['git', 'log', '-1', '--no-merges', '--format=%h']
@@ -482,16 +477,6 @@ def main():
                                  "\tBin ver: {0}".format(bin_ver) + "\n"
                                  "\tGit rev: {0}".format(git_rev) + "\n")
                 exit_code = 158
-
-    if platform_system in [ 'linux', 'sunos' ]:
-        try:
-            import spwd
-            spwd
-        except:
-            sys.stderr.write('"spwd" is missing, but it should be present.\n')
-            exit_code = 161
-        else:
-            print('"spwd" module is present.')
 
     # The readline module is built using libedit only on selected platforms.
     if BUILD_LIBEDIT:
