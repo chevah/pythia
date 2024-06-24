@@ -94,6 +94,7 @@ jobs:
       run: |
         sudo mv -v /usr/local/bin/git{,.saved}
         sudo chmod -v a-r /usr/local/include/libintl.h
+        sudo chmod -v a-r /usr/local/include/gdbm.h
         sudo chmod -v a-r /usr/local/opt/gettext/lib/libintl.*
         sudo chmod -v a-r /usr/local/opt/gdbm/lib/libgdbm*
         sudo chmod -v a-r /usr/local/opt/mpdecimal/lib/libmpdec*
@@ -105,8 +106,9 @@ jobs:
     # Fix back Homebrew, for working Shellcheck tests and tmate debugging.
     - name: Unhack Homebrew
       run: |
-        sudo chmod -v a+r /usr/local/opt/gettext/lib/libintl*
         sudo chmod -v a+r /usr/local/include/libintl.h
+        sudo chmod -v a-r /usr/local/include/gdbm.h
+        sudo chmod -v a+r /usr/local/opt/gettext/lib/libintl*
         sudo chmod -v a+r /usr/local/opt/gdbm/lib/libgdbm*
         sudo chmod -v a+r /usr/local/opt/mpdecimal/lib/libmpdec*
         sudo mv -v /usr/local/bin/git{.saved,}
