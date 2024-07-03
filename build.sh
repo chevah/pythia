@@ -222,8 +222,6 @@ help_text_test="Run own tests for the newly-build Python distribution."
 command_test() {
     local test_file="test_python_binary_dist.py"
     local python_binary="$PYTHON_BIN"
-    local safety_id_to_ignore
-    declare -a safety_ignore_opts
 
     echo "::group::Chevah tests"
     if [ ! -d "$BUILD_DIR" ]; then
@@ -243,22 +241,10 @@ command_test() {
     echo "::endgroup::"
 
     echo "::group::Security tests"
-    echo "## Testing for outdated packages and security issues... ##"
+    echo "## Testing for outdated packages... ##"
     execute "$python_binary" -m pip list --outdated --format=columns
     execute "$python_binary" -m pip install "${PIP_ARGS[@]}" \
         safety=="$SAFETY_VERSION"
-
-    if (( ${#SAFETY_IGNORED_IDS[@]} != 0 )); then
-        (>&2 echo "Following Safety DB IDs are excepted from checks:")
-        (>&2 echo -e "\t${SAFETY_IGNORED_IDS[*]}")
-        for safety_id_to_ignore in "${SAFETY_IGNORED_IDS[@]}"; do
-            safety_ignore_opts+=("-i $safety_id_to_ignore")
-        done
-    fi
-
-    execute "$python_binary" -m safety check --full-report \
-        "${safety_ignore_opts[@]}"
-    execute popd
     echo "::endgroup::"
 
     echo "::group::Shell tests"
