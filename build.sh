@@ -238,13 +238,12 @@ command_test() {
     execute cp src/chevah-python-tests/get_binaries_deps.sh "$BUILD_DIR"
     execute pushd "$BUILD_DIR"
     execute "$python_binary" "$test_file"
+    execute popd
     echo "::endgroup::"
 
     echo "::group::Security tests"
     echo "## Testing for outdated packages... ##"
     execute "$python_binary" -m pip list --outdated --format=columns
-    execute "$python_binary" -m pip install "${PIP_ARGS[@]}" \
-        safety=="$SAFETY_VERSION"
     echo "::endgroup::"
 
     echo "::group::Shell tests"
