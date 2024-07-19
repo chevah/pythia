@@ -45,6 +45,10 @@ jobs:
       run: |
         yum -y upgrade
         yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu
+        # To avoid linking against libdb and gdmb libraries on Amazon Linux 2.
+        # Can't simply uninstall libdb-devel and gdmb-devel, they are required by perl-IPC-Cmd.
+        chmod -v a-r /usr/include/libdb/db.h
+        chmod -v a-r /usr/include/gdbm.h
 
     - name: Ubuntu setup
       if: startsWith(matrix.container, 'ubuntu')
