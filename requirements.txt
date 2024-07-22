@@ -1,3 +1,4 @@
+pip==24.1.2
 psutil==6.0.0
 pycparser==2.22
 setuptools==71.0.3

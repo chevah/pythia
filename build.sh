@@ -214,7 +214,7 @@ command_install_python_modules() {
     execute "$PYTHON_BIN" -m pip uninstall --yes wheel
 
     echo "# Regenerating requirements.txt file... #"
-    execute "$PYTHON_BIN" -m pip freeze > requirements.txt
+    execute "$PYTHON_BIN" -m pip freeze --all > requirements.txt
 
     echo "::endgroup::"
 }
