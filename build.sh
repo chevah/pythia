@@ -210,8 +210,11 @@ command_install_python_modules() {
         execute "$PYTHON_BIN" -m pip install "${PIP_ARGS[@]}" "$library"
     done
 
-    # When done, uninstall wheel.
+    echo "# Uninstalling wheel... #"
     execute "$PYTHON_BIN" -m pip uninstall --yes wheel
+
+    echo "# Regenerating requirements.txt file... #"
+    execute "$PYTHON_BIN" -m pip freeze > requirements.txt
 
     echo "::endgroup::"
 }
