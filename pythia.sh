@@ -171,14 +171,14 @@ _clean_pyc() {
 
 
 #
-# Removes the download/pip cache entries. Must be called before
+# Removes the download/pip cache folder. Must be called before
 # building/generating the distribution.
 #
 purge_cache() {
     clean_build
 
-    echo "Cleaning download cache ..."
-    rm -rf "${CACHE_FOLDER:?}"/*
+    echo "Removing download cache ..."
+    rm -rf "${CACHE_FOLDER:?}"
 }
 
 
