@@ -107,7 +107,7 @@ check_source_folder() {
 # Called to trigger the entry point in the virtual environment.
 # Can be overwritten in pythia.conf
 execute_venv() {
-    "$PYTHON_BIN" -c "from paver.tasks import main; main()" "$@"
+    "$PYTHON_BIN" -X utf8 -c "from paver.tasks import main; main()" "$@"
 }
 
 
@@ -149,6 +149,8 @@ clean_build() {
     delete_folder "$DIST_FOLDER"
     echo "Removing publish/..."
     delete_folder publish/
+    echo "Removing node_modules/..."
+    delete_folder node_modules/
 
     # In some case pip hangs with a build folder in temp and
     # will not continue until it is manually removed.
@@ -311,7 +313,7 @@ resolve_python_version() {
 # Install base package.
 #
 install_base_deps() {
-    echo "::groups::Installing base requirements:" "${BASE_REQUIREMENTS[@]}"
+    echo "::group::Installing base requirements:" "${BASE_REQUIREMENTS[@]}"
 
     set +e
     # There is a bug in pip/setuptools when using custom build folders.
@@ -368,7 +370,7 @@ get_binary_dist() {
     local dist_name="$1"
     local remote_base_url="$2"
 
-    echo "Getting $dist_name from $remote_base_url..."
+    echo "Getting $dist_name from $remote_base_url ..."
 
     tar_gz_file="$dist_name".tar.gz
     tar_file="$dist_name".tar
@@ -396,7 +398,7 @@ test_version_exists() {
     local remote_base_url="$1"
     local target_file="python-$PYTHON_VERSION-$OS-$ARCH.tar.gz"
 
-    echo "Checking $remote_base_url/$PYTHON_VERSION/$target_file..."
+    echo "Checking $remote_base_url/$PYTHON_VERSION/$target_file ..."
     "${ONLINETEST_CMD[@]}" "$remote_base_url"/"$PYTHON_VERSION"/"$target_file"
     return $?
 }
@@ -476,7 +478,8 @@ copy_python() {
             get_python_dist "$BINARY_DIST_URI"
         fi
 
-        echo "Copying Python distribution files... "
+        echo "Copying Python distribution files from $python_distributable " \
+             "to $BUILD_FOLDER ... "
         cp -R "$python_distributable"/* "$BUILD_FOLDER"
 
         echo "::endgroup::"
@@ -682,6 +685,7 @@ check_glibc_version(){
 
 check_musl_version(){
     local musl_version
+    local musl_version_cleaned
     local musl_version_array
     local musl_version_unsupported="false"
     local supported_musl11_version=24
@@ -689,25 +693,25 @@ check_musl_version(){
     echo "No specific runtime for the current distribution / version / arch."
     echo "Minimum musl version for this arch: 1.1.$supported_musl11_version."
 
-    # Tested with musl 1.1.24/1.2.2/1.2.5/1.2.5_git20240512.
+    # Tested with musl 1.1.24/1.2.2/1.2.4_git20230717/1.2.5.
     musl_version="$(grep -E ^"Version" "$ldd_output_file" | cut -d" " -f2)"
     rm "$ldd_output_file"
 
-    # Bleeding edge distributions might use git versions.
-    musl_version="${musl_version//_git/.}"
+    # Some Alpine Linux releases (e.g. Alpine 3.19) use git-versioned musl.
+    musl_version_cleaned="${musl_version//_git/.}"
 
-    if [[ "$musl_version" =~ [^[:digit:]\.] ]]; then
-        (>&2 echo "Musl version should only have digits and dots, but:")
-        (>&2 echo "    \$musl_version=$musl_version")
+    if [[ "$musl_version_cleaned" =~ [^[:digit:]\.] ]]; then
+        (>&2 echo "Cleaned musl version should only have digits and dots, but")
+        (>&2 echo "    \$musl_version_cleaned=$musl_version_cleaned")
         exit 25
     fi
 
-    IFS=. read -r -a musl_version_array <<< "$musl_version"
+    IFS=. read -r -a musl_version_array <<< "$musl_version_cleaned"
 
     # Decrement supported_musl11_version above if building against older musl.
     if [ "${musl_version_array[0]}" -lt 1 ]; then
         musl_version_unsupported="true"
-    elif [ "${musl_version_array[0]}" -eq 1 ]; then      
+    elif [ "${musl_version_array[0]}" -eq 1 ]; then
         if [ "${musl_version_array[1]}" -lt 1 ];then
             musl_version_unsupported="true"
         elif [ "${musl_version_array[1]}" -eq 1 ];then
