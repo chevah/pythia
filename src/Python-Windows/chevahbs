@@ -22,9 +22,9 @@ EXT="amd64.zip"
 ARCHIVE="python-$VER.$EXT"
 
 # For beta versions, remove everything after the b for the dir name.
-DIR=${VER%b*}
+DIR=${VER%%b*}
 # For rc versions, remove everything after rc for the dir name
-DIR=${ver%rc*}
+DIR=${VER%%rc*}
 
 LINK="https://www.python.org/ftp/python/$DIR/python-$VER-embed-$EXT"
 
