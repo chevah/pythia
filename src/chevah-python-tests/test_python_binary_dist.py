@@ -344,10 +344,10 @@ def main():
         import _hashlib
         exit_code = egg_check(_hashlib) | exit_code
         # Check OpenSSL version to prevent linking to OS libs.
-        expecting_openssl_version = u'OpenSSL 3.0.14 4 Jun 2024'
+        expecting_openssl_version = u'OpenSSL 3.0.15 3 Sep 2024'
         if CHEVAH_OS == "windows":
             # The upstream Windows packages embed their own OpenSSL libs.
-            expecting_openssl_version = u'OpenSSL 3.0.13 30 Jan 2024'
+            expecting_openssl_version = u'OpenSSL 3.0.15 3 Sep 2024'
         if current_openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting_openssl_version, current_openssl_version))
