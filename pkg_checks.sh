@@ -19,7 +19,7 @@ BASE_PKGS="gcc make m4 patch unzip perl"
 if [ "$BUILD_LIBEDIT" = "yes" ]; then
     BASE_PKGS="$BASE_PKGS automake libtool"
 fi
-APK_PKGS="$BASE_PKGS git curl bash musl-dev linux-headers lddtree shadow \
+APK_PKGS="$BASE_PKGS git curl bash musl-dev linux-headers lddtree \
     openssh-client file unzip g++ musl-locales dejagnu"
 DEB_PKGS="$BASE_PKGS tar diffutils git curl \
     openssh-client libtest-simple-perl xz-utils g++ dejagnu"

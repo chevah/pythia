@@ -678,7 +678,7 @@ check_musl_version(){
     local musl_version_cleaned
     local musl_version_array
     local musl_version_unsupported="false"
-    local supported_musl11_version=24
+    local supported_musl12_version=2
 
     # Tested with musl 1.1.24/1.2.2/1.2.4_git20230717/1.2.5.
     musl_version="$(grep -E ^"Version" "$ldd_output_file" | cut -d" " -f2)"
@@ -695,17 +695,17 @@ check_musl_version(){
 
     IFS=. read -r -a musl_version_array <<< "$musl_version_cleaned"
 
-    # Decrement supported_musl11_version above if building against older musl.
+    # Decrement supported_musl12_version above if building against older musl.
     if [ "${musl_version_array[0]}" -lt 1 ]; then
         musl_version_unsupported="true"
     elif [ "${musl_version_array[0]}" -eq 1 ]; then
         if [ "${musl_version_array[1]}" -lt 1 ];then
             musl_version_unsupported="true"
         elif [ "${musl_version_array[1]}" -eq 1 ];then
-            if [ "${musl_version_array[2]}" -lt "$supported_musl11_version" ]
+            if [ "${musl_version_array[2]}" -lt "$supported_musl12_version" ]
             then
-                echo -n "Minimum musl version for this arch: 1.1."
-                echo "$supported_musl11_version."
+                echo -n "Minimum musl version for this arch: 1.2."
+                echo "$supported_musl12_version."
                 (>&2 echo "NOT good. Detected version is older: $musl_version!")
                 exit 27
             fi
@@ -713,7 +713,7 @@ check_musl_version(){
     fi
 
     if [ "$musl_version_unsupported" = "true" ]; then
-        (>&2 echo "Only musl 1.1 or greater supported! Detected: $musl_version")
+        (>&2 echo "Only musl 1.2 or greater supported! Detected: $musl_version")
         exit 26
     fi
 

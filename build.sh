@@ -8,6 +8,7 @@ set -o nounset    # always check if variables exist
 set -o errexit    # always exit on error
 set -o errtrace   # trap errors in functions as well
 set -o pipefail   # don't ignore exit codes when piping output
+set -o functrace  # inherit DEBUG and RETURN traps
 
 # Default PyPI server to use. Can be overwritten in build.conf.
 PIP_INDEX_URL="https://pypi.org/simple"
