@@ -1,0 +1,20 @@
+--- setup.py.orig	2023-04-05 01:22:17.000000000 +0300
++++ setup.py	2023-05-02 13:21:57.151724870 +0300
+@@ -56,7 +56,16 @@
+ 
+ 
+ # This global variable is used to hold the list of modules to be disabled.
+-DISABLED_MODULE_LIST = []
++DISABLED_MODULE_LIST = [
++    '_curses',
++    '_curses_panel',
++    '_dbm',
++    '_gdbm',
++    '_locale',
++    '_tkinter',
++    'nis',
++    'readline',
++    ]
+ 
+ # --list-module-names option used by Tools/scripts/generate_module_names.py
+ LIST_MODULE_NAMES = False

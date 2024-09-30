@@ -34,12 +34,13 @@ def get_allowed_deps():
         elif 'linux' in CHEVAH_OS:
             # Deps without paths for generic glibc Linux builds.
             # Only glibc 2.x libs are allowed.
-            # Tested on Amazon 2 & Ubuntu 16.04/18.04 with glibc 2.26/2.23/2.27.
+            # Tested on Amazon 2 & Ubuntu 20.04/22.04 with glibc 2.26/2.31/2.35.
             allowed_deps=[
                 'libc.so.6',
                 'libcrypt.so.1',
                 'libdl.so.2',
                 'libm.so.6',
+                'libnsl.so.1',
                 'libpthread.so.0',
                 'librt.so.1',
                 'libutil.so.1',
