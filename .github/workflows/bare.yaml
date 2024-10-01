@@ -20,6 +20,10 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 45
 
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit requirements.txt
+      contents: write
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out the repository under $GITHUB_WORKSPACE, so the job can access it
@@ -35,6 +39,12 @@ jobs:
     - name: Test Pythia
       timeout-minutes: 5
       run: bash ./build.sh test
+
+    # Commit changed requirements.txt back to the repository
+    - uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: Automated update of requirements.txt from Windows build.
+        file_pattern: 'requirements.txt'
 
     # To use an RSA key with SFTPPlus, install upstream OpenSSH package,
     # which is more finicky in regards to file permissions.
