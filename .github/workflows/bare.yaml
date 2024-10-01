@@ -41,7 +41,7 @@ jobs:
       run: bash ./build.sh test
 
     # Commit changed requirements.txt back to the repository
-    - uses: chevah/git-auto-commit-action
+    - uses: chevah/git-auto-commit-action@HEAD
       with:
         commit_message: Automated update of requirements.txt from Windows build.
         file_pattern: 'requirements.txt'
