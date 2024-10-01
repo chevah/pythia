@@ -37,7 +37,10 @@ chevahbs_try() {
 
 
 chevahbs_cp() {
-    execute "${MAKE_CMD[@]}" install DESTDIR="$INSTALL_DIR"
+    # xz's installation copies binaries too, but there's no need for them.
+    execute cp -R src/liblzma/api/* "$INSTALL_DIR"/include/
+    execute cp src/liblzma/.libs/liblzma.a "$INSTALL_DIR"/lib/
+    execute cp -L src/liblzma/.libs/liblzma.la "$INSTALL_DIR"/lib/
 }
 
 
