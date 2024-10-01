@@ -243,6 +243,8 @@ cleanup_install_dir() {
                     execute mv pkgconfig/* lib/pkgconfig/
                     execute rmdir pkgconfig
                 fi
+                # Compress packaged Makefiles to save some space when unpacked.
+                execute bzip2 lib/config/Makefile*
                 ;;
         esac
         # Test that only bin/ and lib/ sub-dirs are left.

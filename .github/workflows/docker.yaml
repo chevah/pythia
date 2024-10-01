@@ -35,7 +35,7 @@ jobs:
       if: startsWith(matrix.container, 'alpine')
       run: |
         apk upgrade -U
-        apk add git curl bash gcc make m4 patch musl-dev linux-headers lddtree shadow openssh-client file unzip perl g++ musl-locales dejagnu
+        apk add git curl bash gcc make m4 patch musl-dev linux-headers lddtree shadow openssh-client file unzip perl g++ musl-locales dejagnu bzip2
         apk del util-linux-dev
         curl --output /usr/local/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/local/bin/paxctl
