@@ -4,5 +4,5 @@
 /src/*/*.tar.gz
 /src/*/*.tgz
 /src/*/*.zip
-/build-pythia/
+/build-py3/
 /cache/

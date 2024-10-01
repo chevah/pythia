@@ -234,12 +234,12 @@ execute() {
 check_cache_path() {
     execute mkdir -p "$CACHE_FOLDER"
 
-    pushd ..
+    cd ..
         if [ ! -d "$CACHE_FOLDER" ]; then
             (>&2 echo "CACHE_PATH \"$CACHE_FOLDER\" is not an absolute path!")
             exit 9
         fi
-    popd
+    cd -
 }
 
 #
