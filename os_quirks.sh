@@ -101,9 +101,11 @@ case "$OS" in
 esac
 
 # Use PIC (Position Independent Code) with GCC on 64-bit arches (currently all).
-if [ "$CC" = "gcc" ]; then
-    export CFLAGS="${CFLAGS:-} -fPIC"
-fi
+case "$CC" in
+    gcc*)
+        export CFLAGS="${CFLAGS:-} -fPIC"
+        ;;
+esac
 
 # Get number of useful CPUs, to enable parallel builds where applicable.
 case "$OS" in
