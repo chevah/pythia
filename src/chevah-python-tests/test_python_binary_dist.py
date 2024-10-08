@@ -40,7 +40,6 @@ def get_allowed_deps():
                 'libcrypt.so.1',
                 'libdl.so.2',
                 'libm.so.6',
-                'libnsl.so.1',
                 'libpthread.so.0',
                 'librt.so.1',
                 'libutil.so.1',

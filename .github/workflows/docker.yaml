@@ -50,7 +50,7 @@ jobs:
         rm -v /usr/include/libdb/db.h
         rm -v /usr/include/gdbm.h
         # This is for avoiding building the NIS module with Python 3.12.
-        rm -v /usr/include/nss.h
+        rm -v /usr/include/rpc/rpc.h
 
     - name: Ubuntu setup
       if: startsWith(matrix.container, 'ubuntu')
