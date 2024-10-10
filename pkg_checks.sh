@@ -15,15 +15,15 @@
 # On platforms with multiple C compilers, choose by setting CC in os_quirks.sh.
 
 # List of OS packages required for building Python/pyOpenSSL/cryptography etc.
-BASE_PKGS="gcc make m4 patch unzip perl"
+BASE_PKGS="gcc make m4 patch perl"
 if [ "$BUILD_LIBEDIT" = "yes" ]; then
     BASE_PKGS="$BASE_PKGS automake libtool"
 fi
-APK_PKGS="$BASE_PKGS git curl bash musl-dev linux-headers lddtree shadow \
-    openssh-client file unzip g++ musl-locales dejagnu"
-DEB_PKGS="$BASE_PKGS tar diffutils git curl \
+APK_PKGS="$BASE_PKGS git curl bash musl-dev linux-headers lddtree \
+    openssh-client file g++ musl-locales dejagnu"
+DEB_PKGS="$BASE_PKGS unzip tar diffutils git curl \
     openssh-client libtest-simple-perl xz-utils g++ dejagnu"
-RPM_PKGS="$BASE_PKGS tar diffutils git-core curl \
+RPM_PKGS="$BASE_PKGS bzip2 unzip tar diffutils git-core curl \
     openssh-clients perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu"
 
 # Check for OS packages required for the build.
@@ -33,7 +33,7 @@ PACKAGES="$CC make m4 git patch curl sha512sum tar unzip"
 # This is defined as an array of commands and opts, to allow it to be quoted.
 CHECK_CMD=(command -v)
 
-# $CHECK_CMD should exit with 0 only when checked packages is installed.
+# $CHECK_CMD should exit with 0 only when checked package is installed.
 case "$OS" in
     windows)
         # Nothing to actually build on Windows.
@@ -54,7 +54,7 @@ case "$OS" in
         ;;
     linux*)
         if [ -x /sbin/apk ]; then
-            # Assumes Alpine Linux 3.12.
+            # Assumes Alpine Linux 3.15.
             CHECK_CMD=(apk info -q -e)
             PACKAGES="$APK_PKGS"
         elif [ -x /usr/bin/dpkg ]; then
@@ -74,7 +74,7 @@ esac
 # External checks with various exit codes are checked below.
 set +o errexit
 
-# If $CHECK_CMD is still (command -v), it's only a check for needed commands.
+# If $CHECK_CMD is still "(command -v)", it's only a check for needed commands.
 if [ -n "$PACKAGES" ]; then
     for package in $PACKAGES ; do
         echo "Checking if $package is available..."

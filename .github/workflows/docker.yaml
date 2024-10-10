@@ -25,8 +25,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Alpine 3.12 has musl 1.1.24, Amazon 2 has glibc 2.26.
-        container: [ 'alpine:3.12', 'amazonlinux:2' ]
+        # Alpine Linux 3.15 has musl 1.2.2, Amazon Linux 2 has glibc 2.26.
+        container: [ 'alpine:3.15', 'amazonlinux:2' ]
     timeout-minutes: 60
     steps:
 
@@ -44,7 +44,13 @@ jobs:
       if: startsWith(matrix.container, 'amazonlinux')
       run: |
         yum -y upgrade
-        yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu
+        yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu bzip2
+        # To avoid linking against libdb and gdmb libraries on Amazon Linux 2.
+        # Can't simply uninstall libdb-devel and gdmb-devel, they are required by perl-IPC-Cmd.
+        rm -v /usr/include/libdb/db.h
+        rm -v /usr/include/gdbm.h
+        # This is for avoiding building the NIS module with Python 3.12.
+        rm -v /usr/include/rpc/rpc.h
 
     - name: Ubuntu setup
       if: startsWith(matrix.container, 'ubuntu')

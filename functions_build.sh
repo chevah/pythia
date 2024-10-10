@@ -170,7 +170,7 @@ build() {
 # Put stuff where it's expected and remove some of the cruft.
 #
 cleanup_install_dir() {
-    local python_lib_file="lib$PYTHON_VERSION.a"
+    local python_lib_file="lib${PYTHON_VERSION}.a"
 
     echo "::group::Clean up Python install dir"
     execute pushd "$BUILD_DIR/$PYTHON_BUILD_DIR"
@@ -243,6 +243,8 @@ cleanup_install_dir() {
                     execute mv pkgconfig/* lib/pkgconfig/
                     execute rmdir pkgconfig
                 fi
+                # Compress packaged Makefiles to save some space when unpacked.
+                execute bzip2 lib/config/Makefile*
                 ;;
         esac
         # Test that only bin/ and lib/ sub-dirs are left.

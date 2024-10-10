@@ -40,6 +40,7 @@ set -o nounset    # always check if variables exist
 set -o errexit    # always exit on error
 set -o errtrace   # trap errors in functions as well
 set -o pipefail   # don't ignore exit codes when piping output
+set -o functrace  # inherit DEBUG and RETURN traps
 
 # Initialize default values.
 COMMAND="${1-''}"
@@ -61,6 +62,7 @@ export PATH="$PATH:/sbin:/usr/sbin:/usr/local/bin"
 #
 WAS_PYTHON_JUST_INSTALLED=0
 DIST_FOLDER="dist"
+PYTHIA_VERSION_FILE="lib/PYTHIA_VERSION"
 
 # Path global variables.
 
@@ -76,7 +78,6 @@ CACHE_FOLDER=""
 
 PYTHON_BIN=""
 PYTHON_LIB=""
-LOCAL_PYTHON_BINARY_DIST=""
 
 # Put default values and create them as global variables.
 OS="not-detected-yet"
@@ -107,7 +108,7 @@ check_source_folder() {
 # Called to trigger the entry point in the virtual environment.
 # Can be overwritten in pythia.conf
 execute_venv() {
-    "$PYTHON_BIN" -c "from paver.tasks import main; main()" "$@"
+    "$PYTHON_BIN" -X utf8 -c "from paver.tasks import main; main()" "$@"
 }
 
 
@@ -143,21 +144,24 @@ source pythia.conf
 
 clean_build() {
     # Shortcut for clear since otherwise it will depend on python
-    echo "Removing $BUILD_FOLDER..."
-    delete_folder "$BUILD_FOLDER"
-    echo "Removing $DIST_FOLDER..."
-    delete_folder "$DIST_FOLDER"
+    echo "Removing $BUILD_FOLDER ..."
+    quick_rm "$BUILD_FOLDER"
+    echo "Removing $DIST_FOLDER ..."
+    quick_rm "$DIST_FOLDER"
     echo "Removing publish/..."
-    delete_folder publish/
+    quick_rm publish/
+    echo "Removing node_modules/ ..."
+    quick_rm node_modules/
 
     # In some case pip hangs with a build folder in temp and
     # will not continue until it is manually removed.
     # On the OSX build server tmp is in $TMPDIR
+    echo "Removing pip* sub-dirs in temp dir..."
     if [ -n "${TMPDIR-}" ]; then
         # check if TMPDIR is set before trying to clean it.
-        rm -rf "$TMPDIR"/pip*
+        quick_rm "$TMPDIR"/pip*
     else
-        rm -rf /tmp/pip*
+        quick_rm /tmp/pip*
     fi
 }
 
@@ -171,31 +175,32 @@ _clean_pyc() {
 
 
 #
-# Removes the download/pip cache entries. Must be called before
+# Removes the download/pip cache folder. Must be called before
 # building/generating the distribution.
 #
 purge_cache() {
     clean_build
 
-    echo "Cleaning download cache ..."
-    rm -rf "${CACHE_FOLDER:?}"/*
+    echo "Removing the cache folder..."
+    quick_rm "$CACHE_FOLDER"
 }
 
 
 #
-# Delete the folder as quickly as possible.
+# Deletes a list of files and folders as quick as possible.
 #
-delete_folder() {
-    local target="$1"
+quick_rm() {
     # On Windows, we use internal command prompt for maximum speed.
     # See: https://stackoverflow.com/a/6208144/539264
     if [ "$OS" = "windows" ]; then
-        if [ -d "$target" ]; then
+        for target in "$@"; do
             cmd //c "del /f/s/q $target > nul"
-            cmd //c "rmdir /s/q $target"
-        fi
+            if [ -d "$target" ]; then
+                cmd //c "rmdir /s/q $target"
+            fi
+        done
     else
-        rm -rf "$target"
+        execute rm -rf "$@"
     fi
 }
 
@@ -219,6 +224,24 @@ execute() {
     fi
 }
 
+
+#
+# Checks that the final CACHE_FOLDER is an absolute path.
+# Creates it if not existing.
+# Works with "C:\" style paths on Windows.
+# Assumes current dir is not the top one.
+#
+check_cache_path() {
+    execute mkdir -p "$CACHE_FOLDER"
+
+    cd ..
+        if [ ! -d "$CACHE_FOLDER" ]; then
+            (>&2 echo "CACHE_PATH \"$CACHE_FOLDER\" is not an absolute path!")
+            exit 9
+        fi
+    cd -
+}
+
 #
 # Update global variables with current paths.
 #
@@ -234,10 +257,9 @@ update_path_variables() {
     fi
 
     # Read first from env var.
-    set +o nounset
-    BUILD_FOLDER="$CHEVAH_BUILD"
-    CACHE_FOLDER="$CHEVAH_CACHE"
-    set -o nounset
+    BUILD_FOLDER="${CHEVAH_BUILD:-}"
+    # Use CHEVAH_CACHE by default.
+    CACHE_FOLDER="${CHEVAH_CACHE:-}"
 
     if [ -z "$BUILD_FOLDER" ] ; then
         # Use value from configuration file.
@@ -250,19 +272,20 @@ update_path_variables() {
     fi
 
     if [ -z "$CACHE_FOLDER" ] ; then
-        # Use default if not yet defined.
+        # Use CHEVAH_CACHE_DIR as a second option.
         CACHE_FOLDER="$CHEVAH_CACHE_DIR"
     fi
 
     if [ -z "$CACHE_FOLDER" ] ; then
-        # Use default if not yet defined.
-        CACHE_FOLDER="cache"
+        # Use "cache/" in current dir if still not defined.
+        # Full path to it is needed when unpacking in build folder.
+        CACHE_FOLDER="$(pwd)/cache"
     fi
+
+    check_cache_path
 
     PYTHON_BIN="$BUILD_FOLDER/$PYTHON_BIN"
     PYTHON_LIB="$BUILD_FOLDER/$PYTHON_LIB"
-
-    LOCAL_PYTHON_BINARY_DIST="$PYTHON_NAME-$OS-$ARCH"
 
     export PYTHONPATH="$BUILD_FOLDER"
     export CHEVAH_PYTHON="$PYTHON_NAME"
@@ -311,12 +334,12 @@ resolve_python_version() {
 # Install base package.
 #
 install_base_deps() {
-    echo "::groups::Installing base requirements:" "${BASE_REQUIREMENTS[@]}"
+    echo "::group::Installing base requirements:" "${BASE_REQUIREMENTS[@]}"
 
     set +e
     # There is a bug in pip/setuptools when using custom build folders.
     # See https://github.com/pypa/pip/issues/3564
-    rm -rf "${BUILD_FOLDER:?}"/pip-build
+    quick_rm "$BUILD_FOLDER"/pip-build
     "$PYTHON_BIN" -m \
         pip install \
             --index-url="$PIP_INDEX_URL" \
@@ -338,182 +361,156 @@ install_base_deps() {
 #
 set_download_commands() {
     set +o errexit
-    if command -v curl > /dev/null; then
-        # Options not used because of no support in older curl versions:
-        #     --retry-connrefused (since curl 7.52.0)
-        #     --retry-all-errors (since curl 7.71.0)
-        # Retry 2 times, allocating 10s for the connection phase,
-        # at most 300s for an attempt, sleeping for 5s between retries.
-        # Strings wouldn't work when quoted, using Bash arrays instead.
-        CURL_RETRY_OPTS=(\
-            --retry 2 \
-            --connect-timeout 10 \
-            --max-time 300 \
-            --retry-delay 5 \
-            )
-        DOWNLOAD_CMD=(curl --remote-name --location "${CURL_RETRY_OPTS[@]}")
-        ONLINETEST_CMD=(curl --fail --silent --head "${CURL_RETRY_OPTS[@]}" \
-            --output /dev/null)
-        set -o errexit
-        return
+    if ! command -v curl > /dev/null; then
+        (>&2 echo "Missing curl! It's needed for downloading Python package.")
+        exit 3
     fi
-    (>&2 echo "Missing curl! It is needed for downloading the Python package.")
-    exit 3
+    set -o errexit
+
+    # Options not used because of no support in older curl versions:
+    #     --retry-connrefused (since curl 7.52.0)
+    #     --retry-all-errors (since curl 7.71.0)
+    # Retry 2 times, allocating 10s for the connection phase,
+    # at most 300s for an attempt, sleeping for 5s between retries.
+    CURL_RETRY_OPTS=(\
+        --retry 2 \
+        --connect-timeout 10 \
+        --max-time 300 \
+        --retry-delay 5 \
+        )
+    CURL_CMD=(curl --location "${CURL_RETRY_OPTS[@]}")
+    ONLINETEST_CMD=(curl --fail --silent --head "${CURL_RETRY_OPTS[@]}" \
+        --output /dev/null)
 }
 
 #
-# Download and extract a binary distribution.
+# Put the Pythia package in the cache folder if missing.
+# Requires as parameter the filename of the package to download.
 #
-get_binary_dist() {
-    local dist_name="$1"
-    local remote_base_url="$2"
+get_pythia_package() {
+    local python_pkg_file="$1"
+    local package_url="$BINARY_DIST_URI/$PYTHON_VERSION/$python_pkg_file"
+    local cached_pkg_file="$CACHE_FOLDER/$python_pkg_file"
+    local random_id="${HOSTNAME:=nohostname}-${BUILD_ID:=nobuild}-$RANDOM"
+    local curl_tmpdir="/tmp"
+    if [ -n "${TMPDIR-}" ]; then
+        local curl_tmpdir="$TMPDIR"
+    fi
+    local curl_tmpfile="$curl_tmpdir"/"$python_pkg_file"."$random_id".tmp
 
-    echo "Getting $dist_name from $remote_base_url..."
+    if [ -e "$cached_pkg_file" ]; then
+        # To optimize output, only the package filename is shown here.
+        # Full path of the cached package file is shown when unpacking.
+        echo "Found \"$python_pkg_file\" in cache. Updating its timestamp ..."
+        execute date +%s > "$cached_pkg_file".last-access
+        return
+    fi
 
-    tar_gz_file="$dist_name".tar.gz
-    tar_file="$dist_name".tar
+    echo "File \"$python_pkg_file\" not found in cache, getting it from:"
+    echo "$package_url"
 
-    mkdir -p "$CACHE_FOLDER"
-    pushd "$CACHE_FOLDER"
+    set +o errexit
+    if ! "${ONLINETEST_CMD[@]}" "$package_url"; then
+        (>&2 echo "Couldn't find package on remote server!")
+        exit 4
+    fi
+    set -o errexit
 
-        # Get and extract archive.
-        rm -rf "$dist_name"
-        rm -f "$tar_gz_file"
-        rm -f "$tar_file"
-        execute "${DOWNLOAD_CMD[@]}" "$remote_base_url"/"$tar_gz_file"
-        execute gunzip -f "$tar_gz_file"
-        execute tar -xf "$tar_file"
-        rm -f "$tar_gz_file"
-        rm -f "$tar_file"
+    # Requested Pythia package is available online, get it.
+    execute "${CURL_CMD[@]}" "$package_url" --output "$curl_tmpfile"
+    execute mv "$curl_tmpfile" "$cached_pkg_file"
+    execute date +%s > "$cached_pkg_file".last-access
+}
 
+#
+# Unpack TAR.GZ file given as parameter 2 in sub-dir given as parameter 1.
+# Remaining parameters must be long opts to append to the tar command.
+# If failing to unpack it, remove the cached TAR.GZ file.
+#
+unpack_in_dir(){
+    local dir="$1"; shift
+    local pkg="$1"; shift
+    local long_tar_opts=( "$@" )
+
+    if [ "$OS" = "windows" ]; then
+        # GNU tar considers Windows paths containing ":" as network paths.
+        long_tar_opts+=( --force-local )
+    elif [ "$OS" = "macos" ]; then
+        # The old Bash on macOS requires to have at least one element.
+        long_tar_opts+=( --no-mac-metadata )
+    fi
+
+    echo "Unpacking in \"$dir\" the archive \"$pkg\" ..."
+    execute mkdir -p "$dir"
+    pushd "$dir"
+        set +o errexit
+        if ! tar xfz "$pkg" "${long_tar_opts[@]}"; then
+            (>&2 echo "Couldn't unpack! Removing ${pkg}* ...")
+            quick_rm "$pkg"*
+            # Unpacking an incomplete archive may leave files on disk.
+            if [ -n "${TARGET_OS-}" ]; then
+                quick_rm "$PYTHON_NAME-$TARGET_OS-$TARGET_ARCH"
+            else
+                quick_rm "$PYTHON_NAME-$OS-$ARCH"
+            fi
+            exit 6
+        fi
+        set -o errexit
     popd
 }
 
 #
-# Check if we have a versioned Python distribution.
+# Check if a Python distribution with desired version is present in a folder.
+# If yes, returns successfully.
+# If not, removes the folder to check.
+# Requires as parameter the target folder to check.
 #
-test_version_exists() {
-    local remote_base_url="$1"
-    local target_file="python-$PYTHON_VERSION-$OS-$ARCH.tar.gz"
-
-    echo "Checking $remote_base_url/$PYTHON_VERSION/$target_file..."
-    "${ONLINETEST_CMD[@]}" "$remote_base_url"/"$PYTHON_VERSION"/"$target_file"
-    return $?
-}
-
-#
-# Download and extract in cache the python distributable.
-#
-get_python_dist() {
-    local remote_base_url="$1"
-    local python_distributable="python-$PYTHON_VERSION-$OS-$ARCH"
-    local onlinetest_errorcode
-
-    set +o errexit
-    test_version_exists "$remote_base_url"
-    onlinetest_errorcode="$?"
-    set -o errexit
-
-    if [ $onlinetest_errorcode -eq 0 ]; then
-        # We have the requested python version.
-        get_binary_dist "$python_distributable" \
-            "$remote_base_url"/"$PYTHON_VERSION"
-    else
-        (>&2 echo "Couldn't find package on remote server. Full link:")
-        echo "$remote_base_url/$PYTHON_VERSION/$python_distributable.tar.gz"
-        exit 4
-    fi
-}
-
-
-# copy_python can be called in a recursive way, and this is here to prevent
-# accidental infinite loops.
-COPY_PYTHON_RECURSIONS=0
-#
-# Copy python to build folder from binary distribution.
-#
-copy_python() {
-    local python_distributable="$CACHE_FOLDER/$LOCAL_PYTHON_BINARY_DIST"
+check_python_version() {
+    local python_dist_dir="$1"
     local python_installed_version
+    local version_file="$python_dist_dir"/"$PYTHIA_VERSION_FILE"
 
-    COPY_PYTHON_RECURSIONS="$((COPY_PYTHON_RECURSIONS + 1))"
-
-    if [ "$COPY_PYTHON_RECURSIONS" -gt 2 ]; then
-        (>&2 echo "Too many calls to copy_python: $COPY_PYTHON_RECURSIONS")
-        exit 5
+    if [ ! -d "$python_dist_dir" ]; then
+        echo "Missing \"$python_dist_dir\" folder. Rebuilding ..."
+        # Make sure there's no file with the same name.
+        quick_rm "$python_dist_dir"
+        return 1
     fi
 
-    # Check that python dist was installed
-    if [ ! -s "$PYTHON_BIN" ]; then
-        # We don't have a Python binary, so we install it since everything
-        # else depends on it.
-        echo "::group::Get Python"
-        echo "Bootstrapping $LOCAL_PYTHON_BINARY_DIST environment" \
-            "to $BUILD_FOLDER..."
-        mkdir -p "$BUILD_FOLDER"
-
-        if [ -d "$python_distributable" ]; then
-            # We have a cached distributable.
-            # Check if is at the right version.
-            local cache_ver_file
-            cache_ver_file="$python_distributable"/lib/PYTHIA_VERSION
-            cache_version="UNVERSIONED"
-            if [ -f "$cache_ver_file" ]; then
-                cache_version="$(cut -d"-" -f1 < "$cache_ver_file")"
-            fi
-            if [ "$PYTHON_VERSION" != "$cache_version" ]; then
-                # We have a different version in the cache.
-                # Just remove it and hope that the next step will download
-                # the right one.
-                rm -rf "$python_distributable"
-            fi
-        fi
-
-        if [ ! -d "$python_distributable" ]; then
-            # We don't have a cached python distributable.
-            echo "No $LOCAL_PYTHON_BINARY_DIST environment." \
-                "Start downloading it..."
-            get_python_dist "$BINARY_DIST_URI"
-        fi
-
-        echo "Copying Python distribution files... "
-        cp -R "$python_distributable"/* "$BUILD_FOLDER"
-
-        echo "::endgroup::"
-
-        install_base_deps
-        WAS_PYTHON_JUST_INSTALLED=1
-    else
-        # We have a Python, but we are not sure if is the right version.
-        local version_file="$BUILD_FOLDER"/lib/PYTHIA_VERSION
-
-        # If we are upgrading the cache from Python 2,
-        # This file is required, so we create it if non-existing.
-        touch "$version_file"
-        python_installed_version="$(cut -d"-" -f1 < "$version_file")"
-        if [ "$PYTHON_VERSION" != "$python_installed_version" ]; then
-            # We have a different python installed.
-            # Check if we have the to-be-updated version and fail if
-            # it does not exists.
-            set +o errexit
-            test_version_exists "$BINARY_DIST_URI"
-            local test_version="$?"
-            set -o errexit
-            if [ $test_version -ne 0 ]; then
-                (>&2 echo "The build is now at $python_installed_version.")
-                (>&2 echo "Failed to find the required $PYTHON_VERSION.")
-                (>&2 echo "Check your configuration or the remote server.")
-                exit 6
-            fi
-
-            # Remove it and try to install it again.
-            echo "Updating Python from" \
-                "$python_installed_version to $PYTHON_VERSION"
-            rm -rf "${BUILD_FOLDER:?}"/*
-            rm -rf "$python_distributable"
-            copy_python
-        fi
+    # This fails graciously (but with a visible error) if the file is missing.
+    python_installed_version="$(cut -d- -f1 < "$version_file")"
+    if [ "$python_installed_version" = "$PYTHON_VERSION" ]; then
+        return 0
     fi
+
+    # These messages are aligned on purpose.
+    echo "Found previous Python version: $python_installed_version"
+    echo "New Python version to install: $PYTHON_VERSION"
+    echo "Removing $python_dist_dir ..."
+    quick_rm "$python_dist_dir"
+    return 2
+}
+
+#
+# Initiate build folder with extracted Pythia if required version not found.
+#
+bootstrap_build_folder() {
+    local extra_tar_opts=( --strip-components 1 )
+
+    # Return if set Python version is already present.
+    check_python_version "$BUILD_FOLDER" && return
+
+    echo "::group::Get Python"
+    echo "Bootstrapping \"$PYTHON_NAME-$OS-$ARCH\" in \"$BUILD_FOLDER\" ..."
+    execute mkdir -p "$BUILD_FOLDER"
+    get_pythia_package "python-$PYTHON_VERSION-$OS-$ARCH.tar.gz"
+    unpack_in_dir "$BUILD_FOLDER" \
+        "$CACHE_FOLDER"/"python-$PYTHON_VERSION-$OS-$ARCH.tar.gz" \
+        "${extra_tar_opts[@]}"
+    echo "::endgroup::"
+
+    install_base_deps
+    WAS_PYTHON_JUST_INSTALLED=1
 }
 
 
@@ -648,9 +645,6 @@ check_glibc_version(){
     # beware we haven't normalized arch names yet.
     supported_glibc2_version=26
 
-    echo "No specific runtime for the current distribution / version / arch."
-    echo "Minimum glibc version for this arch: 2.$supported_glibc2_version."
-
     # Tested with glibc 2.5/2.11.3/2.12/2.23/2.28-35 and eglibc 2.13/2.19.
     glibc_version="$(head -n 1 "$ldd_output_file" | rev | cut -d" " -f1 | rev)"
     rm "$ldd_output_file"
@@ -670,10 +664,9 @@ check_glibc_version(){
 
     # Decrement supported_glibc2_version above if building against older glibc.
     if [ "${glibc_version_array[1]}" -lt "$supported_glibc2_version" ]; then
+        echo "Minimum glibc version for this arch: 2.$supported_glibc2_version."
         (>&2 echo "NOT good. Detected version is older: $glibc_version!")
         exit 22
-    else
-        echo "All is good. Detected glibc version: $glibc_version."
     fi
 
     # Supported glibc version detected, set $OS for a generic glibc Linux build.
@@ -682,37 +675,37 @@ check_glibc_version(){
 
 check_musl_version(){
     local musl_version
+    local musl_version_cleaned
     local musl_version_array
     local musl_version_unsupported="false"
-    local supported_musl11_version=24
+    local supported_musl12_version=2
 
-    echo "No specific runtime for the current distribution / version / arch."
-    echo "Minimum musl version for this arch: 1.1.$supported_musl11_version."
-
-    # Tested with musl 1.1.24/1.2.2/1.2.5/1.2.5_git20240512.
+    # Tested with musl 1.1.24/1.2.2/1.2.4_git20230717/1.2.5.
     musl_version="$(grep -E ^"Version" "$ldd_output_file" | cut -d" " -f2)"
     rm "$ldd_output_file"
 
-    # Bleeding edge distributions might use git versions.
-    musl_version="${musl_version//_git/.}"
+    # Some Alpine Linux releases (e.g. Alpine 3.19) use git-versioned musl.
+    musl_version_cleaned="${musl_version//_git/.}"
 
-    if [[ "$musl_version" =~ [^[:digit:]\.] ]]; then
-        (>&2 echo "Musl version should only have digits and dots, but:")
-        (>&2 echo "    \$musl_version=$musl_version")
+    if [[ "$musl_version_cleaned" =~ [^[:digit:]\.] ]]; then
+        (>&2 echo "Cleaned musl version should only have digits and dots, but")
+        (>&2 echo "    \$musl_version_cleaned=$musl_version_cleaned")
         exit 25
     fi
 
-    IFS=. read -r -a musl_version_array <<< "$musl_version"
+    IFS=. read -r -a musl_version_array <<< "$musl_version_cleaned"
 
-    # Decrement supported_musl11_version above if building against older musl.
+    # Decrement supported_musl12_version above if building against older musl.
     if [ "${musl_version_array[0]}" -lt 1 ]; then
         musl_version_unsupported="true"
-    elif [ "${musl_version_array[0]}" -eq 1 ]; then      
+    elif [ "${musl_version_array[0]}" -eq 1 ]; then
         if [ "${musl_version_array[1]}" -lt 1 ];then
             musl_version_unsupported="true"
         elif [ "${musl_version_array[1]}" -eq 1 ];then
-            if [ "${musl_version_array[2]}" -lt "$supported_musl11_version" ]
+            if [ "${musl_version_array[2]}" -lt "$supported_musl12_version" ]
             then
+                echo -n "Minimum musl version for this arch: 1.2."
+                echo "$supported_musl12_version."
                 (>&2 echo "NOT good. Detected version is older: $musl_version!")
                 exit 27
             fi
@@ -720,11 +713,9 @@ check_musl_version(){
     fi
 
     if [ "$musl_version_unsupported" = "true" ]; then
-        (>&2 echo "Only musl 1.1 or greater supported! Detected: $musl_version")
+        (>&2 echo "Only musl 1.2 or greater supported! Detected: $musl_version")
         exit 26
     fi
-
-    echo "All is good. Detected musl version: $musl_version."
 
     # Supported musl version detected, set $OS for a generic musl Linux build.
     OS="linux_musl"
@@ -826,16 +817,33 @@ if [ "$COMMAND" = "detect_os" ]; then
     exit 0
 fi
 
+#
+# This is here to help generate distributables for other platforms.
+# It creates a fresh Pythia Python virtual environment for the
+# required platform in a specified destination path.
 if [ "$COMMAND" = "get_python" ] ; then
-    OS="$2"
-    ARCH="$3"
+    TARGET_OS="$2"
+    TARGET_ARCH="$3"
+    TARGET_PATH="$4"
     resolve_python_version
-    get_python_dist "$BINARY_DIST_URI"
-    exit 0
+
+    # Make sure the target path is clean even when executed directly.
+    quick_rm "$TARGET_PATH"
+
+    echo -n "Initializing a \"$PYTHON_NAME-$TARGET_OS-$TARGET_ARCH\" "
+    echo "distribution in \"$TARGET_PATH\" ..."
+    # Get the needed tar.gz file if not found in cache.
+    get_pythia_package "python-$PYTHON_VERSION-$TARGET_OS-$TARGET_ARCH.tar.gz"
+
+    # Unpack the Python distribution in the cache folder.
+    unpack_in_dir "$TARGET_PATH" \
+        "$CACHE_FOLDER"/"python-$PYTHON_VERSION-$TARGET_OS-$TARGET_ARCH.tar.gz"\
+        --strip-components 1
+    exit
 fi
 
 check_source_folder
-copy_python
+bootstrap_build_folder
 install_dependencies
 
 # Update pythia.conf dependencies when running deps.

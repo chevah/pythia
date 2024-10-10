@@ -20,7 +20,13 @@ INSTALL_DIR="$3"/lib
 # Construct the relevant download link for the Windows version.
 EXT="amd64.zip"
 ARCHIVE="python-$VER.$EXT"
-LINK="https://www.python.org/ftp/python/$VER/python-$VER-embed-$EXT"
+
+# For beta versions, remove everything after the b for the dir name.
+DIR=${VER%%b*}
+# For rc versions, remove everything after rc for the dir name
+DIR=${VER%%rc*}
+
+LINK="https://www.python.org/ftp/python/$DIR/python-$VER-embed-$EXT"
 
 # Download without unpacking (amd64.zip extension is treated specially).
 download_sources "$NAME" "$VER" "$LINK" "$EXT"
@@ -30,5 +36,5 @@ echo "## Extracting ZIP archive to $INSTALL_DIR... ##"
 execute unzip -q "$ARCHIVE" -d "$INSTALL_DIR"
 
 echo "## Adding site-packages to python*._pth file... ##"
-echo "import site" >> "$INSTALL_DIR"/python311._pth
-echo "site.main()" >> "$INSTALL_DIR"/python311._pth
+echo "import site" >> "$INSTALL_DIR"/python312._pth
+echo "site.main()" >> "$INSTALL_DIR"/python312._pth

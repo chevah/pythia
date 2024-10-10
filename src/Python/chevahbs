@@ -15,17 +15,20 @@ chevahbs_getsources() {
     local name="$1"
     local ver="$2"
     local ext="tgz"
-    local link=https://www.python.org/ftp/python/"$ver"/"$name"-"$ver"."$ext"
+    local dir
+    local link
+
+    # For beta versions, remove everything after the b for the dir name.
+    dir=${ver%%b*}
+    # For rc versions, remove everything after rc for the dir name.
+    dir=${ver%%rc*}
+    link=https://www.python.org/ftp/python/"$dir"/"$name"-"$ver"."$ext"
 
     download_sources "$name" "$ver" "$link" "$ext"
 }
 
 
 chevahbs_patch() {
-    # Our own patch to avoid compiling certain modules.
-    echo "# Applying disabled_modules.patch... #"
-    execute patch < disabled_modules.patch
-
     if [ "$BUILD_LIBEDIT" = "yes" ]; then
         # Adapted from https://bugs.python.org/issue13501.
         echo "# Applying readline_libedit.patch... #"

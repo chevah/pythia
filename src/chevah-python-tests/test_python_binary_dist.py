@@ -34,7 +34,7 @@ def get_allowed_deps():
         elif 'linux' in CHEVAH_OS:
             # Deps without paths for generic glibc Linux builds.
             # Only glibc 2.x libs are allowed.
-            # Tested on Amazon 2 & Ubuntu 16.04/18.04 with glibc 2.26/2.23/2.27.
+            # Tested on Amazon 2 & Ubuntu 20.04/22.04 with glibc 2.26/2.31/2.35.
             allowed_deps=[
                 'libc.so.6',
                 'libcrypt.so.1',
@@ -139,9 +139,11 @@ def get_allowed_deps():
             '/System/Library/Frameworks/Security.framework/Versions/A/Security',
             '/System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration',
             '/usr/lib/libbz2.1.0.dylib',
+            '/usr/lib/libedit.3.dylib',
             '/usr/lib/libffi.dylib',
             '/usr/lib/libiconv.2.dylib',
             '/usr/lib/libncurses.5.4.dylib',
+            '/usr/lib/libpanel.5.4.dylib',
             '/usr/lib/libresolv.9.dylib',
             '/usr/lib/libSystem.B.dylib',
             '/usr/lib/libz.1.dylib',
@@ -336,15 +338,15 @@ def main():
     else:
         print('zlib %s' % (zlib.ZLIB_VERSION,))
 
+    # Check OpenSSL version to prevent linking to OS libs.
+    # On Windows, this version is what upstream embedded with Python.
     try:
         from ssl import OPENSSL_VERSION as current_openssl_version
         import _hashlib
         exit_code = egg_check(_hashlib) | exit_code
-        # Check OpenSSL version to prevent linking to OS libs.
-        expecting_openssl_version = u'OpenSSL 3.0.14 4 Jun 2024'
+        expecting_openssl_version = u'OpenSSL 3.0.15 3 Sep 2024'
         if CHEVAH_OS == "windows":
-            # The upstream Windows packages embed their own OpenSSL libs.
-            expecting_openssl_version = u'OpenSSL 3.0.13 30 Jan 2024'
+            expecting_openssl_version = u'OpenSSL 3.0.15 3 Sep 2024'
         if current_openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting_openssl_version, current_openssl_version))
