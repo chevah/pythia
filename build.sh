@@ -282,6 +282,7 @@ command_compat() {
     # Some tests might still fail due to causes not related to the new Python.
     execute ./pythia.sh deps
     execute ./pythia.sh test_normal
+    execute ./pythia.sh test_ci2
 
     execute popd
     echo "::endgroup::"
