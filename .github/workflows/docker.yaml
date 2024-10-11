@@ -59,31 +59,30 @@ jobs:
         apt --yes dist-upgrade
         apt --yes install wget curl gcc make m4 patch openssh-client unzip git libtest-simple-perl xz-utils g++ dejagnu
 
-    - name: Clone repo independently
+    - name: Chevah user setup
       run: |
-        git clone https://github.com/chevah/pythia.git
-        cd pythia
-        git checkout ${GITHUB_HEAD_REF}
+        useradd -g adm -s /bin/bash -m chevah
+        echo '%adm    ALL=NOPASSWD: ALL' > /etc/sudoers
+
+    - uses: actions/checkout@v4
 
     - name: Build Pythia
       timeout-minutes: 30
       run: |
-        cd pythia
-        ./build.sh build
+        chown -R chevah .
+        su chevah -c "./build.sh build"
 
     - name: Test Pythia
       timeout-minutes: 5
       run: |
-        cd pythia
-        ./build.sh test
+        su chevah -c "./build.sh test"
 
     - name: Test compat
       timeout-minutes: 5
       env:
         CODECOV_TOKEN: local
       run: |
-        cd pythia
-        ./build.sh compat
+        su chevah -c "./build.sh compat"
 
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.
