@@ -37,8 +37,8 @@ jobs:
         apk upgrade -U
         apk add git curl bash gcc make m4 patch musl-dev linux-headers lddtree shadow openssh-client file unzip perl g++ musl-locales dejagnu
         apk del util-linux-dev
-        curl --output /usr/local/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
-        chmod +x /usr/local/bin/paxctl
+        curl --output /usr/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
+        chmod +x /usr/bin/paxctl
 
     - name: Amazon setup
       if: startsWith(matrix.container, 'amazonlinux')
