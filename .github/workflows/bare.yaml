@@ -43,7 +43,7 @@ jobs:
     - name: Test compat
       timeout-minutes: 5
       env:
-        CODECOV_TOKEN: "local"
+        CODECOV_TOKEN: local
       run: bash ./build.sh compat
 
     # Commit changed requirements.txt back to the repository
@@ -136,7 +136,7 @@ jobs:
     - name: Test compat
       timeout-minutes: 5
       env:
-        CODECOV_TOKEN: "local"
+        CODECOV_TOKEN: local
       run: ./build.sh compat
 
     - name: Upload testing package
@@ -176,7 +176,7 @@ jobs:
     - name: Test compat
       timeout-minutes: 5
       env:
-        CODECOV_TOKEN: "local"
+        CODECOV_TOKEN: local
       run: ./build.sh compat
 
     - name: Upload testing package

@@ -281,7 +281,7 @@ command_compat() {
     cp ../../"$DIST_DIR"/"$PYTHON_BUILD_VERSION.$PYTHIA_VERSION"/* cache/
     # Some tests might still fail due to causes not related to the new Python.
     execute ./pythia.sh deps
-    execute ./pythia.sh test_ci
+    execute ./pythia.sh test_normal
 
     execute popd
     echo "::endgroup::"

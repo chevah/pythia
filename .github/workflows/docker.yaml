@@ -80,7 +80,7 @@ jobs:
     - name: Test compat
       timeout-minutes: 5
       env:
-        CODECOV_TOKEN: "local"
+        CODECOV_TOKEN: local
       run: |
         cd pythia
         ./build.sh compat
