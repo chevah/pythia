@@ -87,6 +87,7 @@ jobs:
     - name: Test compat
       timeout-minutes: 5
       env:
+        USER: chevah
         CODECOV_TOKEN: local
       run: |
         cd pythia
