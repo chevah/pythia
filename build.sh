@@ -274,10 +274,11 @@ command_compat() {
     execute cp ../../pythia.{conf,sh} ./
     # Patch compat to use the newly-built Python, then copy it to cache/.
     echo -e "\nPYTHON_CONFIGURATION=default@${new_python_conf}" >> pythia.conf
-    execute mkdir cache
-    execute cp -r ../"$PYTHON_BUILD_DIR" cache/
     # Make sure everything is done from scratch in the current dir.
     unset CHEVAH_CACHE CHEVAH_BUILD
+    # Copy dist file to local cache, if existing.
+    execute mkdir cache
+    cp ../../"$DIST_DIR"/"$PYTHON_BUILD_VERSION.$PYTHIA_VERSION"/* cache/
     # Some tests might still fail due to causes not related to the new Python.
     execute ./pythia.sh deps
     execute ./pythia.sh test_ci
