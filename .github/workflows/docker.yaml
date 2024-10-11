@@ -59,8 +59,9 @@ jobs:
         apt --yes dist-upgrade
         apt --yes install wget curl gcc make m4 patch openssh-client unzip git libtest-simple-perl xz-utils g++ dejagnu
 
+    # actions/checkout doesn't work on Amazon Linux 2, requires glibc 2.27.
     - name: Clone repo independently
-       run: |
+      run: |
         git clone https://github.com/chevah/pythia.git
         cd pythia
         git checkout ${GITHUB_HEAD_REF}
