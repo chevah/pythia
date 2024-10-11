@@ -40,6 +40,10 @@ jobs:
       timeout-minutes: 5
       run: bash ./build.sh test
 
+    - name: Test compat
+      timeout-minutes: 5
+      run: bash ./build.sh compat
+
     # Commit changed requirements.txt back to the repository
     - uses: chevah/git-auto-commit-action@HEAD
       with:
@@ -127,6 +131,10 @@ jobs:
       timeout-minutes: 5
       run: ./build.sh test
 
+    - name: Test compat
+      timeout-minutes: 5
+      run: ./build.sh compat
+
     - name: Upload testing package
       timeout-minutes: 5
       run: |
@@ -160,6 +168,10 @@ jobs:
     - name: Test Pythia
       timeout-minutes: 5
       run: ./build.sh test
+
+    - name: Test compat
+      timeout-minutes: 5
+      run: ./build.sh compat
 
     - name: Upload testing package
       timeout-minutes: 5

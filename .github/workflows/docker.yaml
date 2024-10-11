@@ -77,6 +77,12 @@ jobs:
         cd pythia
         ./build.sh test
 
+    - name: Test compat
+      timeout-minutes: 5
+      run: |
+        cd pythia
+        ./build.sh compat
+
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.
     - name: Upload testing package
