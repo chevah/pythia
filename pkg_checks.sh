@@ -55,7 +55,7 @@ case "$OS" in
     linux*)
         if [ -x /sbin/apk ]; then
             # Assumes Alpine Linux 3.15.
-            CHECK_CMD=(apk info -q -e)
+            CHECK_CMD=(/sbin/apk info -q -e)
             PACKAGES="$APK_PKGS"
         elif [ -x /usr/bin/dpkg ]; then
             # Assumes Ubuntu Linux 16.04.

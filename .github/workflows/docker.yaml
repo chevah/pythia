@@ -15,6 +15,8 @@ concurrency:
   group: docker-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CI: 'true'
 
 # Using a job name that doesn't contain the OS name, to minimize the risk of
 # confusion with the OS names of the containers, which are the relevant ones.
@@ -35,16 +37,16 @@ jobs:
       if: startsWith(matrix.container, 'alpine')
       run: |
         apk upgrade -U
-        apk add git curl bash gcc make m4 patch musl-dev linux-headers lddtree shadow openssh-client file unzip perl g++ musl-locales dejagnu
+        apk add git curl bash gcc make m4 patch musl-dev linux-headers lddtree shadow openssh-client file unzip perl g++ musl-locales dejagnu sudo
         apk del util-linux-dev
-        curl --output /usr/local/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
-        chmod +x /usr/local/bin/paxctl
+        curl --output /usr/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
+        chmod +x /usr/bin/paxctl
 
     - name: Amazon setup
       if: startsWith(matrix.container, 'amazonlinux')
       run: |
         yum -y upgrade
-        yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu bzip2
+        yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu bzip2 sudo
         # To avoid linking against libdb and gdmb libraries on Amazon Linux 2.
         # Can't simply uninstall libdb-devel and gdmb-devel, they are required by perl-IPC-Cmd.
         rm -v /usr/include/libdb/db.h
@@ -57,25 +59,41 @@ jobs:
       run: |
         apt update
         apt --yes dist-upgrade
-        apt --yes install wget curl gcc make m4 patch openssh-client unzip git libtest-simple-perl xz-utils g++ dejagnu
+        apt --yes install wget curl gcc make m4 patch openssh-client unzip git libtest-simple-perl xz-utils g++ dejagnu sudo
 
+    # actions/checkout doesn't work on Amazon Linux 2, requires glibc 2.27.
     - name: Clone repo independently
       run: |
         git clone https://github.com/chevah/pythia.git
         cd pythia
         git checkout ${GITHUB_HEAD_REF}
 
+    - name: Chevah user setup
+      run: |
+        useradd -g adm -s /bin/bash -m chevah
+        echo '%adm    ALL=NOPASSWD: ALL' > /etc/sudoers
+
     - name: Build Pythia
       timeout-minutes: 30
       run: |
+        chown -R chevah pythia
         cd pythia
-        ./build.sh build
+        su chevah -c "./build.sh build"
 
     - name: Test Pythia
       timeout-minutes: 5
       run: |
         cd pythia
-        ./build.sh test
+        su chevah -c "./build.sh test"
+
+    - name: Test compat
+      timeout-minutes: 10
+      env:
+        USER: chevah
+        CODECOV_TOKEN: local
+      run: |
+        cd pythia
+        su chevah -c "./build.sh compat"
 
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.
