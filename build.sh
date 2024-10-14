@@ -275,20 +275,22 @@ command_compat() {
         echo "## Unsetting CHEVAH_CACHE and CHEVAH_BUILD... ##"
         unset CHEVAH_CACHE CHEVAH_BUILD
         # Copy over current pythia stuff, as some changes might require it.
-        echo "## Patching compat code ot use current pythia version... ##"
+        echo "## Patching compat code to use current pythia version... ##"
         execute cp ../../pythia.{conf,sh} ./
         # Patch compat to use the current's branch version.
         echo -e "\nPYTHON_CONFIGURATION=default@${new_python_ver}" >>pythia.conf
-        # Copy dist file to local cache, if existing.
         execute mkdir cache
+        # Copy dist file to local cache, if existing. If not, maybe it's online.
         cp ../../"$DIST_DIR"/"$PYTHON_BUILD_VERSION.$PYTHIA_VERSION"/* cache/
         # Some tests could fail due to causes not related to the new Python.
         echo "## Getting compat deps... ##"
         execute ./pythia.sh deps
         echo "## Running normal compat tests... ##"
         execute ./pythia.sh test -vs normal
-        echo "## Running ci2 compat tests... ##"
-        execute ./pythia.sh test_ci2
+        if [ "${CI:-}" = "true" ]; then
+            echo "## Running ci2 compat tests... ##"
+            execute ./pythia.sh test_ci2
+        fi
     execute popd
     echo "::endgroup::"
 }
