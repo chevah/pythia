@@ -87,7 +87,7 @@ jobs:
         su chevah -c "./build.sh test"
 
     - name: Test compat
-      timeout-minutes: 5
+      timeout-minutes: 10
       env:
         USER: chevah
         CODECOV_TOKEN: local

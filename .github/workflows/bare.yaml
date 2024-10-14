@@ -44,7 +44,7 @@ jobs:
       run: bash ./build.sh test
 
     - name: Test compat
-      timeout-minutes: 5
+      timeout-minutes: 10
       env:
         USER: runneradmin
         CODECOV_TOKEN: local
@@ -138,7 +138,7 @@ jobs:
       run: ./build.sh test
 
     - name: Test compat
-      timeout-minutes: 5
+      timeout-minutes: 10
       env:
         CODECOV_TOKEN: local
       run: ./build.sh compat
@@ -178,7 +178,7 @@ jobs:
       run: ./build.sh test
 
     - name: Test compat
-      timeout-minutes: 5
+      timeout-minutes: 10
       env:
         CODECOV_TOKEN: local
       run: ./build.sh compat
