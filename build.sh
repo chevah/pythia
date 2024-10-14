@@ -286,6 +286,7 @@ command_compat() {
         echo "## Getting compat deps... ##"
         execute ./pythia.sh deps
         echo "## Running normal compat tests... ##"
+        # Why not test_normal? See https://github.com/chevah/compat/issues/691.
         execute ./pythia.sh test -vs normal
         if [ "${CI:-}" = "true" ]; then
             echo "## Running ci2 compat tests... ##"
