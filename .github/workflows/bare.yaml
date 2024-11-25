@@ -14,6 +14,9 @@ concurrency:
   group: bare-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CI: 'true'
+
 jobs:
   windows:
     # The type of runner that the job will run on
@@ -39,6 +42,13 @@ jobs:
     - name: Test Pythia
       timeout-minutes: 5
       run: bash ./build.sh test
+
+    - name: Test compat
+      timeout-minutes: 10
+      env:
+        USER: runneradmin
+        CODECOV_TOKEN: local
+      run: bash ./build.sh compat
 
     # Commit changed requirements.txt back to the repository
     - uses: chevah/git-auto-commit-action@HEAD
@@ -127,6 +137,12 @@ jobs:
       timeout-minutes: 5
       run: ./build.sh test
 
+    - name: Test compat
+      timeout-minutes: 10
+      env:
+        CODECOV_TOKEN: local
+      run: ./build.sh compat
+
     - name: Upload testing package
       timeout-minutes: 5
       run: |
@@ -160,6 +176,12 @@ jobs:
     - name: Test Pythia
       timeout-minutes: 5
       run: ./build.sh test
+
+    - name: Test compat
+      timeout-minutes: 10
+      env:
+        CODECOV_TOKEN: local
+      run: ./build.sh compat
 
     - name: Upload testing package
       timeout-minutes: 5

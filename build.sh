@@ -260,7 +260,7 @@ command_test() {
 # shellcheck disable=SC2034 # Only used through compgen.
 help_text_compat="Run the test suite from chevah/compat master."
 command_compat() {
-    local new_python_conf="$PYTHON_BUILD_VERSION.$PYTHIA_VERSION"
+    local new_python_ver="$PYTHON_BUILD_VERSION.$PYTHIA_VERSION"
     execute pushd "$BUILD_DIR"
 
     # This is quite hackish, as compat is arm-twisted to use the local version.
@@ -268,20 +268,30 @@ command_compat() {
     echo "#### Running chevah's compat tests... ####"
     echo "## Removing any pre-existing compat code... ##"
     execute rm -rf compat/
+    echo "## Cloning compat's master branch... ##"
     execute git clone https://github.com/chevah/compat.git --depth=1 -b master
     execute pushd compat
-    # Copy over current pythia stuff, as some changes might require it.
-    execute cp ../../pythia.{conf,sh} ./
-    # Patch compat to use the newly-built Python, then copy it to cache/.
-    echo -e "\nPYTHON_CONFIGURATION=default@${new_python_conf}" >> pythia.conf
-    execute mkdir cache
-    execute cp -r ../"$PYTHON_BUILD_DIR" cache/
-    # Make sure everything is done from scratch in the current dir.
-    unset CHEVAH_CACHE CHEVAH_BUILD
-    # Some tests might still fail due to causes not related to the new Python.
-    execute ./pythia.sh deps
-    execute ./pythia.sh test_ci
-
+        # Make sure everything is done from scratch in the current dir.
+        echo "## Unsetting CHEVAH_CACHE and CHEVAH_BUILD... ##"
+        unset CHEVAH_CACHE CHEVAH_BUILD
+        # Copy over current pythia stuff, as some changes might require it.
+        echo "## Patching compat code to use current pythia version... ##"
+        execute cp ../../pythia.{conf,sh} ./
+        # Patch compat to use the current's branch version.
+        echo -e "\nPYTHON_CONFIGURATION=default@${new_python_ver}" >>pythia.conf
+        execute mkdir cache
+        # Copy dist file to local cache, if existing. If not, maybe it's online.
+        cp ../../"$DIST_DIR"/"$PYTHON_BUILD_VERSION.$PYTHIA_VERSION"/* cache/
+        # Some tests could fail due to causes not related to the new Python.
+        echo "## Getting compat deps... ##"
+        execute ./pythia.sh deps
+        echo "## Running normal compat tests... ##"
+        # Why not test_normal? See https://github.com/chevah/compat/issues/691.
+        execute ./pythia.sh test -vs normal
+        if [ "${CI:-}" = "true" ]; then
+            echo "## Running ci2 compat tests... ##"
+            execute ./pythia.sh test_ci2
+        fi
     execute popd
     echo "::endgroup::"
 }
