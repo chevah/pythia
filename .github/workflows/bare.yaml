@@ -48,7 +48,7 @@ jobs:
       env:
         USER: runneradmin
         CODECOV_TOKEN: local
-      run: bash true ./build.sh compat
+      run: true bash ./build.sh compat
 
     # Commit changed requirements.txt back to the repository
     - uses: chevah/git-auto-commit-action@HEAD
