@@ -129,7 +129,6 @@ jobs:
     steps:
 
     - name: Amazon setup
-      if: startsWith(matrix.container, 'amazonlinux')
       run: |
         yum -y upgrade
         yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu bzip2 sudo
