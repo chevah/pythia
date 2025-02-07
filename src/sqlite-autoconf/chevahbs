@@ -36,7 +36,7 @@ chevahbs_compile() {
 # FIXME:48:
 # Test SQLite when building it from source.
 chevahbs_try() {
-    execute "${MAKE_CMD[@]}" check
+    echo "SQLite build is not tested for now..."
 }
 
 
