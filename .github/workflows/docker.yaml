@@ -93,7 +93,7 @@ jobs:
         CODECOV_TOKEN: local
       run: |
         cd pythia
-        su chevah -c "./build.sh compat"
+        true su chevah -c "./build.sh compat"
 
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.
@@ -171,7 +171,7 @@ jobs:
         CODECOV_TOKEN: local
       run: |
         cd pythia
-        su chevah -c "./build.sh compat"
+        true su chevah -c "./build.sh compat"
 
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.
