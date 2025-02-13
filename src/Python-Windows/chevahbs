@@ -36,5 +36,5 @@ echo "## Extracting ZIP archive to $INSTALL_DIR... ##"
 execute unzip -q "$ARCHIVE" -d "$INSTALL_DIR"
 
 echo "## Adding site-packages to python*._pth file... ##"
-echo "import site" >> "$INSTALL_DIR"/python312._pth
-echo "site.main()" >> "$INSTALL_DIR"/python312._pth
+echo "import site" >> "$INSTALL_DIR"/python313._pth
+echo "site.main()" >> "$INSTALL_DIR"/python313._pth

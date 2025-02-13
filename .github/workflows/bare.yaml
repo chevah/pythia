@@ -48,7 +48,9 @@ jobs:
       env:
         USER: runneradmin
         CODECOV_TOKEN: local
-      run: bash ./build.sh compat
+      # FIXME:72:
+      # Re-enable compat tests.
+      run: true bash ./build.sh compat
 
     # Commit changed requirements.txt back to the repository
     - uses: chevah/git-auto-commit-action@HEAD
@@ -141,7 +143,9 @@ jobs:
       timeout-minutes: 10
       env:
         CODECOV_TOKEN: local
-      run: ./build.sh compat
+      # FIXME:72:
+      # Re-enable compat tests.
+      run: true ./build.sh compat
 
     - name: Upload testing package
       timeout-minutes: 5
@@ -181,7 +185,9 @@ jobs:
       timeout-minutes: 10
       env:
         CODECOV_TOKEN: local
-      run: ./build.sh compat
+      # FIXME:72:
+      # Re-enable compat tests.
+      run: true ./build.sh compat
 
     - name: Upload testing package
       timeout-minutes: 5

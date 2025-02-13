@@ -14,11 +14,15 @@ set -o pipefail   # don't ignore exit codes when piping output
 
 BUILD_DIR="$1"
 OS_STRING="$(uname | tr '[:upper:]' '[:lower:]')"
+ARCH="$(uname -m)"
+if [ "$ARCH" = "arm64" ]; then
+    ARCH="aarch64"
+fi
 
 # Upstream Shellcheck stuff.
 SHELLCHECK_LNK="https://github.com/koalaman/shellcheck/releases/download/latest"
 SHELLCHECK_DIR="shellcheck-latest"
-SHELLCHECK_XZ="$SHELLCHECK_DIR.$OS_STRING.x86_64.tar.xz"
+SHELLCHECK_XZ="$SHELLCHECK_DIR.$OS_STRING.$ARCH.tar.xz"
 
 
 # Using Bash arrays for commands, to make them quotable.
