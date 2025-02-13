@@ -93,6 +93,8 @@ jobs:
         CODECOV_TOKEN: local
       run: |
         cd pythia
+        # FIXME:72:
+        # Re-enable compat tests.
         true su chevah -c "./build.sh compat"
 
     # Using `~/` is problematic under Docker, use `/root/`.
@@ -173,6 +175,8 @@ jobs:
         CODECOV_TOKEN: local
       run: |
         cd pythia
+        # FIXME:72:
+        # Re-enable compat tests.
         true su chevah -c "./build.sh compat"
 
     # Using `~/` is problematic under Docker, use `/root/`.

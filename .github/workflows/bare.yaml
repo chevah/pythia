@@ -48,6 +48,8 @@ jobs:
       env:
         USER: runneradmin
         CODECOV_TOKEN: local
+      # FIXME:72:
+      # Re-enable compat tests.
       run: true bash ./build.sh compat
 
     # Commit changed requirements.txt back to the repository
@@ -141,6 +143,8 @@ jobs:
       timeout-minutes: 10
       env:
         CODECOV_TOKEN: local
+      # FIXME:72:
+      # Re-enable compat tests.
       run: true ./build.sh compat
 
     - name: Upload testing package
@@ -181,6 +185,8 @@ jobs:
       timeout-minutes: 10
       env:
         CODECOV_TOKEN: local
+      # FIXME:72:
+      # Re-enable compat tests.
       run: true ./build.sh compat
 
     - name: Upload testing package
