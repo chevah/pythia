@@ -344,7 +344,7 @@ def main():
         from ssl import OPENSSL_VERSION as current_openssl_version
         import _hashlib
         exit_code = egg_check(_hashlib) | exit_code
-        expecting_openssl_version = u'OpenSSL 3.0.15 3 Sep 2024'
+        expecting_openssl_version = u'OpenSSL 3.0.16 11 Feb 2025'
         if CHEVAH_OS == "windows":
             expecting_openssl_version = u'OpenSSL 3.0.15 3 Sep 2024'
         if current_openssl_version != expecting_openssl_version:
