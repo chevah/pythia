@@ -126,7 +126,7 @@ jobs:
     - name: Amazon setup
       run: |
         yum -y upgrade
-        yum -y install git-core dejagnu bzip2 sudo
+        yum -y install git-core dejagnu bzip2 sudo tar unzip
 
     # actions/checkout doesn't work on Amazon Linux 2, requires glibc 2.27.
     - name: Clone repo independently

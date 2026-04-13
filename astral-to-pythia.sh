@@ -107,6 +107,8 @@ case "$TARGET" in
         ;;
 esac
 
+ls -al
+
 # Compile all source files to speed up load time and write Pythia version
 "${python_bin}" -m compileall -r 100 python
 pythia_version="${PY_RELEASE}.${PBS_RELEASE}-${TARGET}"
@@ -114,6 +116,6 @@ echo -n "${pythia_version}" > python/lib/PYTHIA_VERSION
 
 pythia_base="python${PY_VERSION}-${TARGET}"
 mv python ${pythia_base}
-echo "> Creating ${pythia_base} to ../dist/"
+echo "> Creating ${pythia_base} for ${pythia_version} to ../dist/"
 
 tar czf ../dist/python-${PYTHIA_RELEASE}-${TARGET}.tar.gz ${pythia_base}
