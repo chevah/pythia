@@ -36,11 +36,3 @@ case "$OS" in
 esac
 
 "$sftp_cmd" "${sftp_opts[@]}" "$UPLOAD_USER"@"$UPLOAD_SERVER"
-
-# As dist/ is rebuilt on every build, it should only have 1 sub-dir with 1 pkg.
-upload_dir="$(cd "$DIST_DIR" && ls -1)"
-pkg_name="$(cd "$DIST_DIR"/"$upload_dir" && ls -1)"
-
-# Local hierarchy matches the remote one.
-echo "Package $pkg_name uploaded to: $root_link/$upload_dir/"
-echo "Direct link: $root_link/$upload_dir/$pkg_name"
