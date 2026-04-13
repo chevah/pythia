@@ -16,6 +16,7 @@ root_link="https://$UPLOAD_SERVER:20443/testing"
 
 target_dir="/${TARGET_DEPLOY}/${PYTHIA_RELEASE}/"
 batch_file="${BUILD_DIR}/sftp.batch"
+ls -al ${DIST_DIR}
 echo "> Uploading to ${target_dir}"
 echo "-mkdir ${target_dir}" > "${batch_file}"
 echo "mput ${DIST_DIR}/python-*.tar.gz ${target_dir}" >> "${batch_file}"
