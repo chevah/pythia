@@ -322,6 +322,14 @@ def main():
     else:
         print('zlib %s' % (zlib.ZLIB_VERSION,))
 
+    try:
+        import zipfile
+        zipfile.ZipFile._ZipExtFile
+        zipfile.ZipFile._ZipInfo
+    except:
+        sys.stderr.write('"zipfile" not patched.\n')
+        exit_code = 132
+
     # Check OpenSSL version to prevent linking to OS libs.
     # On Windows, this version is what upstream embedded with Python.
     try:

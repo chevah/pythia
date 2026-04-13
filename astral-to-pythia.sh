@@ -93,6 +93,13 @@ case "$TARGET" in
     *)
         # Linux and MacOS
         mv python/include python/lib
+
+        # Cleanup bin folder with simple bin/python
+        mv python/bin/python${PY_VERSION} python/python
+        rm -rf python/bin
+        mkdir python/bin
+        mv python/python python/bin/
+
         rm -rf python/share
         rm -rf python/lib/itcl*
         rm -rf python/lib/tcl*
@@ -103,7 +110,7 @@ case "$TARGET" in
         rm -rf python/lib/python${PY_VERSION}/turtledemo
         rm -f python/lib/python${PY_VERSION}/lib-dynload/_tkinter*
         cp ../src/zipfile_init.py python/lib/python${PY_VERSION}/zipfile/__init__.py
-        python_bin="python/bin/python"
+        python_bin="./python/bin/python"
         ;;
 esac
 
