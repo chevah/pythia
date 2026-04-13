@@ -1,21 +1,33 @@
 Pythia - a portable Python package
 ==================================
 
+.. image:: https://img.shields.io/badge/License-MIT-yellow.svg
+  :target: https://opensource.org/licenses/MIT
+
+.. image:: https://github.com/chevah/pythia/workflows/ci/badge.svg
+  :target: https://github.com/chevah/pythia/actions
+
+.. image:: https://img.shields.io/github/issues/chevah/pythia.svg
+  :target: https://github.com/chevah/pythia/issues
+
+
 Build system for a portable Python package.
-A derivative of https://github.com/chevah/python-package/.
 
-Building:
+It is based on `astral-sh/python-build-standalone <https://github.com/astral-sh/python-build-standalone>`_
 
-* ``./build.sh build``
+It builds on top of `python-build-standalone` by allowing you to create a local Python virtual environment without the need to use `uv`
 
-Testing:
+The `pythia.sh` script can automatically download and create the Python venv.
 
-* ``./build.sh test``
-* ``./build.sh compat``
+It is designed to be used for self-contained applications that are distributed together with Python.
 
-Use ``./build.sh help`` to discover all available commands.
+It is also designed for applications that are packaged only Linux GLIBC,
+with Linux MUSL, macOS and Windows installation packages also generated on Linux.
 
-Note that compat tests are currently only working on the ``python2.7`` branch.
+It comes with a few pre-installed packages, depending on the OS.
+This is done to simplify building the final distributable package on Linux,
+regardless of the target OS.
+Example on Windows, pywin32 is preinstaleld.
 
 
 Supported platforms
@@ -33,46 +45,34 @@ Platforms that should work, but are not regularly tested:
 * all glibc-based Linux distributions (glibc 2.26+)
 * all musl-based Linux distributions (musl 1.1.24+).
 
-Platforms built in the past, but not any more:
-
-* FreeBSD 12 and newer
-* OpenBSD 6.7 and newer
-* Solaris 11.4 (x86 only).
-
 Where not noted, supported architecture is x64 (also known as X86-64 or AMD64).
 
-Note that https://github.com/chevah/python-package/ supported more platforms,
-but only for Python 2.7.
+
+Usage
+-----
+
+Copy `pythia.sh` script into your repo.
+Copy `pythia.conf` file into your repo and configure your mirrors and targeted Python version.
+
+It is designed to create the Python virtual environment and automatically call paver inside the newly created environment.
+`pythia.conf` contains a set of Python packages that needs to be intallled to boostrap the `paver` usage.
 
 
-Patching upstream code
-----------------------
+Development
+-----------
 
-This repository contains some patches for upstream code, e.g. Python and bzip2.
+It is designed to download the Python .tar.gz from `python-build-standalone` GitHub release page, convert it into a format usable by `pythia.sh`
+and upload the resulting tar.gz into a download/mirror server.
 
-These patches are applied at build time when added as:
+It has support for uploading into testing vs production.
 
-* ``src/$PROJECT/*.patch``
+Building:
 
-An example for creating a patch for pristine Python 3.11.3 sources::
+* `./astral-to-pytia.sh TARGET_ARCH`
 
-    # Make a copy of the file to be patched from Python sources:
-    cp setup.py setup.py.orig
-    # Modify it as needed, then check the diff:
-    diff -ru setup.py.orig setup.py
-    # Save the diff into a file such as:
-    src/Python/disabled_modules.patch
+TARGET_ARCH needs to match the local arch.
 
-Finally, edit the corresponding ``chevahbs`` script in ``/src`` to apply
-the new patch on platforms that require it before building from sources.
-When applying a patch on top of another patch, make sure you get the order
-right, then save the diff to the sources patched with the preceding patch.
+Testing:
 
-.. image:: https://img.shields.io/badge/License-MIT-yellow.svg
-  :target: https://opensource.org/licenses/MIT
-
-.. image:: https://github.com/chevah/pythia/workflows/GitHub-CI/badge.svg
-  :target: https://github.com/chevah/pythia/actions
-
-.. image:: https://img.shields.io/github/issues/chevah/pythia.svg
-  :target: https://github.com/chevah/pythia/issues
+* `./test_pythia.sh`
+* `./test_compat.sh`

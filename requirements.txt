@@ -1,5 +1,4 @@
-pip==25.0
-psutil==6.1.1
-pycparser==2.22
+# Here to help with dependbot.
+# Should be manually updated once a new version is used.
 pywin32==308
-setuptools==75.8.0
+
