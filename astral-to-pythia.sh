@@ -24,7 +24,7 @@ WINDOWS_X64="x86_64-pc-windows-msvc"
 
 # Start with a clean build
 #rm -rf "$BUILD_DIR"
-#mkdir "$BUILD_DIR"
+mkdir "$BUILD_DIR"
 
 rm -rf "$DIST_DIR"
 mkdir "$DIST_DIR"
@@ -52,7 +52,7 @@ case "$TARGET" in
         ;;
     *)
         #
-        echo "Unknown target ${file_name}"
+        echo "Unknown target ${TARGET}"
         exit 1
 
         ;;
@@ -62,7 +62,7 @@ esac
 file_name="${pbs_arch}-install_only_stripped.tar.gz"
 source_url="https://github.com/astral-sh/python-build-standalone/releases/download/$PBS_RELEASE/cpython-${PY_RELEASE}+${PBS_RELEASE}-${file_name}"
 echo "> Downloading $file_name"
-#curl -L -o $file_name $source_url
+curl -L -o $file_name $source_url
 
 echo "> Extracting $file_name"
 

@@ -6,6 +6,9 @@
 # These jobs are preparing the OS, then building the Python package,
 # run some tests and upload the result.
 #
+# Available list of runners:
+# https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job#choosing-github-hosted-runners
+#
 name: CI
 
 on:
@@ -48,12 +51,6 @@ jobs:
       run: |
         yum -y upgrade
         yum -y install git-core dejagnu bzip2 sudo
-        # To avoid linking against libdb and gdmb libraries on Amazon Linux 2.
-        # Can't simply uninstall libdb-devel and gdmb-devel, they are required by perl-IPC-Cmd.
-        rm -v /usr/include/libdb/db.h
-        rm -v /usr/include/gdbm.h
-        # This is for avoiding building the NIS module with Python 3.12.
-        rm -v /usr/include/rpc/rpc.h
 
     # actions/checkout doesn't work on Amazon Linux 2, requires glibc 2.27.
     - name: Clone repo independently
@@ -129,13 +126,7 @@ jobs:
     - name: Amazon setup
       run: |
         yum -y upgrade
-        yum -y install git-core gcc make m4 patch tar unzip perl perl-Test-Simple perl-IPC-Cmd xz gcc-c++ dejagnu bzip2 sudo
-        # To avoid linking against libdb and gdmb libraries on Amazon Linux 2.
-        # Can't simply uninstall libdb-devel and gdmb-devel, they are required by perl-IPC-Cmd.
-        rm -v /usr/include/libdb/db.h
-        rm -v /usr/include/gdbm.h
-        # This is for avoiding building the NIS module with Python 3.12.
-        rm -v /usr/include/rpc/rpc.h
+        yum -y install git-core dejagnu bzip2 sudo
 
     # actions/checkout doesn't work on Amazon Linux 2, requires glibc 2.27.
     - name: Clone repo independently
@@ -282,7 +273,7 @@ jobs:
 
   macos:
     # For macOS on Intel at GitHub.
-    runs-on: macos-13
+    runs-on: macos-15-intel
     timeout-minutes: 90
     steps:
     - uses: actions/checkout@v4
@@ -345,7 +336,7 @@ jobs:
 
   macos-m1:
     # For macOS on Apple Silicon at GitHub.
-    runs-on: macos-latest
+    runs-on: macos-14
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@v4
