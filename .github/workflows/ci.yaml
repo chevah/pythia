@@ -45,7 +45,7 @@ jobs:
         apk del util-linux-dev
         curl --output /usr/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/bin/paxctl
-        echo "TARGET_ARCH=linux-arm64" >> $GITHUB_ENV
+        echo "TARGET_ARCH=linux_musl-x64" >> $GITHUB_ENV
 
     - name: Amazon setup
       if: startsWith(matrix.container, 'amazonlinux')
