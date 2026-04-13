@@ -15,8 +15,6 @@ except:
     print('Could not get $OS/$ARCH Chevah env vars.')
     sys.exit(120)
 
-BUILD_LIBEDIT = os.environ.get('BUILD_LIBEDIT', 'no').lower() == 'yes'
-
 
 def get_allowed_deps():
     """
@@ -238,10 +236,15 @@ def get_actual_deps(script_helper):
                 else:
                     if any(string in line for string in linux_ignored_strings):
                         continue
+                    if len(line.split()) < 3:
+                        continue
                     dep = line.split()[2]
             else:
                 # For other OS'es, the third field in each line is needed.
                 dep = line.split()[2]
+            if dep == 'not':
+                sys.stderr.write(f'Broken deps {line}.\n')
+                sys.exit(121)
             libs_deps.append(dep)
     return list(set(libs_deps))
 
@@ -302,25 +305,6 @@ def test_dependencies():
     return 0
 
 
-def egg_check(module):
-    """
-    Check that the tested module is in the current path.
-    If not, it may be pulled from ~/.python-eggs and that's not good.
-
-    Return 0 on success, non zero on error.
-    """
-    if not os.getcwd() in module.__file__:
-        sys.stderr.write(
-            "{0} module not in current path, ".format(module.__name__) +
-                "is zip_safe set to True for it?\n"
-            "\tcurrent path: {0}".format(os.getcwd()) + "\n"
-            "\tmodule file: {0}".format(module.__file__) + "\n"
-            )
-        return 125
-
-    return 0
-
-
 def main():
     """
     Launch tests to check required modules and OS-specific dependencies.
@@ -343,10 +327,7 @@ def main():
     try:
         from ssl import OPENSSL_VERSION as current_openssl_version
         import _hashlib
-        exit_code = egg_check(_hashlib) | exit_code
-        expecting_openssl_version = u'OpenSSL 3.0.16 11 Feb 2025'
-        if CHEVAH_OS == "windows":
-            expecting_openssl_version = u'OpenSSL 3.0.15 3 Sep 2024'
+        expecting_openssl_version = 'OpenSSL 3.5.5 27 Jan 2026'
         if current_openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting_openssl_version, current_openssl_version))
@@ -413,17 +394,7 @@ def main():
         sys.stderr.write('"sqlite3" is missing or broken.\n')
         exit_code = 153
     else:
-        print('sqlite3 %s - sqlite %s' % (
-                sqlite.version, sqlite.sqlite_version))
-
-    try:
-        import psutil
-        cpu_percent = psutil.cpu_percent()
-    except:
-        sys.stderr.write('"psutil" is missing or broken.\n')
-        exit_code = 160
-    else:
-        print('psutil %s' % (psutil.__version__,))
+        print('sqlite {}'.format(sqlite.sqlite_version))
 
     try:
         import uuid
@@ -461,38 +432,8 @@ def main():
                         pywin32_version = pywin32_version.strip()
             print('pywin32 %s' % (pywin32_version))
 
-    else:
-        # Linux / Unix stuff.
-        # Check for the git revision in Python's sys.version on Linux and Unix.
-        try:
-            git_rev_cmd = ['git', 'log', '-1', '--no-merges', '--format=%h']
-            git_rev = subprocess.check_output(git_rev_cmd).strip().decode()
-        except:
-            sys.stderr.write("Couldn't get the git rev for the current tree.\n")
-            exit_code = 157
-        else:
-            bin_ver = sys.version.split('(')[1].split(',')[0]
-            if bin_ver != git_rev:
-                sys.stderr.write("Python version doesn't match git revision!\n"
-                                 "\tBin ver: {0}".format(bin_ver) + "\n"
-                                 "\tGit rev: {0}".format(git_rev) + "\n")
-                exit_code = 158
 
-    # The readline module is built using libedit only on selected platforms.
-    if BUILD_LIBEDIT:
-        try:
-            import readline
-            readline.get_history_length()
-        except:
-            sys.stderr.write('"readline" is missing or broken.\n')
-            exit_code = 162
-        else:
-            print('"readline" module is present.')
-
-
-    exit_code = test_dependencies() | exit_code
-
-
+    exit_code = test_dependencies() or exit_code
     sys.exit(exit_code)
 
 

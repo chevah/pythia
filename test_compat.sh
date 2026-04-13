@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
 # Test the Pythia distribtution availabe in DIST agains compat.
+# Test are done agains the fully packed version from dist.
 #
 
 # Bash checks
@@ -35,7 +36,7 @@ execute pushd compat
     echo -e "\nPYTHON_CONFIGURATION=default@${PYTHIA_RELEASE}" >>pythia.conf
     execute mkdir cache
     # Copy dist file to local cache, if existing. If not, maybe it's online.
-    cp ../../"$DIST_DIR"/"$PYTHIA_RELEASE"/* cache/
+    cp ../../"$DIST_DIR"/* cache/
     # Some tests could fail due to causes not related to the new Python.
     echo "## Getting compat deps... ##"
     execute ./pythia.sh deps

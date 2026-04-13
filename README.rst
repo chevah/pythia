@@ -57,6 +57,8 @@ Copy `pythia.conf` file into your repo and configure your mirrors and targeted P
 It is designed to create the Python virtual environment and automatically call paver inside the newly created environment.
 `pythia.conf` contains a set of Python packages that needs to be intallled to boostrap the `paver` usage.
 
+TK is removed to save space and since this is designed for server-side apps.
+
 
 Development
 -----------

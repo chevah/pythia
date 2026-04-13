@@ -62,14 +62,13 @@ esac
 file_name="${pbs_arch}-install_only_stripped.tar.gz"
 source_url="https://github.com/astral-sh/python-build-standalone/releases/download/$PBS_RELEASE/cpython-${PY_RELEASE}+${PBS_RELEASE}-${file_name}"
 echo "> Downloading $file_name"
-curl -L -o $file_name $source_url
+#curl -L -o $file_name $source_url
 
 echo "> Extracting $file_name"
 
 # Delete any leftover from a previous failed extraction.
 # Used during dev when the whole build folder is not cleaned.
 rm -rf python
-
 
 tar xzf $file_name
 
@@ -83,7 +82,15 @@ case "$TARGET" in
         mkdir python
         mv lib python
         rm -rf python/lib/include
+        rm -rf python/lib/tcl
+        rm -f python/lib/libs/_tkinter.lib
+        rm -f python/lib/DLLs/tcl*.dll
+        rm -f python/lib/DLLs/tk*.dll
+        cp ../src/zipfile_init.py python/lib/Lib/zipfile/__init__.py
         python_bin="python/lib/python"
+        ${python_bin} -m pip install \
+            --index-url="$PIP_INDEX_URL" \
+            pywin32==${PYWIN32_VERSION}
         ;;
     *)
         # Linux and MacOS
@@ -96,6 +103,8 @@ case "$TARGET" in
         rm -f python/lib/libtcl*
         rm -rf python/lib/python${PY_VERSION}/tkinter
         rm -rf python/lib/python${PY_VERSION}/turtledemo
+        rm -f python/lib/python${PY_VERSION}/lib-dynload/_tkinter*
+        cp ../src/zipfile_init.py python/lib/python${PY_VERSION}/zipfile/__init__.py
         python_bin="python/bin/python"
         ;;
 esac
