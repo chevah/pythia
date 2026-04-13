@@ -147,6 +147,7 @@ def get_allowed_deps():
             '/usr/lib/libz.1.dylib',
             '@rpath/_rust.abi3.so',
             '@rpath/_bcrypt.abi3.s',
+            '@rpath/libpython3.12.dylib',
             ]
     elif platform_system == 'freebsd':
         # Deps for FreeBSD 12, with full path.

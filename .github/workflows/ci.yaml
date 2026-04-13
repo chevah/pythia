@@ -45,12 +45,14 @@ jobs:
         apk del util-linux-dev
         curl --output /usr/bin/paxctl https://bin.chevah.com:20443/third-party-stuff/alpine/paxctl-3.12
         chmod +x /usr/bin/paxctl
+        echo "TARGET_ARCH=linux-arm64" >> $GITHUB_ENV
 
     - name: Amazon setup
       if: startsWith(matrix.container, 'amazonlinux')
       run: |
         yum -y upgrade
         yum -y install git-core dejagnu bzip2 sudo tar
+        echo "TARGET_ARCH=linux-x64" >> $GITHUB_ENV
 
     # actions/checkout doesn't work on Amazon Linux 2, requires glibc 2.27.
     - name: Clone repo independently
@@ -69,13 +71,13 @@ jobs:
       run: |
         chown -R chevah pythia
         cd pythia
-        su chevah -c "./astral-to-pythia.sh linux-x64"
+        su chevah -c "./astral-to-pythia.sh $TARGET_ARCH"
 
     - name: Test Pythia
       timeout-minutes: 5
       run: |
         cd pythia
-        su chevah -c "./test_pythia.sh linux-x64"
+        su chevah -c "./test_pythia.sh $TARGET_ARCH"
 
     - name: Test compat
       timeout-minutes: 10

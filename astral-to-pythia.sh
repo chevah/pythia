@@ -116,8 +116,6 @@ esac
 
 ls -al python/*
 
-# Compile all source files to speed up load time and write Pythia version
-"${python_bin}" -m compileall -r 100 python
 pythia_version="${PY_RELEASE}.${PBS_RELEASE}-${TARGET}"
 echo -n "${pythia_version}" > python/lib/PYTHIA_VERSION
 
