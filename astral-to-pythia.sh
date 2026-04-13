@@ -107,7 +107,7 @@ case "$TARGET" in
         ;;
 esac
 
-ls -al
+ls -al python/*
 
 # Compile all source files to speed up load time and write Pythia version
 "${python_bin}" -m compileall -r 100 python

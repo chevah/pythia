@@ -18,7 +18,7 @@ target_dir="/${TARGET_DEPLOY}/${PYTHIA_RELEASE}/"
 batch_file="${BUILD_DIR}/sftp.batch"
 echo "> Uploading to ${target_dir}"
 echo "-mkdir ${target_dir}" > "${batch_file}"
-echo "mput -v ${DIST_DIR}/python-*.tar.gz ${target_dir}" >> "${batch_file}"
+echo "mput ${DIST_DIR}/python-*.tar.gz ${target_dir}" >> "${batch_file}"
 
 sftp_opts=(-P 10022 -b ${batch_file} -o IdentityFile=priv_key \
     -o StrictHostKeyChecking=yes)
