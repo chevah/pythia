@@ -24,10 +24,10 @@ WINDOWS_X64="x86_64-pc-windows-msvc"
 
 # Start with a clean build
 #rm -rf "$BUILD_DIR"
-mkdir "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
 
 rm -rf "$DIST_DIR"
-mkdir "$DIST_DIR"
+mkdir -p "$DIST_DIR"
 
 cd $BUILD_DIR
 
@@ -73,8 +73,6 @@ rm -rf python
 tar xzf $file_name
 
 
-pythia_version="${PY_RELEASE}.${PBS_RELEASE}-${pythia_arch}"
-
 case "$TARGET" in
     *windows*)
         # Do stuff
@@ -111,6 +109,7 @@ esac
 
 # Compile all source files to speed up load time and write Pythia version
 "${python_bin}" -m compileall -r 100 python
+pythia_version="${PY_RELEASE}.${PBS_RELEASE}-${TARGET}"
 echo -n "${pythia_version}" > python/lib/PYTHIA_VERSION
 
 pythia_base="python${PY_VERSION}-${TARGET}"

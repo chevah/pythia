@@ -27,7 +27,7 @@ with Linux MUSL, macOS and Windows installation packages also generated on Linux
 It comes with a few pre-installed packages, depending on the OS.
 This is done to simplify building the final distributable package on Linux,
 regardless of the target OS.
-Example on Windows, pywin32 is preinstaleld.
+Example on Windows, pywin32 is preinstalled.
 
 
 Supported platforms
@@ -55,7 +55,7 @@ Copy `pythia.sh` script into your repo.
 Copy `pythia.conf` file into your repo and configure your mirrors and targeted Python version.
 
 It is designed to create the Python virtual environment and automatically call paver inside the newly created environment.
-`pythia.conf` contains a set of Python packages that needs to be intallled to boostrap the `paver` usage.
+`pythia.conf` contains a set of Python packages that needs to be installed to bootstrap the `paver` usage.
 
 TK is removed to save space and since this is designed for server-side apps.
 
@@ -70,11 +70,11 @@ It has support for uploading into testing vs production.
 
 Building:
 
-* `./astral-to-pytia.sh TARGET_ARCH`
+* `./astral-to-pythia.sh TARGET_ARCH`
 
 TARGET_ARCH needs to match the local arch.
 
 Testing:
 
-* `./test_pythia.sh`
+* `./test_pythia.sh TARGET_ARCH`
 * `./test_compat.sh`

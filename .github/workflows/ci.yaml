@@ -75,7 +75,7 @@ jobs:
       timeout-minutes: 5
       run: |
         cd pythia
-        su chevah -c "./test.sh linux-x64"
+        su chevah -c "./test_pythia.sh linux-x64"
 
     - name: Test compat
       timeout-minutes: 10
@@ -151,7 +151,7 @@ jobs:
       timeout-minutes: 5
       run: |
         cd pythia
-        su chevah -c "./test.sh linux-arm64"
+        su chevah -c "./test_pythia.sh linux-arm64"
 
     - name: Test compat
       timeout-minutes: 10
@@ -211,7 +211,7 @@ jobs:
 
     - name: Test Pythia
       timeout-minutes: 5
-      run: bash ./test.sh windows-x64
+      run: bash ./test_pythia.sh windows-x64
 
     - name: Test compat
       timeout-minutes: 10
@@ -307,7 +307,7 @@ jobs:
 
     - name: Test Pythia
       timeout-minutes: 5
-      run: ./test.sh macos-x64
+      run: ./test_pythia.sh macos-x64
 
     - name: Test compat
       timeout-minutes: 10
@@ -349,7 +349,7 @@ jobs:
 
     - name: Test Pythia
       timeout-minutes: 5
-      run: ./test.sh macos-arm64
+      run: ./test_pythia.sh macos-arm64
 
     - name: Test compat
       timeout-minutes: 10
