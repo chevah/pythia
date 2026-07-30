@@ -25,7 +25,7 @@ echo "::group::Compat tests"
 echo "#### Running chevah's compat tests... ####"
 echo "## Removing any pre-existing compat code... ##"
 execute rm -rf compat/
-echo "## Cloning compat's master branch... ##"
+echo "## Cloning compat's $TEST_BRANCH branch... ##"
 execute git clone https://github.com/chevah/compat.git --depth=1 -b $TEST_BRANCH
 execute pushd compat
     # Make sure everything is done from scratch in the current dir.
