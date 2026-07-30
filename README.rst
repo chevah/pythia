@@ -70,6 +70,9 @@ Update the values from `build.conf`.
 You can see the available `python-build-standalone` releases at
 https://github.com/astral-sh/python-build-standalone/releases
 
+Update the `PYWIN32_VERSION` version from `build.conf` and upload the wheel
+to the private PyPI mirror.
+
 It has support for uploading into testing vs production.
 
 Local build, and then you can copy the resulting file from `dist/` to your
