@@ -66,6 +66,10 @@ Development
 It is designed to download the Python .tar.gz from `python-build-standalone` GitHub release page, convert it into a format usable by `pythia.sh`
 and upload the resulting tar.gz into a download/mirror server.
 
+Update the values from `build.conf`.
+You can see the available `python-build-standalone` releases at
+https://github.com/astral-sh/python-build-standalone/releases
+
 It has support for uploading into testing vs production.
 
 Building:
