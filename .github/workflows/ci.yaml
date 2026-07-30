@@ -86,9 +86,7 @@ jobs:
         CODECOV_TOKEN: local
       run: |
         cd pythia
-        # FIXME:72:
-        # Re-enable compat tests.
-        true su chevah -c "./test_compat.sh"
+        su chevah -c "./test_compat.sh"
 
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.

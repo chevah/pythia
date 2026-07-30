@@ -11,6 +11,8 @@ set -o errtrace   # trap errors in functions as well
 set -o pipefail   # don't ignore exit codes when piping output
 set -o functrace  # inherit DEBUG and RETURN traps
 
+TEST_BRANCH='737-python-3.14-update'
+
 # Set versions for the software to be built and other defaults.
 source build.conf
 
@@ -24,7 +26,7 @@ echo "#### Running chevah's compat tests... ####"
 echo "## Removing any pre-existing compat code... ##"
 execute rm -rf compat/
 echo "## Cloning compat's master branch... ##"
-execute git clone https://github.com/chevah/compat.git --depth=1 -b master
+execute git clone https://github.com/chevah/compat.git --depth=1 -b $TEST_BRANCH
 execute pushd compat
     # Make sure everything is done from scratch in the current dir.
     echo "## Unsetting CHEVAH_CACHE and CHEVAH_BUILD... ##"
