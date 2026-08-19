@@ -66,9 +66,17 @@ Development
 It is designed to download the Python .tar.gz from `python-build-standalone` GitHub release page, convert it into a format usable by `pythia.sh`
 and upload the resulting tar.gz into a download/mirror server.
 
+Update the values from `build.conf`.
+You can see the available `python-build-standalone` releases at
+https://github.com/astral-sh/python-build-standalone/releases
+
+Update the `PYWIN32_VERSION` version from `build.conf` and upload the wheel
+to the private PyPI mirror.
+
 It has support for uploading into testing vs production.
 
-Building:
+Local build, and then you can copy the resulting file from `dist/` to your
+CHEVAH_CACHE location (`~/.cache/chevah`):
 
 * `./astral-to-pythia.sh TARGET_ARCH`
 
@@ -77,4 +85,16 @@ TARGET_ARCH needs to match the local arch.
 Testing:
 
 * `./test_pythia.sh TARGET_ARCH`
+
+For compat, edit the script to point to the latest in-dev version of compat.
+The master branch will most probably not work with the newers Python version:
+
 * `./test_compat.sh`
+
+
+Publishing
+----------
+
+The GitHub Action will upload the files to the testing location by default.
+
+You can update the other projects to load the files from the testing locations.

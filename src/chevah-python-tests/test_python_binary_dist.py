@@ -9,8 +9,8 @@ script_helper = './get_binaries_deps.sh'
 platform_system = platform.system().lower()
 
 try:
-    CHEVAH_OS = os.environ.get('OS')
-    CHEVAH_ARCH = os.environ.get('ARCH')
+    CHEVAH_OS = os.environ.get('OS', '')
+    CHEVAH_ARCH = os.environ.get('ARCH', '')
 except:
     print('Could not get $OS/$ARCH Chevah env vars.')
     sys.exit(120)
@@ -336,7 +336,7 @@ def main():
     try:
         from ssl import OPENSSL_VERSION as current_openssl_version
         import _hashlib
-        expecting_openssl_version = 'OpenSSL 3.5.5 27 Jan 2026'
+        expecting_openssl_version = 'OpenSSL 3.5.7 9 Jun 2026'
         if current_openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting_openssl_version, current_openssl_version))

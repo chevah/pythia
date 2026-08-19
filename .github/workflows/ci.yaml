@@ -86,9 +86,7 @@ jobs:
         CODECOV_TOKEN: local
       run: |
         cd pythia
-        # FIXME:72:
-        # Re-enable compat tests.
-        true su chevah -c "./test_compat.sh"
+        su chevah -c "./test_compat.sh"
 
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.
@@ -162,9 +160,7 @@ jobs:
         CODECOV_TOKEN: local
       run: |
         cd pythia
-        # FIXME:72:
-        # Re-enable compat tests.
-        true su chevah -c "./test_compat.sh"
+        su chevah -c "./test_compat.sh"
 
     # Using `~/` is problematic under Docker, use `/root/`.
     # Remove key in same step to avoid leaving it on disk if publishing fails.
@@ -220,9 +216,7 @@ jobs:
       env:
         USER: runneradmin
         CODECOV_TOKEN: local
-      # FIXME:72:
-      # Re-enable compat tests.
-      run: true bash ./test_compat.sh
+      run: bash ./test_compat.sh
 
     # Commit changed requirements.txt back to the repository
     - uses: chevah/git-auto-commit-action@HEAD
@@ -315,9 +309,7 @@ jobs:
       timeout-minutes: 10
       env:
         CODECOV_TOKEN: local
-      # FIXME:72:
-      # Re-enable compat tests.
-      run: true ./test_compat.sh
+      run: ./test_compat.sh
 
     - name: Upload testing package
       timeout-minutes: 5
@@ -357,9 +349,7 @@ jobs:
       timeout-minutes: 10
       env:
         CODECOV_TOKEN: local
-      # FIXME:72:
-      # Re-enable compat tests.
-      run: true ./test_compat.sh
+      run: ./test_compat.sh
 
     - name: Upload testing package
       timeout-minutes: 5
