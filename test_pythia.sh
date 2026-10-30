@@ -38,6 +38,7 @@ test_file="test_python_binary_dist.py"
 cp src/chevah-python-tests/"$test_file" "$BUILD_DIR"
 cp src/chevah-python-tests/get_binaries_deps.sh "$BUILD_DIR"
 pushd "$BUILD_DIR"
+export OPENSSL_RELEASE="$OPENSSL_RELEASE"
 execute "$python_binary" "$test_file"
 popd
 echo "::endgroup::"
