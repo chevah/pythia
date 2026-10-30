@@ -336,7 +336,7 @@ def main():
     try:
         from ssl import OPENSSL_VERSION as current_openssl_version
         import _hashlib
-        expecting_openssl_version = 'OpenSSL 3.5.5 27 Jan 2026'
+        expecting_openssl_version = os.environ.get('OPENSSL_RELEASE', '')
         if current_openssl_version != expecting_openssl_version:
             sys.stderr.write('Expecting %s, got %s.\n' % (
                 expecting_openssl_version, current_openssl_version))
