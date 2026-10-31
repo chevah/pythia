@@ -11,7 +11,7 @@ set -o errtrace   # trap errors in functions as well
 set -o pipefail   # don't ignore exit codes when piping output
 set -o functrace  # inherit DEBUG and RETURN traps
 
-TEST_BRANCH='737-python-3.14-update'
+TEST_BRANCH='master'
 
 # Set versions for the software to be built and other defaults.
 source build.conf
